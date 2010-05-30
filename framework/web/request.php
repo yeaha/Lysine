@@ -1,5 +1,16 @@
 <?php
 class Ly_Request {
+    static public $instance;
+
+    static public function instance() {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
+    }
+
+    public function __get($key) {
+        return $this->request($key);
+    }
+
     protected function _getFrom($source, $key = null, $default = false) {
         if (is_null($key)) return $source;
         return isset($source[$key]) ? $source[$key] : $default;
