@@ -1,6 +1,7 @@
 <?php
 class Ly_Request {
     static public $instance;
+    protected $_requestUri;
 
     static public function instance() {
         if (!self::$instance) self::$instance = new self();
@@ -57,9 +58,29 @@ class Ly_Request {
     }
 
     public function requestUri() {
+        if ($this->_requestUri !== null) return $this->_requestUri;
+
         $uri = $this->server('http_x_rewrite_url');
-        if ($uri) return $uri;
-        return $this->server('request_uri');
+        if ($uri) return $this->_requestUri = $uri;
+
+        $uri = $this->server('request_uri');
+        if ($uri) return $this->_requestUri = $uri;
+
+        $uri = $this->server('orig_path_info');
+        if ($uri) {
+            $query = $this->server('query_string');
+            if (!empty($query)) $uri .= '?'. $query;
+            return $this->_requestUri = $uri;
+        }
+
+        throw new Exception('Unable to get request URI');
+    }
+
+    public function requestBaseUri() {
+        $uri = $this->requestUri();
+        $pos = strpos($uri, '?');
+        if ($pos !== false) $uri = substr($uri, 0, $pos);
+        return $uri;
     }
 
     public function isGET() {
