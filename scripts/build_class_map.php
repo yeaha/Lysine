@@ -19,6 +19,7 @@ foreach (files($path) as $file) {
 $map = implode(",\n", $map);
 
 echo <<< EOF
+<?php
 return array(
 {$map}
 );
