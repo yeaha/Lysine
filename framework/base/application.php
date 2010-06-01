@@ -1,20 +1,14 @@
 <?php
 class Ly_Application {
     static public $instance;
-    protected $urls;
-    protected $config;
     protected $include_path = array();
 
-    public function __construct(array $urls, array $config = array()) {
-        $this->urls = $urls;
-        $this->config = $config;
+    public function __construct() {
         spl_autoload_register(array($this, 'autoload'));
     }
 
     static public function instance(array $urls = null, array $config = null) {
-        if (self::$instance) return self::$instance;
-        if (empty($urls)) die('invalid construct app');
-        self::$instance = new self($config);
+        if (!self::$instance) self::$instance = new self();
         return self::$instance;
     }
 
@@ -44,14 +38,17 @@ class Ly_Application {
         return false;
     }
 
-    public function run() {
+    public static function run(array $urls, $include_path = null) {
+        $app = self::instance();
+        if ($include_path) $app->includePath($include_path);
+
         $req = req();
         $base_uri = $req->requestBaseUri();
 
         $method = $req->requestMethod();
         $ajax = $req->isAJAX();
 
-        foreach ($this->urls as $re => $class) {
+        foreach ($urls as $re => $class) {
             if (!preg_match($re, $base_uri, $match)) continue;
 
             $fn = $method;
@@ -61,7 +58,11 @@ class Ly_Application {
             }
 
             array_shift($match);
+            $handle = new $class();
+
+            if (method_exists('preRun', $handle)) $handle->preRun();
             $rep = call_user_func_array(array(new $class(), $fn), $match);
+            if (method_exists('postRun', $handle)) $handle->postRun();
             break;
         }
         return $rep;
