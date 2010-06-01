@@ -78,6 +78,10 @@ class Ly_Request {
         return $this->requestMethod() === 'delete';
     }
 
+    public function isAJAX() {
+        return strtolower($this->header('X_REQUESTED_WITH')) == 'xmlhttprequest';
+    }
+
     protected function _getAccept($key) {
         $result = array();
         if (!$accept = $this->server($key)) return $result;
