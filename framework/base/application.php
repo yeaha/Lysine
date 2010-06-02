@@ -12,7 +12,7 @@ class Ly_Application {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    static public function instance(array $urls = null, array $config = null) {
+    static public function instance() {
         if (!self::$instance) self::$instance = new self();
         return self::$instance;
     }
@@ -81,7 +81,7 @@ class Ly_Application {
         $method = $req->requestMethod();
         $ajax = $req->isAJAX();
 
-        foreach ($urls as $re => $class) {
+        while (list($re, $class) = each($urls)) {
             if (!preg_match($re, $base_uri, $match)) continue;
 
             $fn = $method;
