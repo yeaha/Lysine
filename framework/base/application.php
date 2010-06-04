@@ -40,10 +40,8 @@ class Ly_Application {
     }
 
     public function getConfig() {
-        $args = func_get_args();
-
         $result = $this->config;
-        foreach ($args as $arg) {
+        foreach (func_get_args() as $arg) {
             if (!is_array($result)) return false;
             if (!array_key_exists($arg, $result)) return false;
 

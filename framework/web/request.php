@@ -29,10 +29,6 @@ class Ly_Request {
         return $this->_getFrom($_REQUEST, $key, $default);
     }
 
-    public function cookie($key = null, $default = false) {
-        return $this->_getFrom($_COOKIE, $key, $default);
-    }
-
     public function env($key = null, $default = false) {
         return $this->_getFrom($_ENV, strtoupper($key), $default);
     }
@@ -42,6 +38,32 @@ class Ly_Request {
     }
 
     public function file() {
+    }
+
+    public function cookie() {
+        $result = $_COOKIE;
+        foreach (func_get_args() as $arg) {
+            if (!is_array($result)) return false;
+            if (!array_key_exists($arg, $result)) return false;
+
+            $result = $result[$arg];
+        }
+
+        return $result;
+    }
+
+    public function session() {
+        if (!isset($_SESSION)) return false;
+
+        $result = $_SESSION;
+        foreach (func_get_args() as $arg) {
+            if (!is_array($result)) return false;
+            if (!array_key_exists($arg, $result)) return false;
+
+            $result = $result[$arg];
+        }
+
+        return $result;
     }
 
     public function header($key) {
