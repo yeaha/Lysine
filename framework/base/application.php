@@ -40,15 +40,7 @@ class Ly_Application {
     }
 
     public function getConfig() {
-        $result = $this->config;
-        foreach (func_get_args() as $arg) {
-            if (!is_array($result)) return false;
-            if (!array_key_exists($arg, $result)) return false;
-
-            $result = $result[$arg];
-        }
-
-        return $result;
+        return array_spider($this->config, func_get_args());
     }
 
     public function setBaseUri($base_uri) {

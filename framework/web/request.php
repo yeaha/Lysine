@@ -41,29 +41,12 @@ class Ly_Request {
     }
 
     public function cookie() {
-        $result = $_COOKIE;
-        foreach (func_get_args() as $arg) {
-            if (!is_array($result)) return false;
-            if (!array_key_exists($arg, $result)) return false;
-
-            $result = $result[$arg];
-        }
-
-        return $result;
+        return array_spider($_COOKIE, func_get_args());
     }
 
     public function session() {
         if (!isset($_SESSION)) return false;
-
-        $result = $_SESSION;
-        foreach (func_get_args() as $arg) {
-            if (!is_array($result)) return false;
-            if (!array_key_exists($arg, $result)) return false;
-
-            $result = $result[$arg];
-        }
-
-        return $result;
+        return array_spider($_SESSION, func_get_args());
     }
 
     public function header($key) {
