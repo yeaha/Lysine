@@ -8,13 +8,10 @@ $path = realpath($args[1]) .'/';
 
 $map = array();
 foreach (files($path) as $file) {
-    $code = file_get_contents($file);
-
-    $re = '/((abstract )?class|interface) ([^\s]+)/i';
-    if (!preg_match($re, $code, $match)) continue;
-    $class_name = $match[3];
     $file_name = str_replace($path, '', $file);
-    $map[] = sprintf("    '%s' => '%s'", $class_name, $file_name);
+    foreach (getClass($file) as $class_name) {
+        $map[] = sprintf("    '%s' => '%s'", $class_name, $file_name);
+    }
 }
 $map = implode(",\n", $map);
 
@@ -37,7 +34,7 @@ function files($dir) {
             if (is_dir($file)) {
                 $files = array_merge($files, files($file));
             } else {
-                $files[] = $file;
+                if (preg_match('/\.php$/', $file)) $files[] = $file;
             }
         }
         closedir($handle);
@@ -45,4 +42,22 @@ function files($dir) {
         return array($dir);
     }
     return $files;
+}
+
+function getClass($file) {
+    $class = array();
+    $source = file_get_contents($file);
+    $tokens = token_get_all($source);
+
+    $catch = false;
+    while (list(, $token) = each($tokens)) {
+        if (!is_array($token)) continue;
+        $tname = token_name($token[0]);
+        if ($tname == 'T_CLASS' OR $tname == 'T_INTERFACE') $catch = true;
+        if ($catch && $tname == 'T_STRING') {
+            $class[] = $token[1];
+            $catch = false;
+        }
+    }
+    return $class;
 }
