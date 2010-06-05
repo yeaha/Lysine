@@ -14,7 +14,7 @@ function req() {
     return Ly_Request::instance();
 }
 
-function rep() {
+function resp() {
     return Ly_Response::instance();
 }
 
@@ -27,7 +27,7 @@ function rep() {
  * @return mixed
  */
 function array_spider(array $target, array $path = array()) {
-    while (list(, $key) = each($path))
+    while (list(, $key) = each($path)) {
         if (!is_array($target)) return false;
         if (!array_key_exists($key, $target)) return false;
         $target = $target[$key];
