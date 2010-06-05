@@ -1,5 +1,5 @@
 <?php
-class Controller_Index extends Ly_Controller {
+class Controller_Index {
     public function get() {
         return 'hello world';
     }
