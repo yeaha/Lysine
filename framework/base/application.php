@@ -98,12 +98,13 @@ class Ly_Application {
         return false;
     }
 
-    protected function _dispatch($url) {
+    protected function _dispatch($url, array $options = null) {
         $search = $this->_matchRequest($url);
         if ($search === false)
             throw new Ly_Request_Exception('Page Not Found', 404);
 
         list($class, $args) = $search;
+        if ($options) $args = array_merge($args, $options);
 
         $req = req();
         $req_method = $req->requestMethod();
@@ -129,8 +130,8 @@ class Ly_Application {
         return $resp;
     }
 
-    public function forward($url) {
-        return $this->_dispatch($url);
+    public function forward($url, array $options = null) {
+        return $this->_dispatch($url, $options);
     }
 
     public function run(array $urls) {
