@@ -84,10 +84,6 @@ class Ly_Application {
         return false;
     }
 
-    public function forward($url) {
-        return $this->_dispatch($url);
-    }
-
     protected function _matchRequest($url) {
         $urls = $this->urls;
 
@@ -131,6 +127,10 @@ class Ly_Application {
         if (method_exists('postRun', $handle)) call_user_func_array(array($handle, 'postRun'), $args);
 
         return $resp;
+    }
+
+    public function forward($url) {
+        return $this->_dispatch($url);
     }
 
     public function run(array $urls) {
