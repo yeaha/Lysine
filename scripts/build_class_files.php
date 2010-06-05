@@ -9,17 +9,15 @@ $path = realpath($args[1]) .'/';
 $map = array();
 foreach (files($path) as $file) {
     $file_name = str_replace($path, '', $file);
-    foreach (getClass($file) as $class_name) {
-        $map[] = sprintf("    '%s' => '%s'", $class_name, $file_name);
-    }
+    foreach (getClass($file) as $class_name)
+        $map[$class_name] = $file;
 }
-$map = implode(",\n", $map);
+ksort($map);
+$out = var_export($map, true);
 
 echo <<< EOF
 <?php
-return array(
-{$map}
-);
+return {$out};
 EOF;
 
 function files($dir) {
