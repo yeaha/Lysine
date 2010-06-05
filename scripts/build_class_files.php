@@ -10,7 +10,7 @@ $map = array();
 foreach (files($path) as $file) {
     $file_name = str_replace($path, '', $file);
     foreach (getClass($file) as $class_name)
-        $map[$class_name] = $file;
+        $map[$class_name] = $file_name;
 }
 ksort($map);
 $out = var_export($map, true);
