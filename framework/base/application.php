@@ -84,6 +84,10 @@ class Ly_Application {
         return false;
     }
 
+    public function forward($url) {
+        return $this->_dispatch($url);
+    }
+
     protected function _matchRequest($url) {
         $urls = $this->urls;
 
@@ -98,28 +102,18 @@ class Ly_Application {
         return false;
     }
 
-    public function run(array $urls, $include_path = null) {
-        $this->urls = $urls;
-        if ($include_path) $this->includePath($include_path);
-
-        $req = req();
-        $req_method = $req->requestMethod();
-        if (!in_array($req_method, array('get', 'post', 'put', 'delete'))) die();
-        $ajax = $req->isAJAX();
-
-        $request_uri = $req->requestUri();
-        if ($this->base_uri) {
-            $request_uri = str_replace($this->base_uri, '', $request_uri);
-            if (substr($request_uri, 0, 1) != '/') $request_uri = '/'. $request_uri;
-        }
-
-        $search = $this->_matchRequest($request_uri);
-        if ($search === false) die();
+    protected function _dispatch($url) {
+        $search = $this->_matchRequest($url);
+        if ($search === false)
+            throw new Ly_Request_Exception('Page Not Found', 404);
 
         list($class, $args) = $search;
 
+        $req = req();
+        $req_method = $req->requestMethod();
+
         $fn = $req_method;
-        if ($ajax) {
+        if ($req->isAJAX()) {
             if (method_exists($class, 'ajax')) $fn = 'ajax';
             if (method_exists($class, 'ajax_'.$req_method)) $fn = 'ajax_'.$req_method;
         }
@@ -127,9 +121,33 @@ class Ly_Application {
         $handle = new $class();
 
         if (method_exists('preRun', $handle)) call_user_func_array(array($handle, 'preRun'), $args);
-        $rep = call_user_func_array(array($handle, $fn), $args);
+
+        // 不使用method_exists()检查，用is_callable()
+        // 保留__call()重载方法的方式
+        if (!is_callable(array($handle, $fn)))
+            throw new Ly_Request_Exception('Not Acceptable', 406);
+        $resp = call_user_func_array(array($handle, $fn), $args);
+
         if (method_exists('postRun', $handle)) call_user_func_array(array($handle, 'postRun'), $args);
 
-        return $rep;
+        return $resp;
+    }
+
+    public function run(array $urls) {
+        $this->urls = $urls;
+
+        $req = req();
+        if (!in_array($req->requestMethod(), array('get', 'post', 'put', 'delete')))
+            throw new Ly_Request_Exception('Method Not Allowed', 405);
+
+        $request_uri = $req->requestUri();
+        if ($this->base_uri) {
+            $request_uri = str_replace($this->base_uri, '', $request_uri);
+            if (substr($request_uri, 0, 1) != '/') $request_uri = '/'. $request_uri;
+        }
+
+        $resp = $this->_dispatch($request_uri);
+
+        return $resp;
     }
 }
