@@ -145,3 +145,6 @@ class Ly_Request {
         return $this->server('remote_addr', '127.0.0.1');
     }
 }
+
+class Ly_Request_Exception extends Ly_Exception {
+}
