@@ -4,14 +4,21 @@ function app() {
 }
 
 function cfg() {
-    $app = app();
     $args = func_get_args();
-
-    return call_user_func_array(array($app, 'getConfig'), $args);
+    return call_user_func_array(array(app(), 'getConfig'), $args);
 }
 
 function req() {
     return Ly_Request::instance();
+}
+
+if (!function_exists('render')) {
+    function render($file, array $vars = null) {
+        static $instance;
+        if (!$instance) $instance = new Ly_View_Render(cfg('view'));
+
+        return $instance->fetch($file, $vars);
+    }
 }
 
 /**

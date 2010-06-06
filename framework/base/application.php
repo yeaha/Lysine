@@ -13,6 +13,8 @@ class Ly_Application {
 
     public function __construct() {
         if (!defined('APP_PATH')) die('please define APP_PATH constant');
+
+        $this->config = require LY_PATH .'/base/config.php';
         spl_autoload_register(array($this, 'autoload'));
     }
 
@@ -35,12 +37,13 @@ class Ly_Application {
     }
 
     public function setConfig(array $config) {
-        $this->config = $config;
+        $this->config = array_merge($this->config, $config);
         return $this;
     }
 
     public function getConfig() {
-        return array_spider($this->config, func_get_args());
+        $args = func_get_args();
+        return array_spider($this->config, $args);
     }
 
     public function setBaseUri($base_uri) {
