@@ -69,16 +69,6 @@ class Ly_View_Template {
     }
 
     /**
-     * clone后要清除已有的继承关系
-     *
-     * @access public
-     * @return void
-     */
-    public function __clone() {
-        $this->inherit_file = null;
-    }
-
-    /**
      * 魔法方法
      *
      * @param string $key
@@ -165,12 +155,11 @@ class Ly_View_Template {
         // 如果没有继承其它视图，就直接输出结果
         if (!$this->inherit_file) return $output;
 
-        // clone一个当前的template对象
-        // clone对象会包含所有原来的配置信息
-        // 同时也会包含本次运行产生的block生成数据
-        // 用这些数据从inherit file得到结果
-        $tpl = clone $this;
-        return $tpl->fetch($this->inherit_file);
+        $inherit_file = $this->findFile($this->inherit_file);
+        if ($inherit_file === false) return $output;
+
+        $this->inherit_file = null;
+        return $this->fetch($inherit_file);
     }
 
     /**
