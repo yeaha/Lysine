@@ -79,7 +79,20 @@ class Ly_View_Template {
     }
 
     /**
-     * 指定视图数据
+     * 魔法方法
+     *
+     * @param string $key
+     * @access public
+     * @return mixed
+     */
+    public function __get($key) {
+        return array_key_exists($key, $this->vars)
+             ? $this->vars[$key]
+             : false;
+    }
+
+    /**
+     * 设定视图数据
      *
      * @param string $key
      * @param mixed $val
@@ -109,17 +122,6 @@ class Ly_View_Template {
     }
 
     /**
-     * 清除视图数据
-     *
-     * @access public
-     * @return self
-     */
-    public function clean() {
-        $this->vars = array();
-        return $this;
-    }
-
-    /**
      * 获得真正的视图文件名
      *
      * @param string $file
@@ -127,7 +129,12 @@ class Ly_View_Template {
      * @return string
      */
     protected function findFile($file) {
-        return $file;
+        // 以/开头的是绝对路径，不做任何处理
+        if (substr($file, 0, 1) == '/') return $file;
+
+        $file = sprintf('%s/%s.%s', $this->view_dir, $file, $this->file_ext);
+
+        return is_readable($file) ? $file : false;
     }
 
     /**
@@ -137,12 +144,22 @@ class Ly_View_Template {
      * @access public
      * @return string
      */
-    public function fetch($file) {
+    public function fetch($file, array $vars = null) {
         $file = $this->findFile($file);
+        if ($file === false) return false;
+
+        if ($vars) {
+            while (list($key, $val) = each($vars))
+                $this->set($key, $val);
+        }
 
         ob_start();
-        extract($this->vars, EXTR_REFS);
+
+        extract($this->vars);
         include $file;
+        // 安全措施，关闭掉忘记关闭的block
+        if ($this->current_block) $this->endblock();
+
         $output = ob_get_clean();
 
         // 如果没有继承其它视图，就直接输出结果
@@ -165,9 +182,12 @@ class Ly_View_Template {
      * @return void
      */
     protected function includes($file, array $vars = null) {
-        extract($this->vars, EXTR_REFS);
-        if ($vars) extract($this->vars, EXTR_REFS);
-        include $this->findFile($file);
+        $file = $this->findFile($file);
+        if ($file === false) return false;
+
+        extract($this->vars);
+        if ($vars) extract($this->vars);
+        include $file;
     }
 
     /**
@@ -183,6 +203,7 @@ class Ly_View_Template {
 
     /**
      * 区域开始
+     * 所有的数据都会被output buffer接管
      *
      * @param string $name
      * @param string $config
@@ -190,6 +211,9 @@ class Ly_View_Template {
      * @return void
      */
     protected function block($name, $config = 'replace') {
+        // 如果上一个block忘记关闭，这里先关闭掉
+        if ($this->current_block) $this->endblock();
+
         $this->block_config[$name] = $config;
         $this->current_block = $name;
         ob_start();
@@ -197,19 +221,24 @@ class Ly_View_Template {
 
     /**
      * 区域结束
+     * 从output buffer中返回数据
      *
      * @access protected
      * @return void
      */
     protected function endblock() {
-        $output = ob_get_clean();
+        if (!$this->current_block) return false;
 
         $block_name = $this->current_block;
+        $this->current_block = null;
+
+        $output = ob_get_clean();
+
         // 是否有继承上来的block
         if (isset($this->blocks[$block_name])) {
             if ($this->block_config[$block_name] == 'append') {
                 $output .= $this->blocks[$block_name];
-            } else {    // 默认用继承上来的下层block覆盖上层block
+            } else {    // 默认用继承来的下层block覆盖上层block
                 $output = $this->blocks[$block_name];
             }
         }
@@ -217,7 +246,6 @@ class Ly_View_Template {
         // 如果继承了其它视图，把输出内容放到$this->blocks内
         if ($this->inherit_file) {
             $this->blocks[$block_name] = $output;
-            $this->current_block = null;
         } else {    // 否则直接输出
             echo $output;
         }

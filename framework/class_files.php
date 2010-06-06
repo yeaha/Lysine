@@ -9,5 +9,6 @@ return array (
   'Ly_Request' => 'web/request.php',
   'Ly_Request_Exception' => 'web/request.php',
   'Ly_Response' => 'web/response.php',
+  'Ly_View_Template' => 'view/template.php',
   'Lysine' => 'core.php',
 );
