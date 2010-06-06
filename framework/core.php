@@ -16,7 +16,7 @@ class Lysine {
         if (!array_key_exists($class_name, self::$class_files)) return false;
 
         $file = LY_PATH .'/'. self::$class_files[$class_name];
-        if (!file_exists($file) || !is_readable($file)) return false;
+        if (!is_readable($file)) return false;
 
         require $file;
         return true;
