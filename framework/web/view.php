@@ -4,7 +4,7 @@
  *
  * @author Yang Yi <yangyi.cn.gz@gmail.com>
  */
-class Ly_View_Template {
+class Ly_View_Render {
     /**
      * 视图文件存放路径
      *

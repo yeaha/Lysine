@@ -8,6 +8,6 @@ return array (
   'Ly_Helper_Curl' => 'helper/curl.php',
   'Ly_Request' => 'web/request.php',
   'Ly_Request_Exception' => 'web/request.php',
-  'Ly_View_Template' => 'view/template.php',
+  'Ly_View_Render' => 'web/view.php',
   'Lysine' => 'core.php',
 );
