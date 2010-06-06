@@ -14,10 +14,6 @@ function req() {
     return Ly_Request::instance();
 }
 
-function resp() {
-    return Ly_Response::instance();
-}
-
 /**
  * 根据key路径，在array中找出结果
  * 如果key不存在，返回false
