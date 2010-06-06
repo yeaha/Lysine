@@ -89,7 +89,7 @@ class Ly_Application {
 
         while (list($re, $class) = each($urls)) {
             if (preg_match($re, $url, $match)) {
-                unset($match[0]);
+                array_shift($match);
 
                 return array($class, $match);
             }
