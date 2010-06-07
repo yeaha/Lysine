@@ -2,7 +2,6 @@
 class Ly_Application {
     static public $instance;
     protected $urls;
-    protected $base_uri;
     protected $include_path = array();
     protected $class_map = array();
     protected $config = array();
@@ -44,11 +43,6 @@ class Ly_Application {
     public function getConfig() {
         $args = func_get_args();
         return array_spider($this->config, $args);
-    }
-
-    public function setBaseUri($base_uri) {
-        $this->base_uri = $base_uri;
-        return $this;
     }
 
     public function includePath($path) {
@@ -148,13 +142,7 @@ class Ly_Application {
         if (!in_array($req->requestMethod(), array('get', 'post', 'put', 'delete')))
             throw new Ly_Request_Exception('Method Not Allowed', 405);
 
-        $request_uri = $req->requestUri();
-        if ($this->base_uri) {
-            $request_uri = str_replace($this->base_uri, '', $request_uri);
-            if (substr($request_uri, 0, 1) != '/') $request_uri = '/'. $request_uri;
-        }
-
-        $resp = $this->_dispatch($request_uri);
+        $resp = $this->_dispatch($req->requestUri());
 
         return $resp;
     }
