@@ -1,12 +1,6 @@
 <?php
 class Ly_Request {
-    static public $instance;
     protected $_requestUri;
-
-    static public function instance() {
-        if (!self::$instance) self::$instance = new self();
-        return self::$instance;
-    }
 
     public function __get($key) {
         return $this->request($key);

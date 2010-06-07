@@ -9,7 +9,16 @@ function cfg() {
 }
 
 function req() {
-    return Ly_Request::instance();
+    static $instance;
+
+    if ($instance) return $instance;
+
+    $class = cfg('app', 'request_class');
+    if ( !($class instanceof Ly_Request) )
+        throw new Ly_Exception('Invalid request class');
+    $instance = new $class;
+
+    return $instance;
 }
 
 function render_view($file, array $vars = null) {
