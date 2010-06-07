@@ -6,11 +6,33 @@
  * @author Yang Yi <yangyi.cn.gz@gmail.com>
  */
 abstract class Ly_Db_Adapter_Abstract {
+    /**
+     * 数据库连接配置
+     *
+     * @var mixed
+     * @access protected
+     */
     protected $cfg;
 
+    /**
+     * pdo连接对象
+     *
+     * @var PDO
+     * @access protected
+     */
     protected $dbh;
 
-    public function __construct($dsn, $user, $pass, $options) {
+    /**
+     * 构造函数
+     *
+     * @param string $dsn
+     * @param string $user
+     * @param string $pass
+     * @param array $options
+     * @access public
+     * @return void
+     */
+    public function __construct($dsn, $user, $pass, array $options) {
         $extension = 'pdo_'.
                      strtolower(
                          array_pop(
@@ -25,10 +47,22 @@ abstract class Ly_Db_Adapter_Abstract {
         $this->connect();
     }
 
+    /**
+     * 是否已经连接数据库
+     *
+     * @access protected
+     * @return boolean
+     */
     protected function isConnected() {
         return $this->dbh instanceof PDO;
     }
 
+    /**
+     * 连接数据库
+     *
+     * @access protected
+     * @return self
+     */
     protected function connect() {
         if ($this->isConnected()) return $this;
 
@@ -46,6 +80,12 @@ abstract class Ly_Db_Adapter_Abstract {
         return $this;
     }
 
+    /**
+     * 断开连接
+     *
+     * @access protected
+     * @return void
+     */
     protected function disconnect() {
         $this->dbh = null;
     }
@@ -54,23 +94,85 @@ abstract class Ly_Db_Adapter_Abstract {
         $this->disconnect();
     }
 
+    /**
+     * 返回pdo连接对象
+     *
+     * @access public
+     * @return void
+     */
     public function handle() {
         if (!$this->isConnected()) $this->connect();
         return $this->dbh;
+    }
+
+    /**
+     * 开始事务
+     *
+     * @access public
+     * @return void
+     */
+    public function begin() {
+        if (!$this->isConnected()) $this->connect();
+        $this->dbh->beginTransaction();
+    }
+
+    /**
+     * 回滚事务
+     *
+     * @access public
+     * @return void
+     */
+    public function rollback() {
+        $this->dbh->rollBack();
+    }
+
+    /**
+     * 提交事务
+     *
+     * @access public
+     * @return void
+     */
+    public function commit() {
+        $this->dbh->commit();
     }
 
     public function exec($sql) {
         if (!$this->isConnected()) $this->connect();
     }
 
+    /**
+     * 插入一条记录
+     *
+     * @param string $table
+     * @param array $row
+     * @access public
+     * @return integer
+     */
     public function insert($table, $row) {
         if (!$this->isConnected()) $this->connect();
     }
 
+    /**
+     * 更新记录
+     *
+     * @param string $table
+     * @param array $row
+     * @param mixed $where
+     * @access public
+     * @return integer
+     */
     public function update($table, $row, $where) {
         if (!$this->isConnected()) $this->connect();
     }
 
+    /**
+     * 删除记录
+     *
+     * @param string $table
+     * @param mixed $where
+     * @access public
+     * @return integer
+     */
     public function delete($table, $where) {
         if (!$this->isConnected()) $this->connect();
     }
