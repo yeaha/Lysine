@@ -114,7 +114,13 @@ class Ly_Application {
 
         $handle = new $class();
 
-        if (method_exists('preRun', $handle)) call_user_func_array(array($handle, 'preRun'), $args);
+        if (method_exists('preRun', $handle)) {
+            // 如果preRun返回了内容，就直接完成动作
+            // 可以在这里进行某些阻断操作
+            // 正常的内容不应该通过这里输出
+            $resp = call_user_func_array(array($handle, 'preRun'), $args);
+            if ($resp) return $resp;
+        }
 
         // 不使用method_exists()检查，用is_callable()
         // 保留__call()重载方法的方式
