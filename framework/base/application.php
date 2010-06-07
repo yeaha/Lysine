@@ -36,7 +36,7 @@ class Ly_Application {
     }
 
     public function setConfig(array $config) {
-        $this->config = array_merge($this->config, $config);
+        $this->config = array_merge_recursive($this->config, $config);
         return $this;
     }
 
