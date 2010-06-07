@@ -14,6 +14,14 @@ class Ly_View_Render {
     protected $view_dir;
 
     /**
+     * 视图文件
+     *
+     * @var mixed
+     * @access protected
+     */
+    protected $view;
+
+    /**
      * 视图文件扩展名
      *
      * @var string
@@ -76,6 +84,7 @@ class Ly_View_Render {
      */
     public function reset() {
         $this->inherit_file = null;
+        $this->view = null;
         $this->vars = array();
 
         $this->current_block = null;
@@ -129,6 +138,18 @@ class Ly_View_Render {
     }
 
     /**
+     * 设置视图文件
+     *
+     * @param string $file
+     * @access public
+     * @return self
+     */
+    public function setView($file) {
+        $this->view = $file;
+        return $this;
+    }
+
+    /**
      * 获得真正的视图文件名
      *
      * @param string $file
@@ -136,6 +157,8 @@ class Ly_View_Render {
      * @return string
      */
     protected function findFile($file) {
+        if (!$file) return false;
+
         // 以/开头的是绝对路径，不做任何处理
         if (substr($file, 0, 1) == '/') return $file;
 
@@ -151,9 +174,12 @@ class Ly_View_Render {
      * @access public
      * @return string
      */
-    public function fetch($file, array $vars = null) {
+    public function fetch($file = null, array $vars = null) {
+        if (!$file) $file = $this->view;
+
         $file = $this->findFile($file);
-        if ($file === false) return false;
+        if ($file === false)
+            throw new Ly_Exception('Before render you must set a view');
 
         if ($vars) {
             while (list($key, $val) = each($vars))
@@ -177,6 +203,16 @@ class Ly_View_Render {
 
         $this->inherit_file = null;
         return $this->fetch($inherit_file);
+    }
+
+    /**
+     * 魔法方法，可以直接echo
+     *
+     * @access public
+     * @return string
+     */
+    public function __toString() {
+        return $this->fetch();
     }
 
     /**
