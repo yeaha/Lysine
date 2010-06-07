@@ -14,9 +14,9 @@ function req() {
     if ($instance) return $instance;
 
     $class = cfg('app', 'request_class');
-    if ( !($class instanceof Ly_Request) )
-        throw new Ly_Exception('Invalid request class');
     $instance = new $class;
+    if ( !($instance instanceof Ly_Request) )
+        throw new Ly_Exception('Invalid request class');
 
     return $instance;
 }
