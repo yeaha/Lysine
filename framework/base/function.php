@@ -12,13 +12,11 @@ function req() {
     return Ly_Request::instance();
 }
 
-if (!function_exists('render')) {
-    function render($file, array $vars = null) {
-        static $instance;
-        if (!$instance) $instance = new Ly_View_Render(cfg('view'));
+function render_view($file, array $vars = null) {
+    static $instance;
+    if (!$instance) $instance = new Ly_View_Render(cfg('view'));
 
-        return $instance->fetch($file, $vars);
-    }
+    return $instance->reset()->fetch($file, $vars);
 }
 
 /**

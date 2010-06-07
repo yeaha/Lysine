@@ -69,6 +69,23 @@ class Ly_View_Render {
     }
 
     /**
+     * 清除所有数据
+     *
+     * @access public
+     * @return void
+     */
+    public function reset() {
+        $this->inherit_file = null;
+        $this->vars = array();
+
+        $this->current_block = null;
+        $this->blocks = array();
+        $this->block_config = array();
+
+        return $this;
+    }
+
+    /**
      * 魔法方法
      *
      * @param string $key
@@ -236,6 +253,7 @@ class Ly_View_Render {
         if ($this->inherit_file) {
             $this->blocks[$block_name] = $output;
         } else {    // 否则直接输出
+            unset($this->blocks[$block_name]);
             echo $output;
         }
     }
