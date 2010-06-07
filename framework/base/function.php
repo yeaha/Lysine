@@ -21,6 +21,10 @@ function req() {
     return $instance;
 }
 
+function db($dsn_name = null) {
+    return Ly_Db::conn($dsn_name);
+}
+
 function render_view($file, array $vars = null) {
     static $instance;
     if (!$instance) $instance = new Ly_View_Render(cfg('view'));

@@ -16,4 +16,26 @@ return array(
         // 视图文件扩展名
         'file_ext' => 'php',
     ),
+
+    /* 数据库连接配置
+    'db' => array(
+        '__default__' => array(         // via tcp
+            'adapter' => 'pgsql',
+            'host' => '127.0.0.1',
+            'port' => '5432',
+            'user' => 'dev',
+            'pass' => 'abc',
+            'dbname' => 'template1',
+            'options' => array(),
+        ),
+        '__default__' => array(         // via unix socket
+            'adapter' => 'mysql',
+            'unix_socket' => '/var/run/mysq.socket',
+            'user' => 'dev',
+            'pass' => 'abc',
+            'dbname' => 'template1',
+            'options' => array(),
+        ),
+    ),
+    */
 );
