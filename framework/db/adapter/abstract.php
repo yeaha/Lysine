@@ -69,7 +69,7 @@ abstract class Ly_Db_Adapter_Abstract {
         list($dsn, $user, $pass, $options) = $this->cfg;
 
         try {
-            $this->dbh = new PDO($dsn, $user, $pass, $options);
+            $dbh = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $ex) {
             throw new Ly_Db_Exception(
                 $ex->getMessage(),
@@ -77,6 +77,10 @@ abstract class Ly_Db_Adapter_Abstract {
             );
         }
 
+        // 出错时抛出异常
+        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $this->dbh = $dbh;
         return $this;
     }
 

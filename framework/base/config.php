@@ -19,22 +19,21 @@ return array(
 
     /* 数据库连接配置
     'db' => array(
-        '__default__' => array(         // via tcp
-            'adapter' => 'pgsql',
-            'host' => '127.0.0.1',
-            'port' => '5432',
-            'user' => 'dev',
-            'pass' => 'abc',
-            'dbname' => 'template1',
-            'options' => array(),
-        ),
-        '__default__' => array(         // via unix socket
-            'adapter' => 'mysql',
-            'unix_socket' => '/var/run/mysq.socket',
-            'user' => 'dev',
-            'pass' => 'abc',
-            'dbname' => 'template1',
-            'options' => array(),
+        'dsn' => array(
+            '__default__' => array(         // via tcp
+                'dsn' => 'psql:host=127.0.0.1 port=5432 dbname=template1',
+                'user' => 'dev',
+                'pass' => 'abc',
+                'options' => array(),
+            ),
+            '__default__' => array(         // via unix socket
+                'dsn' => 'mysql:unix_socket=/var/run/mysq.socket dbname=test',
+                'user' => 'dev',
+                'pass' => 'abc',
+                'options' => array(
+                    PDO::ATTR_EMULATE_PREPARES => true
+                ),
+            ),
         ),
     ),
     */
