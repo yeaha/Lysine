@@ -128,7 +128,8 @@ class Ly_Application {
             throw new Ly_Request_Exception('Not Acceptable', 406);
         $resp = call_user_func_array(array($handle, $fn), $args);
 
-        if (method_exists('postRun', $handle)) call_user_func_array(array($handle, 'postRun'), $args);
+        // 把response结果作为参数传递给postRun
+        if (method_exists('postRun', $handle)) call_user_func(array($handle, 'postRun'), $resp);
 
         return $resp;
     }
