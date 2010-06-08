@@ -15,7 +15,8 @@ class Ly_Helper_Curl {
             throw new Exception('Helper_Curl: curl extension must be loaded before use');
 
         if (!is_null($options))
-            $this->default_options = array_merge($this->default_options, $options);
+            while (list($key, $val) = each($options))
+                $this->default_options[$key] = $val;
     }
 
     /**
