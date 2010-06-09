@@ -25,11 +25,21 @@ function db($dsn_name = null) {
     return Ly_Db::conn($dsn_name);
 }
 
+function dbexpr($expr) {
+    return Ly_Db_Expr($expr);
+}
+
 function render_view($file, array $vars = null) {
     static $instance;
     if (!$instance) $instance = new Ly_View_Render(cfg('view'));
 
     return $instance->reset()->fetch($file, $vars);
+}
+
+function dump($var) {
+    echo '<pre>';
+    var_dump($var);
+    echo '</pre>';
 }
 
 /**
