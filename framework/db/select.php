@@ -79,7 +79,7 @@ class Ly_Db_Select {
     protected function compile() {
         $dbh = $this->dbh;
 
-        $cols = $dbh->qcol($this->cols);
+        $cols = implode(',', $dbh->qcol($this->cols));
         if (empty($cols)) $cols = '*';
 
         $sql = sprintf('SELECT %s FROM %s', $cols, $dbh->qtab($this->from));
