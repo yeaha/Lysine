@@ -125,20 +125,54 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
         unset($this->coll[$offset]);
     }
 
+    /**
+     * 返回并删除第一个元素
+     *
+     * @access public
+     * @return mixed
+     */
     public function shift() {
         return array_shift($this->coll);
     }
 
+    /**
+     * 把元素插入到数组第一位
+     *
+     * @param mixed $element
+     * @access public
+     * @return Ly_Coll
+     */
     public function unshift($element) {
+        if (is_array($element)) {
+            foreach ($element as $e) array_unshift($this->coll, $e);
+            return $this;
+        }
+
         array_unshift($this->coll, $element);
         return $this;
     }
 
+    /**
+     * 返回并删除最后一个元素
+     *
+     * @access public
+     * @return mixed
+     */
     public function pop() {
         return array_pop($this->coll);
     }
 
+    /**
+     * 把元素插入到数组尾部
+     *
+     * @param mixed $element
+     * @access public
+     * @return Ly_Coll
+     */
     public function push($element) {
+        if (is_array($element)) {
+            foreach ($element as $e) array_push($this->coll, $e);
+        }
         array_push($this->coll, $element);
         return $this;
     }
@@ -147,7 +181,7 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 把每个元素作为参数传递给callback
      * 把所有的返回值以Ly_Coll方式返回
      *
-     * @param mixed $callback
+     * @param callback $callback
      * @param array $pre_args
      * @param array $post_args
      * @access public
@@ -171,7 +205,7 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 和map不同，map会创建一个新的Ly_Coll
      * each是会修改自身
      *
-     * @param mixed $callback
+     * @param callback $callback
      * @param array $pre_args
      * @param array $post_args
      * @access public
@@ -191,25 +225,46 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
 
     /**
      * 把数组中的每个元素作为参数传递给callback
-     * 保留callback返回true的值
+     * 找出符合条件的值
      *
-     * @param mixed $callback
+     * @param callback $callback
+     * @param array $pre_args
+     * @param array $post_args
      * @access public
      * @return Ly_Coll
      */
-    public function filter($callback, $create_new = true) {
-        $filter = array();
+    public function find($callback, array $pre_args = null, array $post_args = null) {
+        $find = array();
         foreach ($this->coll as $key => $el) {
-            $test = call_user_func($callback, $el);
+            $args = array($el);
+            if ($pre_args) $args = array_merge($pre_args, $args);
+            if ($post_args) $args = array_merge($args, $post_args);
 
-            if ($create_new AND $test) {
-                $filter[$key] = $el;
-                continue;
-            }
-
-            if (!$test) unset($this->coll[$key]);
+            if (call_user_func_array($callback, $args)) $find[$key] = $el;
         }
-        return $create_new ? new self($filter) : $this;
+        return new self($find);
+    }
+
+    /**
+     * 把数组中的每个元素作为参数传递给callback
+     * 过滤掉不符合条件的值
+     *
+     * @param callback $callback
+     * @param array $pre_args
+     * @param array $post_args
+     * @access public
+     * @return Ly_Coll
+     */
+    public function filter($callback, array $pre_args = null, array $post_args = null) {
+        foreach ($this->coll as $key => $el) {
+            $args = array($el);
+            if ($pre_args) $args = array_merge($pre_args, $args);
+            if ($post_args) $args = array_merge($args, $post_args);
+
+            if (!call_user_func_array($callback, $args))
+                unset($this->coll[$key]);
+        }
+        return $this;
     }
 
     /**
