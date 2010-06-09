@@ -26,7 +26,7 @@ function db($dsn_name = null) {
 }
 
 function dbexpr($expr) {
-    return Ly_Db_Expr($expr);
+    return new Ly_Db_Expr($expr);
 }
 
 function render_view($file, array $vars = null) {
