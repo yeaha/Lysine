@@ -22,6 +22,10 @@ abstract class Ly_Db_Adapter_Abstract {
      */
     protected $dbh;
 
+    abstract public function qtab($table_name);
+
+    abstract public function qcol($column_name);
+
     /**
      * 构造函数
      *
@@ -45,6 +49,11 @@ abstract class Ly_Db_Adapter_Abstract {
 
         $this->cfg = array($dsn, $user, $pass, $options);
         $this->connect();
+    }
+
+    public function __call($fn, $args) {
+        if (!$this->isConnected()) return $this;
+        return call_user_func_array(array($this->dbh, $fn), $args);
     }
 
     /**
@@ -79,6 +88,7 @@ abstract class Ly_Db_Adapter_Abstract {
 
         // 出错时抛出异常
         $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('Ly_Db_Statement'));
 
         $this->dbh = $dbh;
         return $this;
@@ -140,8 +150,24 @@ abstract class Ly_Db_Adapter_Abstract {
         $this->dbh->commit();
     }
 
-    public function exec($sql) {
+    public function execute($sql, $params = null) {
         if (!$this->isConnected()) $this->connect();
+        if (!is_array($params)) $params = array_slice(func_get_args(), 1);
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute($params);
+
+        if (strtolower(substr($sql, 0, 6)) == 'select') {
+            $sth->setFetchMode(PDO::FETCH_ASSOC);
+            return $sth;
+        }
+
+        return $sth->rowCount();
+    }
+
+    public function select($table_name) {
+        $select = new Ly_Db_Select($this);
+        return $select->from($table_name);
     }
 
     /**
@@ -152,8 +178,17 @@ abstract class Ly_Db_Adapter_Abstract {
      * @access public
      * @return integer
      */
-    public function insert($table, $row) {
+    public function insert($table, array $row) {
         if (!$this->isConnected()) $this->connect();
+
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $this->qtab($table),
+            implode(',', $this->qcol(array_keys($row))),
+            implode(',', array_fill(0, count($row), '?'))
+        );
+
+        return $this->execute($sql, array_values($row));
     }
 
     /**
@@ -165,8 +200,26 @@ abstract class Ly_Db_Adapter_Abstract {
      * @access public
      * @return integer
      */
-    public function update($table, $row, $where) {
+    public function update($table, array $row, $where = null) {
         if (!$this->isConnected()) $this->connect();
+
+        $set = $params = array();
+        while (list($col, $val) = each($row)) {
+            $set[] = $this->qcol($col) .' = ?';
+            $params[] = $val;
+        }
+
+        $sql = sprintf('UPDATE %s SET %s', $this->qtab($table), implode(',', $set));
+        if (!$where) return $this->execute($sql, $params);
+
+        if (is_array($where)) {
+            $sql .= ' WHERE '. $where[0];
+            foreach (array_slice($where, 1) as $val) $params[] = $val;
+        } else {
+            $sql .= ' WHERE '. $where;
+        }
+
+        return $this->execute($sql, $params);
     }
 
     /**
@@ -177,7 +230,22 @@ abstract class Ly_Db_Adapter_Abstract {
      * @access public
      * @return integer
      */
-    public function delete($table, $where) {
+    public function delete($table, $where = null) {
         if (!$this->isConnected()) $this->connect();
+
+        $params = array();
+
+        $sql = 'DELETE FROM '. $this->qtab($table);
+        if (is_array($where)) {
+            $sql .= ' WHERE '. $where[0];
+            foreach (array_slice($where, 1) as $val) $params[] = $val;
+        } else {
+            $sql .= ' WHERE '. $where;
+        }
+
+        return $this->execute($sql, $params);
+    }
+
+    public function qstr() {
     }
 }
