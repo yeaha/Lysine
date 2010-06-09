@@ -246,6 +246,23 @@ abstract class Ly_Db_Adapter_Abstract {
         return $this->execute($sql, $params);
     }
 
-    public function qstr() {
+    /**
+     * 逃逸特殊字符处理
+     *
+     * @param mixed $val
+     * @access public
+     * @return mixed
+     */
+    public function qstr($val) {
+        if (is_array($val)) {
+            foreach ($val as &$v) $v = $this->qstr($v);
+            return $val;
+        }
+
+        if (is_numeric($val)) return $val;
+        if (is_null($val)) return 'NULL';
+
+        if (!$this->isConnected()) $this->connect();
+        return $this->dbh->quote($val);
     }
 }
