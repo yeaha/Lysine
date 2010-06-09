@@ -59,3 +59,59 @@ function array_spider(array $target, array $path = array()) {
 
     return $target;
 }
+
+function add($a, $b) {
+    return $a + $b;
+}
+
+function sub($a, $b) {
+    return $a - $b;
+}
+
+function mul($a, $b) {
+    return $a * $b;
+}
+
+function div($a, $b) {
+    return $a / $b;
+}
+
+function mod($a, $b) {
+    return $a % $b;
+}
+
+function divmod($a, $b) {
+    return array(floor(div($a, $b)), mod($a, $b));
+}
+
+function inc($n) {
+    return $n + 1;
+}
+
+function dec($n) {
+    return $n - 1;
+}
+
+function eq($a, $b) {
+    return $a === $b;
+}
+
+function comp($a, $b) {
+    return $a == $b;
+}
+
+function great($a, $b) {
+    return $a > $b;
+}
+
+function less($a, $b) {
+    return $a < $b;
+}
+
+function negative($n) {
+    return $n < 0;
+}
+
+function positive($n) {
+    return $n > 0;
+}
