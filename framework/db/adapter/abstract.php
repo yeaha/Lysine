@@ -53,7 +53,9 @@ abstract class Ly_Db_Adapter_Abstract {
 
     public function __call($fn, $args) {
         if (!$this->isConnected()) return $this;
-        return call_user_func_array(array($this->dbh, $fn), $args);
+
+        if (method_exists($this->dbh, $fn))
+            return call_user_func_array(array($this->dbh, $fn), $args);
     }
 
     /**
