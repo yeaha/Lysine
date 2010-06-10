@@ -76,7 +76,7 @@ class Ly_Db_Select {
         return $this;
     }
 
-    protected function compile() {
+    public function compile() {
         $dbh = $this->dbh;
 
         $cols = implode(',', $dbh->qcol($this->cols));
@@ -88,7 +88,7 @@ class Ly_Db_Select {
         foreach ($this->where as $w) {
             list($where_sql, $where_params) = $w;
             $where[] = $where_sql;
-            foreach ($where_params as $p) $params[] = $p;
+            $params = array_merge($params, $where_params);
         }
 
         if ($where) $sql .= sprintf(' WHERE %s', '('. implode(') AND (', $where) .')');
