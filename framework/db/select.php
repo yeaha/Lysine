@@ -47,6 +47,15 @@ class Ly_Db_Select {
 
     public function where($where, $params = null) {
         if (!is_array($params)) $params = array_slice(func_get_args(), 1);
+
+        // 处理:user风格的占位符
+        if (!is_null($params) AND preg_match_all('/:[a-z0-9_\-]+/i', $where, $match)) {
+            $placeholder = $match[0];
+            if (count($placeholder) != count($params))
+                throw new InvalidArgumentException('Missing sql statement parameter');
+            $params = array_combine($placeholder, $params);
+        }
+
         $this->where[] = array($where, $params);
         return $this;
     }
