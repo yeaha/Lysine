@@ -290,6 +290,8 @@ abstract class Ly_Db_Adapter_Abstract {
      * 解析占位符及参数
      * 'user = :user', 'username'
      * 'user = :user', array(':user' => 'username')
+     * 'user = ?', 'username'
+     * 'user = ?', array('username')
      *
      * @param string $sql
      * @param mixed $params
@@ -302,7 +304,7 @@ abstract class Ly_Db_Adapter_Abstract {
         $params = is_array($params) ? $params : array_slice(func_get_args(), 1);
 
         if (!preg_match_all('/:[a-z0-9_\-]+/i', $sql, $match))
-            return array($sql, $params);
+            return array($sql, array_values($params));
         $place = $match[0];
 
         if (count($place) != count($params))
