@@ -189,11 +189,11 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      */
     public function map($callback, array $pre_args = null, array $post_args = null) {
         $map = array();
-        foreach ($this->coll as $key => $el) {
-            $args = array($el);
-            if ($pre_args) $args = array_merge($pre_args, $args);
-            if ($post_args) $args = array_merge($args, $post_args);
+        if (is_null($pre_args)) $pre_args = array();
+        if (is_null($post_args)) $post_args = array();
 
+        foreach ($this->coll as $key => $el) {
+            $args = array_merge($pre_args, array($el), $post_args);
             $map[$key] = call_user_func_array($callback, $args);
         }
 
@@ -212,11 +212,11 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * @return Ly_Coll
      */
     public function each($callback, array $pre_args = null, array $post_args = null) {
-        foreach ($this->coll as $key => &$el) {
-            $args = array($el);
-            if ($pre_args) $args = array_merge($pre_args, $args);
-            if ($post_args) $args = array_merge($args, $post_args);
+        if (is_null($pre_args)) $pre_args = array();
+        if (is_null($post_args)) $post_args = array();
 
+        foreach ($this->coll as $key => &$el) {
+            $args = array_merge($pre_args, array($el), $post_args);
             $el = call_user_func_array($callback, $args);
         }
 
@@ -235,11 +235,11 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      */
     public function find($callback, array $pre_args = null, array $post_args = null) {
         $find = array();
-        foreach ($this->coll as $key => $el) {
-            $args = array($el);
-            if ($pre_args) $args = array_merge($pre_args, $args);
-            if ($post_args) $args = array_merge($args, $post_args);
+        if (is_null($pre_args)) $pre_args = array();
+        if (is_null($post_args)) $post_args = array();
 
+        foreach ($this->coll as $key => $el) {
+            $args = array_merge($pre_args, array($el), $post_args);
             if (call_user_func_array($callback, $args)) $find[$key] = $el;
         }
         return new self($find);
@@ -256,11 +256,11 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * @return Ly_Coll
      */
     public function filter($callback, array $pre_args = null, array $post_args = null) {
-        foreach ($this->coll as $key => $el) {
-            $args = array($el);
-            if ($pre_args) $args = array_merge($pre_args, $args);
-            if ($post_args) $args = array_merge($args, $post_args);
+        if (is_null($pre_args)) $pre_args = array();
+        if (is_null($post_args)) $post_args = array();
 
+        foreach ($this->coll as $key => $el) {
+            $args = array_merge($pre_args, array($el), $post_args);
             if (!call_user_func_array($callback, $args))
                 unset($this->coll[$key]);
         }
