@@ -183,14 +183,24 @@ abstract class Ly_Db_Adapter_Abstract {
     public function insert($table, array $row) {
         if (!$this->isConnected()) $this->connect();
 
+        $cols = array_keys($row);
+        $vals = array_values($row);
+
+        $place = array();
+        foreach ($cols as $col) {
+            $place[] = ':'. $col;
+        }
+
         $sql = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             $this->qtab($table),
-            implode(',', $this->qcol(array_keys($row))),
-            implode(',', array_fill(0, count($row), '?'))
+            implode(',', $this->qcol($cols)),
+            implode(',', $place)
         );
+        var_dump($sql);
+        var_dump($vals);
 
-        return $this->execute($sql, array_values($row));
+        return $this->execute($sql, $vals);
     }
 
     /**
@@ -205,21 +215,29 @@ abstract class Ly_Db_Adapter_Abstract {
     public function update($table, array $row, $where = null) {
         if (!$this->isConnected()) $this->connect();
 
+        // 先解析where，检查使用的place holder类型
+        $where_params = array();
+        if (is_array($where))
+            list($where, $where_params) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
+
+        $holder = null;
+        if ($where_params AND is_int(key($where_params))) $holder = '?';
+
         $set = $params = array();
         while (list($col, $val) = each($row)) {
-            $set[] = $this->qcol($col) .' = ?';
-            $params[] = $val;
+            $h = $holder ? $holder : ':'. $col;
+            $set[] = $this->qcol($col) .' = '. $h;
+
+            if ($holder == '?') {
+                $params[] = $val;
+            } else {
+                $params[$h] = $val;
+            }
         }
+        $params = array_merge($params, $where_params);
 
         $sql = sprintf('UPDATE %s SET %s', $this->qtab($table), implode(',', $set));
-        if (!$where) return $this->execute($sql, $params);
-
-        if (is_array($where)) {
-            $sql .= ' WHERE '. $where[0];
-            foreach (array_slice($where, 1) as $val) $params[] = $val;
-        } else {
-            $sql .= ' WHERE '. $where;
-        }
+        if ($where) $sql .= ' WHERE '. $where;
 
         return $this->execute($sql, $params);
     }
@@ -266,5 +284,30 @@ abstract class Ly_Db_Adapter_Abstract {
 
         if (!$this->isConnected()) $this->connect();
         return $this->dbh->quote($val);
+    }
+
+    /**
+     * 解析占位符及参数
+     * 'user = :user', 'username'
+     * 'user = :user', array(':user' => 'username')
+     *
+     * @param string $sql
+     * @param mixed $params
+     * @access public
+     * @return array
+     */
+    public function parsePlaceHolder($sql, $params = null) {
+        if (is_null($params)) return array($sql, array());
+
+        $params = is_array($params) ? $params : array_slice(func_get_args(), 1);
+
+        if (!preg_match_all('/:[a-z0-9_\-]+/i', $sql, $match))
+            return array($sql, $params);
+        $place = $match[0];
+
+        if (count($place) != count($params))
+            throw new InvalidArgumentException('Missing sql statement parameter');
+
+        return array($sql, array_combine($place, $params));
     }
 }
