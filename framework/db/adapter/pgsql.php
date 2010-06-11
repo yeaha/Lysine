@@ -63,8 +63,7 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
      * @access public
      * @return array
      */
-    function listTables($pattern = null, $schema = null)
-    {
+    public function listTables($pattern = null, $schema = null) {
         $where = array(
             'tablename NOT SIMILAR TO \'(pg_|sql_|information_)%\''
         );
@@ -81,9 +80,8 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
 
         $sql = sprintf('SELECT schemaname, tablename FROM pg_tables WHERE %s', implode(' AND ', $where));
         $tables = array();
-        foreach ($this->execute($sql, $params)->getAll() as $row) {
+        foreach ($this->execute($sql, $params)->getAll() as $row)
             $tables[] = $this->qtab("{$row['schemaname']}.{$row['tablename']}");
-        }
 
         return $tables;
     }
@@ -96,7 +94,7 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
      * @access public
      * @return array
      */
-    function listViews($pattern = null, $schema = null) {
+    public function listViews($pattern = null, $schema = null) {
         $where = array(
             'viewname NOT SIMILAR TO \'(pg_|sql_|information_)%\' AND schemaname NOT SIMILAR TO \'(pg_|sql_|information_)%\''
         );
@@ -129,7 +127,7 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
      * @access public
      * @return array
      */
-    function listConstraints($table_name, $contype = null) {
+    public function listConstraints($table_name, $contype = null) {
         if (!is_array($contype)) $contype = array_slice(func_get_args(), 1);
 
         $constraints = array();
@@ -147,9 +145,8 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
         foreach ($this->execute($sql, $params)->getAll() as $row) {
             // 约束所在的字段
             $concolumns = array();
-            foreach (self::decodeArray($row['conkey']) as $attnum) {
+            foreach (self::decodeArray($row['conkey']) as $attnum)
                 $concolumns[] = $current_table_attribute[$attnum]['attname'];
-            }
 
             // 开始处理不同类型的约束
             if ('p' == $row['contype']) {  // 主键约束
