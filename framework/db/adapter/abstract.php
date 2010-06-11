@@ -152,6 +152,14 @@ abstract class Ly_Db_Adapter_Abstract {
         $this->dbh->commit();
     }
 
+    /**
+     * 执行sql并返回结果或结果对象
+     *
+     * @param string $sql
+     * @param mixed $params
+     * @access public
+     * @return mixed
+     */
     public function execute($sql, $params = null) {
         if (!$this->isConnected()) $this->connect();
         if (!is_array($params)) $params = array_slice(func_get_args(), 1);
@@ -167,6 +175,13 @@ abstract class Ly_Db_Adapter_Abstract {
         return $sth->rowCount();
     }
 
+    /**
+     * 生成Ly_Db_Select实例
+     *
+     * @param string $table_name
+     * @access public
+     * @return Ly_Db_Select
+     */
     public function select($table_name) {
         $select = new Ly_Db_Select($this);
         return $select->from($table_name);
@@ -197,8 +212,6 @@ abstract class Ly_Db_Adapter_Abstract {
             implode(',', $this->qcol($cols)),
             implode(',', $place)
         );
-        var_dump($sql);
-        var_dump($vals);
 
         return $this->execute($sql, $vals);
     }
@@ -215,23 +228,23 @@ abstract class Ly_Db_Adapter_Abstract {
     public function update($table, array $row, $where = null) {
         if (!$this->isConnected()) $this->connect();
 
-        // 先解析where，检查使用的place holder类型
+        // 先解析where
         $where_params = array();
         if (is_array($where))
             list($where, $where_params) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
-
+        //检查place holder类型
         $holder = null;
         if ($where_params AND is_int(key($where_params))) $holder = '?';
 
         $set = $params = array();
         while (list($col, $val) = each($row)) {
-            $h = $holder ? $holder : ':'. $col;
-            $set[] = $this->qcol($col) .' = '. $h;
+            $holder_here = $holder ? $holder : ':'. $col;
+            $set[] = $this->qcol($col) .' = '. $holder_here;
 
-            if ($holder == '?') {
+            if ($holder_here == '?') {
                 $params[] = $val;
             } else {
-                $params[$h] = $val;
+                $params[$holder_here] = $val;
             }
         }
         $params = array_merge($params, $where_params);
@@ -256,12 +269,9 @@ abstract class Ly_Db_Adapter_Abstract {
         $params = array();
 
         $sql = 'DELETE FROM '. $this->qtab($table);
-        if (is_array($where)) {
-            $sql .= ' WHERE '. $where[0];
-            foreach (array_slice($where, 1) as $val) $params[] = $val;
-        } else {
-            $sql .= ' WHERE '. $where;
-        }
+        if (is_array($where))
+            list($where, $params) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
+        $sql .= ' WHERE '. $where;
 
         return $this->execute($sql, $params);
     }
