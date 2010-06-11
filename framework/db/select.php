@@ -1,6 +1,6 @@
 <?php
 class Ly_Db_Select {
-    protected $dbh;
+    protected $adapter;
 
     protected $from;
     protected $cols = array();
@@ -13,8 +13,8 @@ class Ly_Db_Select {
 
     protected $return_as;
 
-    public function __construct(Ly_Db_Adapter_Abstract $dbh) {
-        $this->dbh = $dbh;
+    public function __construct(Ly_Db_Adapter_Abstract $adapter) {
+        $this->adapter = $adapter;
     }
 
     public function __call($fn, $args) {
@@ -28,7 +28,7 @@ class Ly_Db_Select {
     }
 
     public function handle() {
-        return $this->dbh;
+        return $this->adapter;
     }
 
     public function setCols($cols = null) {
@@ -47,7 +47,7 @@ class Ly_Db_Select {
 
     public function where($where, $params = null) {
         $args = func_get_args();
-        $this->where[] = call_user_func_array(array($this->dbh, 'parsePlaceHolder'), $args);
+        $this->where[] = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
         return $this;
     }
 
@@ -77,12 +77,12 @@ class Ly_Db_Select {
     }
 
     public function compile() {
-        $dbh = $this->dbh;
+        $adapter = $this->adapter;
 
-        $cols = implode(',', $dbh->qcol($this->cols));
+        $cols = implode(',', $adapter->qcol($this->cols));
         if (empty($cols)) $cols = '*';
 
-        $sql = sprintf('SELECT %s FROM %s', $cols, $dbh->qtab($this->from));
+        $sql = sprintf('SELECT %s FROM %s', $cols, $adapter->qtab($this->from));
 
         $where = $params = array();
         foreach ($this->where as $w) {
@@ -106,7 +106,7 @@ class Ly_Db_Select {
 
     public function execute() {
         list($sql, $params) = $this->compile();
-        return $this->dbh->execute($sql, $params);
+        return $this->adapter->execute($sql, $params);
     }
 
     public function getFirst() {

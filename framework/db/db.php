@@ -21,9 +21,9 @@ class Ly_Db {
         $adapter = $match[1];
 
         $class = 'Ly_Db_Adapter_'. ucfirst($adapter);
-        $dbh = new $class($dsn, $user, $pass, $options);
+        $adapter = new $class($dsn, $user, $pass, $options);
 
-        self::$conns[$dsn_name] = $dbh;
+        self::$conns[$dsn_name] = $adapter;
         return self::$conns[$dsn_name];
     }
 }
