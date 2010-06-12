@@ -29,30 +29,37 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
 
     /**
      * 把table name转换成为符合格式的完全限定名
+     * table name和column name的处理方式完全一致
+     * 分开为两个不同的方法增加可读性而已
      *
      * @param mixed $table_name
-     * @param string $alias
      * @access public
      * @return string
      */
     public function qtab($table_name) {
-        if (substr($table_name, 0, 1) == '"') return $table_name;
-
-        $parts = explode('.', $table_name);
-        foreach ($parts as &$p) $p = '"'. trim($p, '"') .'"';
-
-        return implode('.', $parts);
+        return $this->qcol($table_name);
     }
 
-    public function qcol($column_name) {
-        if (is_array($column_name)) {
-            foreach ($column_name as &$c) $c = $this->qcol($c);
-            return $column_name;
+    /**
+     * 把字段名转换为符合格式的完全限定名
+     *
+     * @param mixed $col_name
+     * @access public
+     * @return string
+     */
+    public function qcol($col_name) {
+        if (is_array($col_name)) {
+            foreach ($col_name as &$c) $c = $this->qcol($c);
+            return $col_name;
         }
-        if ($column_name instanceof Ly_Db_Expr) return $column_name->__toString();
-        if (substr($column_name, 0, 1) == '"') return $column_name;
 
-        return '"'. $column_name .'"';
+        if ($col_name instanceof Ly_Db_Expr) return $col_name->__toString();
+        if (substr($col_name, 0, 1) == '"') return $col_name;
+        if (strpos($col_name, '.') === false) return '"'. $col_name .'"';
+
+        $parts = explode('.', $col_name);
+        foreach ($parts as &$p) $p = '"'. trim($p, '"') .'"';
+        return implode('.', $parts);
     }
 
     /**
