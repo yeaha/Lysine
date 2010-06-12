@@ -14,14 +14,6 @@ class Ly_View_Render {
     protected $view_dir;
 
     /**
-     * 视图文件
-     *
-     * @var mixed
-     * @access protected
-     */
-    protected $view;
-
-    /**
      * 视图文件扩展名
      *
      * @var string
@@ -84,7 +76,6 @@ class Ly_View_Render {
      */
     public function reset() {
         $this->inherit_file = null;
-        $this->view = null;
         $this->vars = array();
 
         $this->current_block = null;
@@ -138,18 +129,6 @@ class Ly_View_Render {
     }
 
     /**
-     * 设置视图文件
-     *
-     * @param string $file
-     * @access public
-     * @return self
-     */
-    public function setView($file) {
-        $this->view = $file;
-        return $this;
-    }
-
-    /**
      * 获得真正的视图文件名
      *
      * @param string $file
@@ -174,9 +153,7 @@ class Ly_View_Render {
      * @access public
      * @return string
      */
-    public function fetch($file = null, array $vars = null) {
-        if (!$file) $file = $this->view;
-
+    public function fetch($file, array $vars = null) {
         $file = $this->findFile($file);
         if ($file === false)
             throw new Ly_Exception('Before render you must set a view');
@@ -203,16 +180,6 @@ class Ly_View_Render {
 
         $this->inherit_file = null;
         return $this->fetch($inherit_file);
-    }
-
-    /**
-     * 魔法方法，可以直接echo
-     *
-     * @access public
-     * @return string
-     */
-    public function __toString() {
-        return $this->fetch();
     }
 
     /**
@@ -288,7 +255,7 @@ class Ly_View_Render {
         // 如果继承了其它视图，把输出内容放到$this->blocks内
         if ($this->inherit_file) {
             $this->blocks[$block_name] = $output;
-        } else {    // 否则直接输出
+        } else {
             unset($this->blocks[$block_name]);
             echo $output;
         }
