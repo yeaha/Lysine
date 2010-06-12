@@ -12,6 +12,7 @@ return array (
   'Ly_Db_Row' => 'db/row.php',
   'Ly_Db_Select' => 'db/select.php',
   'Ly_Db_Statement' => 'db/statement.php',
+  'Ly_Events' => 'base/events.php',
   'Ly_Exception' => 'base/exception.php',
   'Ly_Helper_Curl' => 'helper/curl.php',
   'Ly_Request' => 'web/request.php',
