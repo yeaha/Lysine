@@ -40,14 +40,11 @@ class Ly_Db_Statement extends PDOStatement {
      * @return array
      */
     public function getAll($col = null) {
+        if (!$col) return $this->fetchAll();
+
         $rowset = array();
-        while ($row = $this->fetch()) {
-            if ($col AND array_key_exists($col, $row)) {
-                $rowset[$row[$col]] = $row;
-            } else {
-                $rowset[] = $row;
-            }
-        }
+        while ($row = $this->fetch())
+            $rowset[$row[$col]] = $row;
         return $rowset;
     }
 }
