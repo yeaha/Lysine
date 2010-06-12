@@ -195,7 +195,7 @@ class Ly_View_Render {
         if ($file === false) return false;
 
         extract($this->vars);
-        if ($vars) extract($this->vars);
+        if ($vars) extract($vars);
         include $file;
     }
 
