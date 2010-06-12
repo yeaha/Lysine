@@ -129,7 +129,7 @@ class Ly_Application {
         $resp = call_user_func_array(array($handle, $fn), $args);
 
         // 把response结果作为参数传递给postRun
-        if (method_exists('postRun', $handle)) call_user_func(array($handle, 'postRun'), $resp);
+        if (method_exists('postRun', $handle)) call_user_func(array($handle, 'postRun'), &$resp);
 
         return $resp;
     }
