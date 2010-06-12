@@ -64,7 +64,10 @@ class Ly_Application {
 
         // 从class_map找到类所在文件直接载入
         if (array_key_exists($class, $this->class_map)) {
-            $file = APP_PATH .'/'. $this->class_map[$class];
+            $file = $this->class_map[$class];
+            if (substr($file, 0, 1) != '/')     // 没有以/开头，属于相对路径
+                $file = APP_PATH .'/'. $file;
+
             if (is_readable($file)) require $file;
             if (class_exists($class, false) || interface_exists($class, false)) return true;
         }
