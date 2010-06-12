@@ -6,19 +6,27 @@ defined('APP_PATH') or define('APP_PATH', dirname(__FILE__));
 $urls = array(
     '#^/hello/(.+)#' => 'Controller_Hello',
     '#^/hi/(.+)#' => 'Controller_Hi',
+    '#^/redirect/lysine#' => 'Controller_Redirect',
+    '#^/test#' => 'Controller_Test',
     '#^/(.*)#' => 'Controller_Index',
 );
 
 $config = array(
     'db' => array(
-        'adapter'   => 'pgsql',
-        'host'      => 'localhost',
-        'port'      => 5432,
-        'user'      => 'dev',
-        'pass'      => 'abc'
+        'dsn' => array(
+            '__default__' => array(
+                'dsn'       => 'pgsql:host=127.0.0.1 dbname=lysine.test',
+                'user'      => 'dev',
+                'pass'      => 'abc',
+            ),
+        ),
     ),
 );
 
+$class_map = require 'class_files.php';
 $include_path = array('.', './model');
-$response = app()->setConfig($config)->includePath($include_path)->run($urls);
+$response = app()->setConfig($config)
+                 ->includeClassMap($class_map)
+                 ->includePath($include_path)
+                 ->run($urls);
 echo $response;
