@@ -19,7 +19,8 @@ class Ly_Db_Select {
 
     public function __call($fn, $args) {
         if (substr($fn, 0, 3) == 'get')
-            return call_user_func_array(array($this->execute(), $fn), $args);
+            $sth = $this->execute();
+            return call_user_func_array(array($sth, $fn), $args);
     }
 
     public function from($table) {
@@ -109,13 +110,16 @@ class Ly_Db_Select {
         return $this->adapter->execute($sql, $params);
     }
 
-    public function getFirst() {
-        $sth = $this->limit(1)->execute();
-        return $sth->getRow();
-    }
+    public function get($limit = null) {
+        if (is_int($limit)) $this->limit($limit);
 
-    public function getCol($col_number = 0) {
-        $sth = $this->limit(1)->execute();
-        return $sth->getCol($col_number = 0);
+        $limit = $this->limit;
+        $sth = $this->execute();
+
+        if ($limit === 1) {
+            return $sth->getRow();
+        } else {
+            return $sth->getAll();
+        }
     }
 }
