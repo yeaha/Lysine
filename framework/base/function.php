@@ -30,10 +30,8 @@ function dbexpr($expr) {
 }
 
 function render_view($file, array $vars = null) {
-    static $instance;
-    if (!$instance) $instance = new Ly_View_Render(cfg('view'));
-
-    return $instance->reset()->fetch($file, $vars);
+    $render = new Ly_View_Render(cfg('view'));
+    return $render->fetch($file, $vars);
 }
 
 function dump($var) {
