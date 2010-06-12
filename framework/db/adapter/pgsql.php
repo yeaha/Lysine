@@ -56,6 +56,32 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
     }
 
     /**
+     * 获得字段定义
+     * 返回二维数组
+     *
+     * [code]
+     * array(
+     *     array(
+     *         'name' => 'id',          // column name
+     *         'ctype' => 'i',          // common type
+     *         'ntype' => 'integer',    // native type
+     *         'length' => null,
+     *         'allow_null' => false,
+     *         'has_default' => true,
+     *         'default' => 1,          // default value
+     *         'primary_key' => true,   // is primary key?
+     *     )
+     * )
+     * [/code]
+     *
+     * @param string $table
+     * @access public
+     * @return array
+     */
+    public function listColumns($table) {
+    }
+
+    /**
      * 获得数据库中所有的表，不包括视图
      *
      * @param string $pattern
@@ -67,20 +93,20 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
         $where = array(
             'tablename NOT SIMILAR TO \'(pg_|sql_|information_)%\''
         );
-        $params = array();
+        $bind = array();
         if ($schema) {
             $where[] = 'schemaname = ?';
-            $params[] = $schema;
+            $bind[] = $schema;
         }
 
         if ($pattern) {
             $where[] = 'tablename ILIKE ?';
-            $params[] = $pattern;
+            $bind[] = $pattern;
         }
 
         $sql = sprintf('SELECT schemaname, tablename FROM pg_tables WHERE %s', implode(' AND ', $where));
         $tables = array();
-        foreach ($this->execute($sql, $params)->getAll() as $row)
+        foreach ($this->execute($sql, $bind)->getAll() as $row)
             $tables[] = $this->qtab("{$row['schemaname']}.{$row['tablename']}");
 
         return $tables;
@@ -98,20 +124,20 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
         $where = array(
             'viewname NOT SIMILAR TO \'(pg_|sql_|information_)%\' AND schemaname NOT SIMILAR TO \'(pg_|sql_|information_)%\''
         );
-        $params = array();
+        $bind = array();
         if ($schema) {
             $where[] = 'schemaname = ?';
-            $params[] = $schema;
+            $bind[] = $schema;
         }
 
         if ($pattern) {
             $where[] = 'viewname ILIKE ?';
-            $params[] = $pattern;
+            $bind[] = $pattern;
         }
 
         $sql = sprintf('SELECT viewname FROM pg_views WHERE %s', implode(' AND ', $where));
 
-        return $this->execute($sql, $params)->getCols();
+        return $this->execute($sql, $bind)->getCols();
     }
 
     /**
@@ -137,12 +163,12 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
 
         // 从pg_constraint查询出表的所有约束定义
         $where = array('conrelid = ?');
-        $params = array($current_table_oid);
+        $bind = array($current_table_oid);
         if ($contype)
             $where[] = sprintf('contype IN (\'%s\')', implode('\',\'', $contype));
 
         $sql = sprintf('SELECT * FROM pg_constraint WHERE %s', implode(' AND ', $where));
-        foreach ($this->execute($sql, $params)->getAll() as $row) {
+        foreach ($this->execute($sql, $bind)->getAll() as $row) {
             // 约束所在的字段
             $concolumns = array();
             foreach (self::decodeArray($row['conkey']) as $attnum)
@@ -241,12 +267,12 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
 
         if (!array_key_exists($fullname, $oid)) {
             $where = array('relname = ?');
-            $params = array($table);
+            $bind = array($table);
             if ($schema) {
                 $where[] = sprintf('relnamespace = %d', $this->_schemaOid($schema));
             }
             $sql = sprintf('SELECT oid FROM pg_class WHERE %s', implode(' AND ', $where));
-            $oid[$fullname] = $this->execute($sql, $params)->getCol();
+            $oid[$fullname] = $this->execute($sql, $bind)->getCol();
         }
 
         return $oid[$fullname];

@@ -156,16 +156,16 @@ abstract class Ly_Db_Adapter_Abstract {
      * 执行sql并返回结果或结果对象
      *
      * @param string $sql
-     * @param mixed $params
+     * @param mixed $bind
      * @access public
      * @return mixed
      */
-    public function execute($sql, $params = null) {
+    public function execute($sql, $bind = null) {
         if (!$this->isConnected()) $this->connect();
-        if (!is_array($params)) $params = array_slice(func_get_args(), 1);
+        if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
         $sth = $this->dbh->prepare($sql);
-        $sth->execute($params);
+        $sth->execute($bind);
 
         if (strtolower(substr($sql, 0, 6)) == 'select') {
             $sth->setFetchMode(PDO::FETCH_ASSOC);
@@ -229,30 +229,30 @@ abstract class Ly_Db_Adapter_Abstract {
         if (!$this->isConnected()) $this->connect();
 
         // 先解析where
-        $where_params = array();
+        $where_bind = array();
         if (is_array($where))
-            list($where, $where_params) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
+            list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         //检查place holder类型
         $holder = null;
-        if ($where_params AND is_int(key($where_params))) $holder = '?';
+        if ($where_bind AND is_int(key($where_bind))) $holder = '?';
 
-        $set = $params = array();
+        $set = $bind = array();
         while (list($col, $val) = each($row)) {
             $holder_here = $holder ? $holder : ':'. $col;
             $set[] = $this->qcol($col) .' = '. $holder_here;
 
             if ($holder_here == '?') {
-                $params[] = $val;
+                $bind[] = $val;
             } else {
-                $params[$holder_here] = $val;
+                $bind[$holder_here] = $val;
             }
         }
-        $params = array_merge($params, $where_params);
+        $bind = array_merge($bind, $where_bind);
 
         $sql = sprintf('UPDATE %s SET %s', $this->qtab($table), implode(',', $set));
         if ($where) $sql .= ' WHERE '. $where;
 
-        return $this->execute($sql, $params);
+        return $this->execute($sql, $bind);
     }
 
     /**
@@ -266,14 +266,14 @@ abstract class Ly_Db_Adapter_Abstract {
     public function delete($table, $where = null) {
         if (!$this->isConnected()) $this->connect();
 
-        $params = array();
+        $bind = array();
 
         $sql = 'DELETE FROM '. $this->qtab($table);
         if (is_array($where))
-            list($where, $params) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
+            list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         $sql .= ' WHERE '. $where;
 
-        return $this->execute($sql, $params);
+        return $this->execute($sql, $bind);
     }
 
     /**
@@ -304,22 +304,22 @@ abstract class Ly_Db_Adapter_Abstract {
      * 'user = ?', array('username')
      *
      * @param string $sql
-     * @param mixed $params
+     * @param mixed $bind
      * @access public
      * @return array
      */
-    public function parsePlaceHolder($sql, $params = null) {
-        if (is_null($params)) return array($sql, array());
+    public function parsePlaceHolder($sql, $bind = null) {
+        if (is_null($bind)) return array($sql, array());
 
-        $params = is_array($params) ? $params : array_slice(func_get_args(), 1);
+        $bind = is_array($bind) ? $bind : array_slice(func_get_args(), 1);
 
         if (!preg_match_all('/:[a-z0-9_\-]+/i', $sql, $match))
-            return array($sql, array_values($params));
+            return array($sql, array_values($bind));
         $place = $match[0];
 
-        if (count($place) != count($params))
+        if (count($place) != count($bind))
             throw new InvalidArgumentException('Missing sql statement parameter');
 
-        return array($sql, array_combine($place, $params));
+        return array($sql, array_combine($place, $bind));
     }
 }

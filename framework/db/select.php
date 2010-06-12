@@ -46,7 +46,7 @@ class Ly_Db_Select {
         return $this;
     }
 
-    public function where($where, $params = null) {
+    public function where($where, $bind = null) {
         $args = func_get_args();
         $this->where[] = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
         return $this;
@@ -85,11 +85,11 @@ class Ly_Db_Select {
 
         $sql = sprintf('SELECT %s FROM %s', $cols, $adapter->qtab($this->from));
 
-        $where = $params = array();
+        $where = $bind = array();
         foreach ($this->where as $w) {
-            list($where_sql, $where_params) = $w;
+            list($where_sql, $where_bind) = $w;
             $where[] = $where_sql;
-            $params = array_merge($params, $where_params);
+            $bind = array_merge($bind, $where_bind);
         }
 
         if ($where) $sql .= sprintf(' WHERE %s', '('. implode(') AND (', $where) .')');
@@ -102,12 +102,12 @@ class Ly_Db_Select {
         if ($this->limit) $sql .= ' LIMIT '. $this->limit;
         if ($this->offset) $sql .= ' OFFSET '. $this->offset;
 
-        return array($sql, $params);
+        return array($sql, $bind);
     }
 
     public function execute() {
-        list($sql, $params) = $this->compile();
-        return $this->adapter->execute($sql, $params);
+        list($sql, $bind) = $this->compile();
+        return $this->adapter->execute($sql, $bind);
     }
 
     public function get($limit = null) {
