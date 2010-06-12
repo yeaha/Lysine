@@ -8,18 +8,15 @@ include_once LY_PATH .'/base/function.php';
 class Lysine {
     static public $class_files = array();
 
-    static public function autoload($class_name) {
-        if (class_exists($class_name, false) || interface_exists($class_name, false)) return true;
-
+    static public function autoload($class) {
         if (!self::$class_files) self::$class_files = require LY_PATH .'/class_files.php';
 
-        if (!array_key_exists($class_name, self::$class_files)) return false;
-
-        $file = LY_PATH .'/'. self::$class_files[$class_name];
+        if (!array_key_exists($class, self::$class_files)) return false;
+        $file = LY_PATH .'/'. self::$class_files[$class];
         if (!is_readable($file)) return false;
 
-        require $file;
-        return true;
+        include($file);
+        return class_exists($class, false) || interface_exists($class, false);
     }
 }
 
