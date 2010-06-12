@@ -11,27 +11,31 @@ function cfg() {
 function req() {
     static $instance;
 
-    if ($instance) return $instance;
-
-    $class = cfg('app', 'request_class');
-    $instance = new $class;
-    if ( !($instance instanceof Ly_Request) )
-        throw new Ly_Exception('Invalid request class');
+    if (!$instance) {
+        $class = cfg('app', 'request_class');
+        $instance = new $class;
+        if ( !($instance instanceof Ly_Request) )
+            throw new Ly_Exception('Invalid request class');
+    }
 
     return $instance;
 }
 
-function db($dsn_name = null) {
-    return Ly_Db::conn($dsn_name);
+if (!function_exists('render_view')) {
+    function render_view($file, array $vars = null) {
+        $render = new Ly_View_Render(cfg('view'));
+        return $render->fetch($file, $vars);
+    }
+}
+
+if (!function_exists('db')) {
+    function db($dsn_name = null) {
+        return Ly_Db::conn($dsn_name);
+    }
 }
 
 function dbexpr($expr) {
     return new Ly_Db_Expr($expr);
-}
-
-function render_view($file, array $vars = null) {
-    $render = new Ly_View_Render(cfg('view'));
-    return $render->fetch($file, $vars);
 }
 
 function dump($var) {
