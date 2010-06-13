@@ -119,7 +119,7 @@ class Ly_Db_Select {
         if ($limit === 1) {
             return $sth->getRow();
         } else {
-            return $sth->getAll();
+            return new Ly_Coll($sth->getAll());
         }
     }
 }
