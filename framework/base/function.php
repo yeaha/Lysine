@@ -66,7 +66,9 @@ function now($format = null) {
  * @param array $path
  * @return mixed
  */
-function array_spider(array $target, array $path = array()) {
+function array_spider(array $target, $path) {
+    $path = is_array($path) ? $path : array_slice(func_get_args(), 1);
+
     while (list(, $key) = each($path)) {
         if (!is_array($target)) return false;
         if (!array_key_exists($key, $target)) return false;
