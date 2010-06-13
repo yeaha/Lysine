@@ -28,7 +28,7 @@ class Ly_Db_Select {
         return $this;
     }
 
-    public function handle() {
+    public function adapter() {
         return $this->adapter;
     }
 
@@ -116,10 +116,8 @@ class Ly_Db_Select {
         $limit = $this->limit;
         $sth = $this->execute();
 
-        if ($limit === 1) {
-            return $sth->getRow();
-        } else {
-            return new Ly_Coll($sth->getAll());
-        }
+        return ($limit === 1)
+             ? $sth->getRow()
+             : new Ly_Coll($sth->getAll());
     }
 }
