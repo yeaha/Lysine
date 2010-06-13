@@ -1,20 +1,24 @@
 <?php
 class Controller_Index {
-    protected $resp = 'hello world';
-
     public function get() {
-        return $this->resp;
+        return 'Hello world!';
     }
 
     public function post() {
-        return $this->resp;
+        return 'Hello world!';
     }
 
     public function ajax_get() {
-        return $this->resp;
+        return new MyResponse();
     }
 
     public function ajax_post() {
-        return $this->resp;
+        return new MyResponse();
+    }
+}
+
+class MyResponse {
+    public function __toString() {
+        return 'Hello world!';
     }
 }
