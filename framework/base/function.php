@@ -45,6 +45,20 @@ function dump($var) {
 }
 
 /**
+ * 当前unix timestamp
+ * 可指定format格式化返回值
+ *
+ * @param string $format
+ * @access public
+ * @return mixed
+ */
+function now($format = null) {
+    static $now = null;
+    if ($now === null) $now = time();
+    return $format ? date($format, $now) : $now;
+}
+
+/**
  * 根据key路径，在array中找出结果
  * 如果key不存在，返回false
  *
