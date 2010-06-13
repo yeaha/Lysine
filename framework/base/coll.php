@@ -143,13 +143,8 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * @return Ly_Coll
      */
     public function unshift($element) {
-        if (is_array($element)) {
-            foreach ($element as $e) array_unshift($this->coll, $e);
-            return $this;
-        }
-
-        array_unshift($this->coll, $element);
-        return $this;
+        $args = array_reverse(func_get_args());
+        foreach ($args as $arg) array_unshift($this->coll, $arg);
     }
 
     /**
@@ -170,11 +165,8 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * @return Ly_Coll
      */
     public function push($element) {
-        if (is_array($element)) {
-            foreach ($element as $e) array_push($this->coll, $e);
-        }
-        array_push($this->coll, $element);
-        return $this;
+        $args = func_get_args();
+        foreach ($args as $arg) array_push($this->coll, $arg);
     }
 
     /**
