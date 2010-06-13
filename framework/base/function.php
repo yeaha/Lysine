@@ -44,6 +44,11 @@ function dump($var) {
     echo '</pre>';
 }
 
+function coll() {
+    $elements = func_get_args();
+    return new Ly_Coll($elements);
+}
+
 /**
  * 当前unix timestamp
  * 可指定format格式化返回值
