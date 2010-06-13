@@ -13,6 +13,8 @@ function req() {
 
     if (!$instance) {
         $class = cfg('app', 'request_class');
+        if (!$class) $class = 'Ly_Request';
+
         $instance = new $class;
         if ( !($instance instanceof Ly_Request) )
             throw new Ly_Exception('Invalid request class');

@@ -11,8 +11,6 @@ class Ly_Application {
     protected $registry = array();
 
     public function __construct() {
-        if (!defined('APP_PATH')) die('please define APP_PATH constant');
-
         $this->config = require LY_PATH .'/base/config.php';
         spl_autoload_register(array($this, 'autoload'));
     }
@@ -65,7 +63,10 @@ class Ly_Application {
             $file = $this->class_map[$class];
 
             // 没有以/开头，属于相对路径
-            if (substr($file, 0, 1) != '/') $file = APP_PATH .'/'. $file;
+            if (substr($file, 0, 1) != '/') {
+                defined('APP_PATH') or throw new RuntimeException('please define APP_PATH constant');
+                $file = APP_PATH .'/'. $file;
+            }
             if (is_readable($file)) include($file);
             if (class_exists($class, false) || interface_exists($class, false)) return true;
         }
