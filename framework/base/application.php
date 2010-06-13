@@ -109,8 +109,11 @@ class Ly_Application {
 
         $fn = $req_method;
         if ($req->isAJAX()) {
-            if (method_exists($class, 'ajax')) $fn = 'ajax';
-            if (method_exists($class, 'ajax_'.$req_method)) $fn = 'ajax_'.$req_method;
+            if (method_exists($class, 'ajax_'.$req_method)) {
+                $fn = 'ajax_'.$req_method;
+            } else if (method_exists($class, 'ajax')) {
+                $fn = 'ajax';
+            }
         }
 
         $handle = new $class();
