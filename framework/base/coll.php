@@ -287,4 +287,35 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
         }
         return new self($result);
     }
+
+    /**
+     * 把所有的元素实例化为指定的类
+     * 指定的类必须有invoke静态方法
+     * 主要是5.2x不支持__invoke()方法，否则不用这么麻烦
+     *
+     * @param string $class
+     * @param array $pre_args
+     * @param array $post_args
+     * @access public
+     * @return Ly_Coll
+     */
+    public function package($class, array $pre_args = null, array $post_args = null) {
+        if (!method_exists($class))
+            throw new RuntimeException("Package class {$class} not exist!");
+
+        $callback = array($class, 'invoke');
+        if (!is_callable($callback))
+            throw new BadMethodCallException("{$class} must have static method 'invoke'!");
+
+        if (is_null($pre_args)) $pre_args = array();
+        if (is_null($post_args)) $post_args = array();
+
+        $packages = array();
+        foreach ($this->coll as $key => $el) {
+            $args = array_merge($pre_args, array($el), $post_args);
+            $packages[$key] = call_user_func_array($callback, $args);
+        }
+
+        return new self($packages);
+    }
 }
