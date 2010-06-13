@@ -307,15 +307,6 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
         if (!is_callable($callback))
             throw new BadMethodCallException("{$class} must have static method 'invoke'!");
 
-        if (is_null($pre_args)) $pre_args = array();
-        if (is_null($post_args)) $post_args = array();
-
-        $packages = array();
-        foreach ($this->coll as $key => $el) {
-            $args = array_merge($pre_args, array($el), $post_args);
-            $packages[$key] = call_user_func_array($callback, $args);
-        }
-
-        return new self($packages);
+        return $this->each($callback, $pre_args, $post_args);
     }
 }
