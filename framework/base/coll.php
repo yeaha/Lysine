@@ -10,12 +10,8 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      */
     protected $has_next = false;
 
-    public function __construct($element) {
-        if (is_array($element)) {
-            $this->coll = $element;
-        } else {
-            $this->coll = array($element);
-        }
+    public function __construct(array $elements = array()) {
+        $this->coll = $elements;
     }
 
     /**
