@@ -90,7 +90,11 @@ abstract class Ly_Db_Adapter_Abstract {
 
         // 出错时抛出异常
         $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('Ly_Db_Statement'));
+
+        // 这里允许通过构造时传递的options定义自己的statement class
+        list($statement_class, $args) = $dbh->getAttribute(PDO::ATTR_STATEMENT_CLASS);
+        if ($statement_class === 'PDOStatement')
+            $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('Ly_Db_Statement'));
 
         $this->dbh = $dbh;
         return $this;
