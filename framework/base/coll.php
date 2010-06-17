@@ -166,6 +166,16 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
     }
 
     /**
+     * 还原为数组
+     *
+     * @access public
+     * @return array
+     */
+    public function toArray() {
+        return $this->coll;
+    }
+
+    /**
      * 把每个元素作为参数传递给callback
      * 把所有的返回值以Ly_Coll方式返回
      *
