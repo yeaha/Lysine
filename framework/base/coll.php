@@ -302,18 +302,19 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 主要是5.2x不支持__invoke()方法，否则不用这么麻烦
      *
      * @param string $class
-     * @param array $pre_args
-     * @param array $post_args
+     * @param mixed $pre_args
+     * @param mixed $post_args
      * @access public
      * @return Ly_Coll
      */
-    public function package($class, array $pre_args = null, array $post_args = null) {
-        if (!method_exists($class))
+    public function package($class, $pre_args = null, $post_args = null) {
+        if (!class_exists($class))
             throw new RuntimeException("Package class {$class} not exist!");
 
-        $callback = array($class, 'invoke');
-        if (!is_callable($callback))
+        if (!method_exists($class, 'invoke'))
             throw new BadMethodCallException("{$class} must have static method 'invoke'!");
+
+        $callback = array($class, 'invoke');
 
         return $this->each($callback, $pre_args, $post_args);
     }
