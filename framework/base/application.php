@@ -64,7 +64,7 @@ class Ly_Application {
 
             // 没有以/开头，属于相对路径
             if (substr($file, 0, 1) != '/') {
-                defined('APP_PATH') or throw new RuntimeException('please define APP_PATH constant');
+                if (!defined('APP_PATH')) throw new RuntimeException('please define APP_PATH constant');
                 $file = APP_PATH .'/'. $file;
             }
             if (is_readable($file)) include($file);
