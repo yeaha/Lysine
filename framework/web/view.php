@@ -136,14 +136,19 @@ class Ly_View_Render {
      * @return string
      */
     protected function findFile($file) {
-        if (!$file) return false;
+        if (!$file) throw new InvalidArgumentException('Invalid view file');
 
-        // 以/开头的是绝对路径，不做任何处理
-        if (substr($file, 0, 1) == '/') return $file;
+        // 没有以/开头的是相对路径，转换为view dir下的文件
+        if (substr($file, 0, 1) != '/')
+            $file = sprintf('%s/%s', $this->view_dir, $file);
 
-        $file = sprintf('%s/%s.%s', $this->view_dir, $file, $this->file_ext);
+        // 没有指定文件扩展名
+        if (!pathinfo($file, PATHINFO_EXTENSION)) $file .= '.'. $this->file_ext;
 
-        return is_readable($file) ? $file : false;
+        if (!is_readable($file))
+            throw new RuntimeException('View file('. $file .') is not exist or readable!');
+
+        return $file;
     }
 
     /**
@@ -155,8 +160,6 @@ class Ly_View_Render {
      */
     public function fetch($file, array $vars = null) {
         $file = $this->findFile($file);
-        if ($file === false)
-            throw new Ly_Exception('Before render you must set a view');
 
         if ($vars) {
             while (list($key, $val) = each($vars))
@@ -176,7 +179,6 @@ class Ly_View_Render {
         if (!$this->inherit_file) return $output;
 
         $inherit_file = $this->findFile($this->inherit_file);
-        if ($inherit_file === false) return $output;
 
         $this->inherit_file = null;
         return $this->fetch($inherit_file);
@@ -192,7 +194,6 @@ class Ly_View_Render {
      */
     protected function includes($file, array $vars = null) {
         $file = $this->findFile($file);
-        if ($file === false) return false;
 
         extract($this->vars);
         if ($vars) extract($vars);
