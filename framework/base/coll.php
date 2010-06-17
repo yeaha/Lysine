@@ -180,15 +180,17 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 把所有的返回值以Ly_Coll方式返回
      *
      * @param callback $callback
-     * @param array $pre_args
-     * @param array $post_args
+     * @param mixed $pre_args
+     * @param mixed $post_args
      * @access public
      * @return Ly_Coll
      */
-    public function map($callback, array $pre_args = null, array $post_args = null) {
+    public function map($callback, $pre_args = null, $post_args = null) {
         $map = array();
         if (is_null($pre_args)) $pre_args = array();
+        if (!is_array($pre_args)) $pre_args = array($pre_args);
         if (is_null($post_args)) $post_args = array();
+        if (!is_array($post_args)) $post_args = array($post_args);
 
         foreach ($this->coll as $key => $el) {
             $args = array_merge($pre_args, array($el), $post_args);
@@ -204,14 +206,16 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * each是会修改自身
      *
      * @param callback $callback
-     * @param array $pre_args
-     * @param array $post_args
+     * @param mixed $pre_args
+     * @param mixed $post_args
      * @access public
      * @return Ly_Coll
      */
-    public function each($callback, array $pre_args = null, array $post_args = null) {
+    public function each($callback, $pre_args = null, $post_args = null) {
         if (is_null($pre_args)) $pre_args = array();
+        if (!is_array($pre_args)) $pre_args = array($pre_args);
         if (is_null($post_args)) $post_args = array();
+        if (!is_array($post_args)) $post_args = array($post_args);
 
         foreach ($this->coll as $key => &$el) {
             $args = array_merge($pre_args, array($el), $post_args);
@@ -226,15 +230,17 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 找出符合条件的值
      *
      * @param callback $callback
-     * @param array $pre_args
-     * @param array $post_args
+     * @param mixed $pre_args
+     * @param mixed $post_args
      * @access public
      * @return Ly_Coll
      */
-    public function find($callback, array $pre_args = null, array $post_args = null) {
+    public function find($callback, $pre_args = null, $post_args = null) {
         $find = array();
         if (is_null($pre_args)) $pre_args = array();
+        if (!is_array($pre_args)) $pre_args = array($pre_args);
         if (is_null($post_args)) $post_args = array();
+        if (!is_array($post_args)) $post_args = array($post_args);
 
         foreach ($this->coll as $key => $el) {
             $args = array_merge($pre_args, array($el), $post_args);
@@ -248,14 +254,16 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 过滤掉不符合条件的值
      *
      * @param callback $callback
-     * @param array $pre_args
-     * @param array $post_args
+     * @param mixed $pre_args
+     * @param mixed $post_args
      * @access public
      * @return Ly_Coll
      */
-    public function filter($callback, array $pre_args = null, array $post_args = null) {
+    public function filter($callback, $pre_args = null, $post_args = null) {
         if (is_null($pre_args)) $pre_args = array();
+        if (!is_array($pre_args)) $pre_args = array($pre_args);
         if (is_null($post_args)) $post_args = array();
+        if (!is_array($post_args)) $post_args = array($post_args);
 
         foreach ($this->coll as $key => $el) {
             $args = array_merge($pre_args, array($el), $post_args);
@@ -270,11 +278,13 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
      * 把每次调用的结果以Ly_Coll类型返回
      *
      * @param string $fn
-     * @param array $args
+     * @param mixed $args
      * @access public
      * @return Ly_Coll
      */
-    public function call($fn, array $args = null) {
+    public function call($fn, $args = null) {
+        $args = array_slice(func_get_args(), 1);
+
         $result = array();
         foreach ($this->coll as $key => $el) {
             if (is_callable(array($el, $fn))) {
