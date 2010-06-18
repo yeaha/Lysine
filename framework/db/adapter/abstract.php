@@ -52,10 +52,12 @@ abstract class Ly_Db_Adapter_Abstract {
     }
 
     public function __call($fn, $args) {
-        if (!$this->isConnected()) return $this;
+        if (!$this->isConnected()) $this->connect();
 
         if (method_exists($this->dbh, $fn))
             return call_user_func_array(array($this->dbh, $fn), $args);
+
+        throw new BadMethodCallException('Bad method: '. $fn);
     }
 
     /**
@@ -226,6 +228,7 @@ abstract class Ly_Db_Adapter_Abstract {
      * $adapter->update('users', array('passwd' => 'abc'), 'id = ?', 1);
      * $adapter->update('users', array('passwd' => 'abc'), array('id = ?', 1));
      * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', array(':id' => 1));
+     * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', 1);
      *
      * @param string $table
      * @param array $row
@@ -278,6 +281,7 @@ abstract class Ly_Db_Adapter_Abstract {
      * $adapter->delete('users', array('id = ?', 3));
      * $adapter->delete('table', 'a = ? and b = ?', 'a1', 'b1');
      * $adapter->delete('table', 'a = :a and b = :b', array(':a' => 'a1', ':b' => 'b1'));
+     * $adapter->delete('table', 'a = :a and b = :b', 'a1', 'b1');
      *
      * @param string $table
      * @param mixed $where
