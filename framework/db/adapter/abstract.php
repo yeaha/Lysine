@@ -36,7 +36,7 @@ abstract class Ly_Db_Adapter_Abstract {
      * @access public
      * @return void
      */
-    public function __construct($dsn, $user, $pass, array $options) {
+    public function __construct($dsn, $user, $pass, array $options = array()) {
         $extension = 'pdo_'.
                      strtolower(
                          array_pop(
