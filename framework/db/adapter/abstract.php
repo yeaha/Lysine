@@ -223,6 +223,10 @@ abstract class Ly_Db_Adapter_Abstract {
     /**
      * 更新记录
      *
+     * $adapter->update('users', array('passwd' => 'abc'), 'id = ?', 1);
+     * $adapter->update('users', array('passwd' => 'abc'), array('id = ?', 1));
+     * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', array(':id' => 1));
+     *
      * @param string $table
      * @param array $row
      * @param mixed $where
@@ -234,8 +238,14 @@ abstract class Ly_Db_Adapter_Abstract {
 
         // 先解析where
         $where_bind = array();
-        if (is_array($where))
+        if (is_null($where)) {
+            $where = $where_bind = null;
+        } elseif (is_array($where)) {
             list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
+        } else {
+            list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), array_slice(func_get_args(), 2));
+        }
+
         //检查place holder类型
         $holder = null;
         if ($where_bind AND is_int(key($where_bind))) $holder = '?';
@@ -262,6 +272,11 @@ abstract class Ly_Db_Adapter_Abstract {
     /**
      * 删除记录
      *
+     * $adapter->delete('users', 'id = ?', 3);
+     * $adapter->delete('users', array('id = ?', 3));
+     * $adapter->delete('table', 'a = ? and b = ?', 'a1', 'b1');
+     * $adapter->delete('table', 'a = :a and b = :b', array(':a' => 'a1', ':b' => 'b1'));
+     *
      * @param string $table
      * @param mixed $where
      * @access public
@@ -273,9 +288,15 @@ abstract class Ly_Db_Adapter_Abstract {
         $bind = array();
 
         $sql = 'DELETE FROM '. $this->qtab($table);
-        if (is_array($where))
+        if (is_null($where)) {
+            $where = $bind = null;
+        } elseif (is_array($where)) {
             list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
-        $sql .= ' WHERE '. $where;
+        } else {
+            list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), array_slice(func_get_args(), 1));
+        }
+
+        if ($where) $sql .= ' WHERE '. $where;
 
         return $this->execute($sql, $bind);
     }
