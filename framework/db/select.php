@@ -11,7 +11,7 @@ class Ly_Db_Select {
     protected $limit;
     protected $offset;
 
-    protected $return_as;
+    protected $return_as = array();
 
     public function __construct(Ly_Db_Adapter_Abstract $adapter) {
         $this->adapter = $adapter;
@@ -110,14 +110,22 @@ class Ly_Db_Select {
         return $this->adapter->execute($sql, $bind);
     }
 
+    public function returnAs($class, $pre_args = null, $post_args = null) {
+        $this->return_as = array($class, $pre_args, $post_args);
+        return $this;
+    }
+
     public function get($limit = null) {
         if (is_int($limit)) $this->limit($limit);
 
         $limit = $this->limit;
         $sth = $this->execute();
 
-        return ($limit === 1)
-             ? $sth->getRow()
-             : new Ly_Coll($sth->getAll());
+        list($as_class, $pre_args, $post_args) = $this->return_as;
+        if (!$as_class) return ($limit === 1) ? $sth->getRow() : new Ly_Coll($sth->getAll());
+
+        $result = new Ly_Coll($sth->getAll());
+        $result->package($as_class, $pre_args, $post_args);
+        return ($limit === 1) ? $result->shift() : $result;
     }
 }
