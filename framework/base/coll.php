@@ -289,11 +289,7 @@ class Ly_Coll implements Iterator, Countable, ArrayAccess {
 
         $result = array();
         foreach ($this->coll as $key => $el) {
-            if (is_callable(array($el, $fn))) {
-                $result[$key] = call_user_func_array(array($el, $fn), $args);
-            } else {
-                $result[$key] = false;
-            }
+            $result[$key] = call_user_func_array(array($el, $fn), $args);
         }
         return new self($result);
     }
