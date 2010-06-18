@@ -239,11 +239,13 @@ abstract class Ly_Db_Adapter_Abstract {
         // 先解析where
         $where_bind = array();
         if (is_null($where)) {
-            $where = $where_bind = null;
+            $where = null;
+            $where_bind = array();
         } elseif (is_array($where)) {
             list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         } else {
-            list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), array_slice(func_get_args(), 2));
+            $args = func_get_args();
+            list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), array_slice($args, 2));
         }
 
         //检查place holder类型
@@ -293,7 +295,8 @@ abstract class Ly_Db_Adapter_Abstract {
         } elseif (is_array($where)) {
             list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         } else {
-            list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), array_slice(func_get_args(), 1));
+            $args = func_get_args();
+            list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), array_slice($args, 1));
         }
 
         if ($where) $sql .= ' WHERE '. $where;
