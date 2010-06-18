@@ -19,14 +19,12 @@ interface Ly_Cache_Interface {
 
     /**
      * 获得缓存数据
-     * 如果没有数据，回调callback参数
      *
      * @param string $key
-     * @param callback $callback
      * @access public
      * @return mixed
      */
-    public function get($key, $callback = null);
+    public function get($key);
 
     /**
      * delete

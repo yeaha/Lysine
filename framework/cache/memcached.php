@@ -72,9 +72,8 @@ class Ly_Cache_Memcached implements Ly_Cache_Interface {
      * @access public
      * @return mixed
      */
-    public function get($key, $callback = null) {
-        $args = func_get_args();
-        return call_user_func_array(array($this->conn, 'get'), $args);
+    public function get($key) {
+        return $this->conn->get($key);
     }
 
     /**
