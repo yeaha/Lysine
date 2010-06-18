@@ -31,8 +31,21 @@ if (!function_exists('render_view')) {
 }
 
 if (!function_exists('db')) {
-    function db($dsn_name = null) {
-        return Ly_Db::conn($dsn_name);
+    function db($dsn_name = '__default__') {
+        static $instance = array();
+
+        if (isset($instance[$dsn_name])) return $instance[$dsn_name];
+
+        $cfg = cfg('db', 'dsn', $dsn_name);
+        if (!is_array($cfg))
+            throw new Ly_Db_Exception('Database config not found!');
+
+        $dsn = isset($cfg['dsn']) ? $cfg['dsn'] : null;
+        $user = isset($cfg['user']) ? $cfg['user'] : null;
+        $pass = isset($cfg['pass']) ? $cfg['pass'] : null;
+        $options = isset($cfg['options']) ? $cfg['options'] : array();
+
+        return $instance[$dsn_name] = Ly_Db::factory($dsn, $user, $pass, $options);
     }
 }
 
