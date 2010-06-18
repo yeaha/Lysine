@@ -65,6 +65,7 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
     /**
      * 获得字段定义
      * 返回二维数组
+     * 抄袭自zend framework
      *
      * [code]
      * array(
@@ -86,6 +87,66 @@ class Ly_Db_Adapter_Pgsql extends Ly_Db_Adapter_Abstract {
      * @return array
      */
     public function listColumns($table) {
+        list($schema, $table) = $this->_parseTableName($table);
+
+        $bind = array($table);
+
+        $sql = <<< EOF
+SELECT a.attnum, n.nspname, c.relname, a.attname as colname, t.typname as type, a.atttypmod,
+       FORMAT_TYPE(a.atttypid, a.atttypmod) AS complete_type,
+       d.adsrc AS default_value,
+       a.attnotnull AS notnull,
+       a.attlen AS length,
+       co.contype,
+       ARRAY_TO_STRING(co.conkey, ',') AS conkey
+FROM pg_attribute AS a
+     JOIN pg_class AS c ON a.attrelid = c.oid
+     JOIN pg_namespace AS n ON c.relnamespace = n.oid
+     JOIN pg_type AS t ON a.atttypid = t.oid
+     LEFT OUTER JOIN pg_constraint AS co ON (co.conrelid = c.oid
+         AND a.attnum = ANY(co.conkey) AND co.contype = 'p')
+     LEFT OUTER JOIN pg_attrdef AS d ON d.adrelid = c.oid AND d.adnum = a.attnum
+WHERE a.attnum > 0 AND c.relname = ?
+EOF;
+        if ($schema) {
+            $sql .= ' AND n.nspname = ?';
+            $bind[] = $schema;
+        }
+        $sql .= ' ORDER BY a.attnum';
+
+        $sth = $this->execute($sql, $bind);
+
+        $cols = array();
+        while ($row = $sth->getRow()) {
+            list($primary_key, $auto_increment) = array(false, false);
+            if ($row['contype'] == 'p') {
+                $primary_key = true;
+                $auto_increment = (bool) preg_match('/^nextval/i', $row['default_value']);
+            }
+
+            $default_value = $row['default_value'];
+            if ($row['type'] == 'varchar' OR $row['type'] == 'bpchar') {
+                if (preg_match('/character(?: varying)?(?:\((\d+)\))?/', $row['complete_type'], $match))
+                    $row['length'] = isset($match[1]) ? $match[1] : null;
+
+                if (preg_match("/^'(.*?)'::(?:character varying|bpchar)$/", $default_value, $match))
+                    $default_value = $match[1];
+            }
+
+            $col = array(
+                'schema' => $schema,
+                'table' => $table,
+                'name' => $row['colname'],
+                'ntype' => $row['complete_type'],
+                'length' => $row['length'],
+                'allow_null' => !$row['notnull'],
+                'default_value' => $default_value,
+                'primary_key' => $primary_key,
+                'auto_increment' => $auto_increment,
+            );
+            $cols[$row['colname']] = $col;
+        }
+        return $cols;
     }
 
     /**
