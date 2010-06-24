@@ -1,8 +1,6 @@
 <?php
 namespace Lysine\Storage\Db;
 
-use Lysine\Storage\Db as DB;
-
 use \PDO;
 
 abstract class Adapter {
@@ -186,7 +184,7 @@ abstract class Adapter {
      * @return Lysine\Storage\Db\Select
      */
     public function select($table_name) {
-        $select = new DB\Select($this);
+        $select = new Select($this);
         return $select->from($table_name);
     }
 
