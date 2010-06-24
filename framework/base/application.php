@@ -44,7 +44,9 @@ class Application {
             if (class_exists($class, false) OR interface_exists($class, false)) return true;
         }
 
-        $find = str_replace('\\', '/', strtolower($class)) .'.php';
+        $pos = strpos($class, '_', strrpos($class, '\\'));
+        $find = ($pos === false) ? $class : substr($class, 0, $pos);
+        $find = str_replace('\\', '/', strtolower($find)) .'.php';
         foreach ($this->include_path as $path) {
             $file = $path .'/'. $find;
             if (!is_readable($file)) continue;
