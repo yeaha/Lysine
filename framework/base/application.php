@@ -4,6 +4,8 @@ namespace Lysine;
 class Application {
     static $instance;
 
+    protected $dispatcher;
+
     protected $config = array();
     protected $url_map = array();
     protected $class_map = array();
@@ -15,7 +17,13 @@ class Application {
         return self::$instance;
     }
 
-    public function __construct() {
+    public function __construct(Application\IDispatcher $dispather = null) {
+        if ($dispatcher) {
+            if ( !($dispatcher instanceof Application\IDispatcher) )
+                throw new \Exception();
+            $this->dispatcher = $dispatcher;
+        }
+
         spl_autoload_register(array($this, 'autoload'));
     }
 
@@ -146,4 +154,9 @@ class Application {
 
         return $this->dispatch($req->requestUri());
     }
+}
+
+namespace Lysine\Application;
+interface IDispatcher {
+    public function execute($url, array $params = array());
 }
