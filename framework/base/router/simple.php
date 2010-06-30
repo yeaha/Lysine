@@ -4,10 +4,17 @@ namespace Lysine\Application\Router;
 use Lysine\Application;
 
 class Simple implements Application\IRouter {
+    public $app;
     protected $map = array();
+    protected $config;
+
+    protected function getConfig() {
+        if (!$this->config) $this->config = \Lysine\cfg('app', 'router');
+        return $this->config;
+    }
 
     protected function match($url) {
-        foreach ($this->map as $re => $class) {
+        foreach ($this->getConfig() as $re => $class) {
             if (preg_match($re, $url, $match))
                 return array($class, array_slice($match, 1));
         }
@@ -15,7 +22,7 @@ class Simple implements Application\IRouter {
         return false;
     }
 
-    public function execute($url, array $params = array()) {
+    public function dispatch($url, array $params = array()) {
         $match = $this->match($url);
         if ($match === false)
             throw new Request_Exception('Page Not Found', 404);
@@ -23,7 +30,7 @@ class Simple implements Application\IRouter {
         list($class, $args) = $match;
         if ($params) $args = array_merge($args, $params);
 
-        $req = req();
+        $req = \Lysine\req();
         $method = $req->method();
 
         $fn = $method;

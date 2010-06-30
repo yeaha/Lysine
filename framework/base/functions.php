@@ -15,7 +15,12 @@ function cfg() {
 }
 
 function req() {
-    return Request::instance();
+    static $instance;
+    if (!$instance) {
+        $class = cfg('app', 'request_class');
+        $instance = $class ? new $class() : new Request();
+    }
+    return $instance;
 }
 
 /**

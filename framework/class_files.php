@@ -1,6 +1,9 @@
 <?php
 return array(
     'Lysine\Application' => 'base/application.php',
+    'Lysine\Application\IRouter' => 'base/application.php',
+    'Lysine\Application\Router\Classic' => 'base/router/classic.php',
+    'Lysine\Application\Router\Simple' => 'base/router/simple.php',
     'Lysine\Request' => 'base/request.php',
     'Lysine\Request_Exception' => 'base/request.php',
     'Lysine\Response' => 'base/response.php',
