@@ -112,7 +112,8 @@ class Application {
         if (!in_array($req->method(), array('get', 'post', 'put', 'delete')))
             throw Request_Exception('Method Not Allowed', 405);
 
-        return $this->dispatch($req->requestUri());
+        $url = parse_url($req->requestUri());
+        return $this->dispatch($url['path']);
     }
 }
 
