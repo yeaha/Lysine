@@ -1,9 +1,9 @@
 <?php
-namespace Lysine\Application\Dispatcher;
+namespace Lysine\Application\Router;
 
 use Lysine\Application;
 
-class Simple implements Application\IDispatcher {
+class Simple implements Application\IRouter {
     protected $map = array();
 
     protected function match($url) {

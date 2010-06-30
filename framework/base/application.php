@@ -4,7 +4,7 @@ namespace Lysine;
 class Application {
     static $instance;
 
-    protected $dispatcher;
+    protected $router;
 
     protected $config = array();
     protected $url_map = array();
@@ -17,12 +17,8 @@ class Application {
         return self::$instance;
     }
 
-    public function __construct(Application\IDispatcher $dispather = null) {
-        if ($dispatcher) {
-            if ( !($dispatcher instanceof Application\IDispatcher) )
-                throw new \Exception();
-            $this->dispatcher = $dispatcher;
-        }
+    public function __construct(Application\IRouter $router = null) {
+        if ($router) $this->router = $router;
 
         spl_autoload_register(array($this, 'autoload'));
     }
@@ -157,6 +153,6 @@ class Application {
 }
 
 namespace Lysine\Application;
-interface IDispatcher {
-    public function execute($url, array $params = array());
+interface IRouter {
+    public function dispatch($url, array $params = array());
 }
