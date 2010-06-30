@@ -4,13 +4,12 @@ $args = $_SERVER['argv'];
 
 if (!isset($args[1]) OR !is_dir($args[1])) die("Example: php -q ${args[0]} /path \n");
 
-$path = realpath($args[1]) .'/';
+$path = $args[1];
 
 $map = array();
 foreach (files($path) as $file) {
-    $file_name = str_replace($path, '', $file);
     foreach (getClass($file) as $class_name)
-        $map[$class_name] = $file_name;
+        $map[$class_name] = $file;
 }
 ksort($map);
 $out = array();
