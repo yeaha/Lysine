@@ -17,23 +17,17 @@ class Application {
         return self::$instance;
     }
 
-    public function __construct(Application\IRouter $router = null) {
-        if ($router) $this->router = $router;
-
+    public function __construct() {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    public function setRouter(Application\IRouter $router = null) {
+    public function setRouter(IRouter $router = null) {
         $this->router = $router;
         return $this;
     }
 
     public function getRouter() {
-        if (!$this->router) {
-            $class = $this->getConfig('app', 'router_class');
-            $this->router = $class ? new $class() : new Application\Router\Simple();
-        }
-
+        if (!$this->router) $this->router = new Router();
         return $this->router;
     }
 
@@ -115,9 +109,4 @@ class Application {
         $url = parse_url($req->requestUri());
         return $this->dispatch($url['path']);
     }
-}
-
-namespace Lysine\Application;
-interface IRouter {
-    public function dispatch($url, array $params = array());
 }

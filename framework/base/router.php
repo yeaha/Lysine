@@ -1,36 +1,43 @@
 <?php
-namespace Lysine\Application\Router;
+namespace Lysine;
 
-use Lysine\Application;
+use Lysine\IRouter;
 
-class Simple implements Application\IRouter {
-    public $app;
-    protected $map = array();
-    protected $config;
+class Router implements IRouter {
+    protected $base_namespace;
+    protected $map;
 
-    protected function getConfig() {
-        if (!$this->config) $this->config = \Lysine\cfg('app', 'router');
-        return $this->config;
+    public function __construct() {
+        $cfg = cfg('app', 'router');
+        $cfg = is_array($cfg) ? $cfg : array();
+
+        $this->map = isset($cfg['map']) ? $cfg['map'] : array();
+
+        $this->base_namespace = isset($cfg['base_namespace'])
+                              ? $cfg['base_namespace']
+                              : 'Controller';
     }
 
     protected function match($url) {
-        foreach ($this->getConfig() as $re => $class) {
+        foreach ($this->map as $re => $class) {
             if (preg_match($re, $url, $match))
                 return array($class, array_slice($match, 1));
         }
 
-        return false;
+        $class = str_replace('/', '\\', trim($url, '/'));
+        if (!$class) $class = 'index';
+        return array($this->base_namespace .'\\'. $class, array());
     }
 
     public function dispatch($url, array $params = array()) {
-        $match = $this->match($url);
-        if ($match === false)
+        list($class, $args) = $this->match($url);
+
+        if (!class_exists($class))
             throw new Request_Exception('Page Not Found', 404);
 
-        list($class, $args) = $match;
         if ($params) $args = array_merge($args, $params);
 
-        $req = \Lysine\req();
+        $req = req();
         $method = $req->method();
 
         $fn = $method;
