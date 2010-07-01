@@ -1,15 +1,16 @@
 #!/usr/bin/php
 <?php
+// Example: php -q build_class_files.php /path1 /path2 ...
 $args = $_SERVER['argv'];
 
-if (!isset($args[1]) OR !is_dir($args[1])) die("Example: php -q ${args[0]} /path \n");
-
-$path = $args[1];
+$all_path = isset($args[1]) ? array_slice($args, 1) : array('./');
 
 $map = array();
-foreach (files($path) as $file) {
-    foreach (getClass($file) as $class_name)
-        $map[$class_name] = $file;
+foreach ($all_path as $path) {
+    foreach (files($path) as $file) {
+        foreach (getClass($file) as $class_name)
+            $map[$class_name] = $file;
+    }
 }
 ksort($map);
 $out = array();
