@@ -1,7 +1,7 @@
 <?php
 namespace Lysine;
 
-use Lysine\Storage\Db;
+use Lysine\Db;
 use Lysine\Utils;
 
 function app() {
