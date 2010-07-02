@@ -122,6 +122,7 @@ class Select {
      */
     public function preProcess($processor) {
         $this->pre_processor = $processor;
+        return $this;
     }
 
     public function get($limit = null) {
