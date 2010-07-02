@@ -12,7 +12,9 @@ $config = array(
     ),
 );
 
+Lysine\Config::import($config);
+
 $app = Lysine\app()->includePath(__DIR__);
 
-$resp = $app->setConfig($config)->run();
+$resp = $app->run();
 echo $resp;

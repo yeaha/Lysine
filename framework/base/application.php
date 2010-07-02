@@ -6,8 +6,6 @@ class Application {
 
     protected $router;
 
-    protected $config = array();
-
     protected $class_map = array();
     protected $include_path = array();
     protected $registry = array();
@@ -77,16 +75,6 @@ class Application {
 
     public function get($key, $default = false) {
         return array_key_exists($key, $this->registry) ? $this->registry[$key] : $default;
-    }
-
-    public function setConfig(array $config) {
-        $this->config = $config;
-        return $this;
-    }
-
-    public function getConfig() {
-        $args = func_get_args();
-        return array_spider($this->config, $args);
     }
 
     protected function dispatch($url, array $params = array()) {

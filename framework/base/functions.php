@@ -10,8 +10,7 @@ function app() {
 
 function cfg() {
     $path = func_get_args();
-
-    return call_user_func_array(array(app(), 'getConfig'), $path);
+    return forward_static_call_array(array('Lysine\Config', 'get'), $path);
 }
 
 function req() {
