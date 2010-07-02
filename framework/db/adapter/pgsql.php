@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Db\Adapter;
 
+use \PDO;
 use Lysine\Db\Adapter as Adapter;
 
 class Pgsql extends Adapter {
@@ -91,6 +92,25 @@ class Pgsql extends Adapter {
      * @return array
      */
     public function listColumns($table) {
+        static $typeMap = array(
+            'image' => PDO::PARAM_LOB,
+            'blob' => PDO::PARAM_LOB,
+            'bit' => PDO::PARAM_LOB,
+            'varbit' => PDO::PARAM_LOB,
+            'bytea' => PDO::PARAM_LOB,
+            'bool' => PDO::PARAM_BOOL,
+            'boolean' => PDO::PARAM_BOOL,
+            'smallint' => PDO::PARAM_INT,
+            'integer' => PDO::PARAM_INT,
+            'bigint' => PDO::PARAM_INT,
+            'int2' => PDO::PARAM_INT,
+            'int4' => PDO::PARAM_INT,
+            'int8' => PDO::PARAM_INT,
+            'oid' => PDO::PARAM_INT,
+            'serial' => PDO::PARAM_INT,
+            'bigserial' => PDO::PARAM_INT,
+        );
+
         list($schema, $table) = $this->_parseTableName($table);
 
         $bind = array($table);
@@ -137,10 +157,12 @@ EOF;
                     $default_value = $match[1];
             }
 
+            $ctype = isset($typeMap[$row['type']]) ? $typeMap[$row['type']] : PDO::PARAM_STR;
             $col = array(
                 'schema' => $schema,
                 'table' => $table,
                 'name' => $row['colname'],
+                'ctype' => $ctype,
                 'ntype' => $row['complete_type'],
                 'length' => $row['length'],
                 'allow_null' => !$row['notnull'],
