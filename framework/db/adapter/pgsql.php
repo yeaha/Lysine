@@ -75,14 +75,14 @@ class Pgsql extends Adapter {
      * [code]
      * array(
      *     array(
-     *         'name' => 'id',          // column name
-     *         'ctype' => 'i',          // common type
-     *         'ntype' => 'integer',    // native type
+     *         'name' => 'id',              // column name
+     *         'ctype' => PDO::PARAM_INT,   // common type
+     *         'ntype' => 'integer',        // native type
      *         'length' => null,
      *         'allow_null' => false,
      *         'has_default' => true,
-     *         'default' => 1,          // default value
-     *         'primary_key' => true,   // is primary key?
+     *         'default' => 1,              // default value
+     *         'primary_key' => true,       // is primary key?
      *     )
      * )
      * [/code]
