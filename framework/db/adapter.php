@@ -1,5 +1,5 @@
 <?php
-namespace Lysine\Storage\Db;
+namespace Lysine\Db;
 
 use \PDO;
 
@@ -50,7 +50,7 @@ abstract class Adapter {
     /**
      * 魔法方法，函数式调用
      *
-     * $db = \Lysine\Storage\Db::factory($dsn, $user, $pass);
+     * $db = \Lysine\Db::factory($dsn, $user, $pass);
      * $rowset = $db('select * from users')->getAll();
      *
      * @access public
@@ -177,11 +177,11 @@ abstract class Adapter {
     }
 
     /**
-     * 生成Lysine\Storage\Db\Select实例
+     * 生成Lysine\Db\Select实例
      *
      * @param string $table_name
      * @access public
-     * @return Lysine\Storage\Db\Select
+     * @return Lysine\Db\Select
      */
     public function select($table_name) {
         $select = new Select($this);

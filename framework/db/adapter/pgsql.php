@@ -1,7 +1,7 @@
 <?php
-namespace Lysine\Storage\Db\Adapter;
+namespace Lysine\Db\Adapter;
 
-use Lysine\Storage\Db\Adapter as Adapter;
+use Lysine\Db\Adapter as Adapter;
 
 class Pgsql extends Adapter {
     /**

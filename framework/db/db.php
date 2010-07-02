@@ -1,5 +1,5 @@
 <?php
-namespace Lysine\Storage;
+namespace Lysine;
 
 class Db {
     static public function factory($dsn, $user, $pass, array $options = array()) {

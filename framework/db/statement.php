@@ -1,5 +1,5 @@
 <?php
-namespace Lysine\Storage\Db;
+namespace Lysine\Db;
 
 use \PDO;
 
