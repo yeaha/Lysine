@@ -13,7 +13,7 @@ class Select {
     protected $limit;
     protected $offset;
 
-    protected $pre_processor;
+    protected $processor;
 
     public function __construct(Adapter $adapter) {
         $this->adapter = $adapter;
@@ -120,8 +120,8 @@ class Select {
      * @access public
      * @return mixed
      */
-    public function preProcess($processor) {
-        $this->pre_processor = $processor;
+    public function setProcessor($processor) {
+        $this->processor = $processor;
         return $this;
     }
 
@@ -131,7 +131,7 @@ class Select {
         $limit = $this->limit;
         $sth = $this->execute();
 
-        $processor = $this->pre_processor;
+        $processor = $this->processor;
         if ($limit === 1) {
             $result = $sth->getRow();
             return $processor ? call_user_func($processor, $result) : $result;
