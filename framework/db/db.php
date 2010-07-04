@@ -2,12 +2,25 @@
 namespace Lysine;
 
 class Db {
+    const TYPE_INTEGER = 1;
+    const TYPE_FLOAT = 2;
+    const TYPE_BOOL = 3;
+    const TYPE_STRING = 4;
+    const TYPE_BINARY = 5;
+
     static protected $pool_path = array('db', 'pool');
+    static protected $default_name = '__default__';
+
     static public function setPoolPath(array $path) {
         self::$pool_path = $path;
     }
 
-    static public function connect($name = '__default__') {
+    static public function setDefaultName($name) {
+        self::$default_name = $name;
+    }
+
+    static public function connect($name = null) {
+        if ($name === null) $name = self::$default_name;
         $path = self::$pool_path;
         array_push($path, $name);
         $cfg = cfg($path);

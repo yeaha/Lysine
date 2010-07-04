@@ -8,8 +8,8 @@ function app() {
     return Application::instance();
 }
 
-function cfg() {
-    $path = func_get_args();
+function cfg($path = null) {
+    $path = is_array($path) ? $path : func_get_args();
     return forward_static_call_array(array('Lysine\Config', 'get'), $path);
 }
 

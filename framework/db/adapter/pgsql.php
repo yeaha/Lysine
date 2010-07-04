@@ -1,7 +1,7 @@
 <?php
 namespace Lysine\Db\Adapter;
 
-use \PDO;
+use Lysine\Db as Db;
 use Lysine\Db\Adapter as Adapter;
 
 class Pgsql extends Adapter {
@@ -76,7 +76,7 @@ class Pgsql extends Adapter {
      * array(
      *     array(
      *         'name' => 'id',              // column name
-     *         'ctype' => PDO::PARAM_INT,   // common type
+     *         'ctype' => Db::TYPE_INTEGER,   // common type
      *         'ntype' => 'integer',        // native type
      *         'length' => null,
      *         'allow_null' => false,
@@ -93,22 +93,22 @@ class Pgsql extends Adapter {
      */
     public function listColumns($table) {
         static $typeMap = array(
-            'image' => PDO::PARAM_LOB,
-            'blob' => PDO::PARAM_LOB,
-            'bit' => PDO::PARAM_LOB,
-            'varbit' => PDO::PARAM_LOB,
-            'bytea' => PDO::PARAM_LOB,
-            'bool' => PDO::PARAM_BOOL,
-            'boolean' => PDO::PARAM_BOOL,
-            'smallint' => PDO::PARAM_INT,
-            'integer' => PDO::PARAM_INT,
-            'bigint' => PDO::PARAM_INT,
-            'int2' => PDO::PARAM_INT,
-            'int4' => PDO::PARAM_INT,
-            'int8' => PDO::PARAM_INT,
-            'oid' => PDO::PARAM_INT,
-            'serial' => PDO::PARAM_INT,
-            'bigserial' => PDO::PARAM_INT,
+            'image' => Db::TYPE_BINARY,
+            'blob' => Db::TYPE_BINARY,
+            'bit' => Db::TYPE_BINARY,
+            'varbit' => Db::TYPE_BINARY,
+            'bytea' => Db::TYPE_BINARY,
+            'bool' => Db::TYPE_BOOL,
+            'boolean' => Db::TYPE_BOOL,
+            'smallint' => Db::TYPE_INTEGER,
+            'integer' => Db::TYPE_INTEGER,
+            'bigint' => Db::TYPE_INTEGER,
+            'int2' => Db::TYPE_INTEGER,
+            'int4' => Db::TYPE_INTEGER,
+            'int8' => Db::TYPE_INTEGER,
+            'oid' => Db::TYPE_INTEGER,
+            'serial' => Db::TYPE_INTEGER,
+            'bigserial' => Db::TYPE_INTEGER,
         );
 
         list($schema, $table) = $this->_parseTableName($table);
@@ -157,7 +157,7 @@ EOF;
                     $default_value = $match[1];
             }
 
-            $ctype = isset($typeMap[$row['type']]) ? $typeMap[$row['type']] : PDO::PARAM_STR;
+            $ctype = isset($typeMap[$row['type']]) ? $typeMap[$row['type']] : Db::TYPE_STRING;
             $col = array(
                 'schema' => $schema,
                 'table' => $table,

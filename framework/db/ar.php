@@ -58,7 +58,7 @@ abstract class ActiveRecord {
         };
 
         $select = new Select($this->getAdapter());
-        $select->from(static::$table_name)->preProcessor($processor);
+        $select->from(static::$table_name)->setProcessor($processor);
 
         if ($args = func_get_args()) call_user_func_array(array($select, 'where'), $args);
 

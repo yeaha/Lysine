@@ -22,6 +22,8 @@ function autoload($class) {
     static $files = null;
     if ($files === null) $files = require \Lysine\PATH . '/class_files.php';
 
+    if (substr($class, 0, 1) == '\\') $class = ltrim($class, '\\');
+
     if (!array_key_exists($class, $files)) return false;
     $file = \Lysine\PATH .'/'. $files[$class];
     if (!is_readable($file)) return false;

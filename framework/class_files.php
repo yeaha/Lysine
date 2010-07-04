@@ -1,10 +1,13 @@
 <?php
 return array(
     'Lysine\Application' => './base/application.php',
+    'Lysine\Config' => './core.php',
     'Lysine\Db' => './db/db.php',
+    'Lysine\Db\ActiveRecord' => './db/ar.php',
     'Lysine\Db\Adapter' => './db/adapter.php',
     'Lysine\Db\Adapter\Pgsql' => './db/adapter/pgsql.php',
     'Lysine\Db\Expr' => './db/expr.php',
+    'Lysine\Db\Row' => './db/row.php',
     'Lysine\Db\Select' => './db/select.php',
     'Lysine\Db\Statement' => './db/statement.php',
     'Lysine\Db\Table' => './db/table.php',
