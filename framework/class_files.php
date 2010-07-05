@@ -1,6 +1,7 @@
 <?php
 return array(
     'Lysine\Application' => './base/application.php',
+    'Lysine\Cache\Memcached' => './cache/memcached.php',
     'Lysine\Config' => './core.php',
     'Lysine\Db' => './db/db.php',
     'Lysine\Db\ActiveRecord' => './db/ar.php',
@@ -11,6 +12,7 @@ return array(
     'Lysine\Db\Select' => './db/select.php',
     'Lysine\Db\Statement' => './db/statement.php',
     'Lysine\Db\Table' => './db/table.php',
+    'Lysine\ICache' => './base/interfaces.php',
     'Lysine\IRouter' => './base/interfaces.php',
     'Lysine\Request' => './base/request.php',
     'Lysine\Request_Exception' => './base/request.php',
