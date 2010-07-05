@@ -2,8 +2,9 @@
 namespace Lysine;
 
 use Lysine\IRouter;
+use Lysine\Utils\Events;
 
-class Router implements IRouter {
+class Router extends Events implements IRouter {
     protected $base_namespace;
     protected $map;
 
@@ -34,6 +35,8 @@ class Router implements IRouter {
 
         if (!class_exists($class))
             throw new Request_Exception('Page Not Found', 404);
+
+        $this->fireEvent('before dispatch', $class, $args);
 
         if ($params) $args = array_merge($args, $params);
 
@@ -68,6 +71,8 @@ class Router implements IRouter {
         // response数据以引用方式传递给postRun
         // 这里有机会对输出结果进行进一步处理
         if (method_exists($handle, 'postRun')) call_user_func(array($handle, 'postRun'), &$resp);
+
+        $this->fireEvent('after dispatch', $class, $args, $resp);
 
         return $resp;
     }
