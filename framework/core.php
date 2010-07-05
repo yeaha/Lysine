@@ -10,11 +10,14 @@ class Config {
     }
 
     static public function set() {
+        $args = func_get_args();
+        array_unshift(self::$config);
+        return call_user_func_array('\Lysine\array_set', $args);
     }
 
     static public function get() {
         $path = func_get_args();
-        return $path ? array_spider(self::$config, $path) : self::$config;
+        return $path ? array_get(self::$config, $path) : self::$config;
     }
 }
 

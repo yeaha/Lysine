@@ -42,12 +42,12 @@ class Request extends Injection {
 
     public function cookie() {
         if (!isset($_COOKIE)) return false;
-        return array_spider($_COOKIE, func_get_args());
+        return array_get($_COOKIE, func_get_args());
     }
 
     public function session() {
         if (!isset($_SESSION)) return false;
-        return array_spider($_SESSION, func_get_args());
+        return array_get($_SESSION, func_get_args());
     }
 
     public function header($key) {

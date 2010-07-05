@@ -26,21 +26,65 @@ function req() {
  * 根据key路径，在array中找出结果
  * 如果key路径不存在，返回false
  *
+ * Example:
+ * array_get($test, 'a', 'b', 'c');
+ * 等于
+ * $test['a']['b']['c']
+ *
  * @param array $target
  * @param mixed $path
  * @access public
  * @return mixed
  */
-function array_spider(array $target, $path) {
+function array_get($target, $path) {
+    if (!is_array($target))
+        throw new \InvalidArgumentException('array_get() excepts parameter 1 to be array');
+
     $path = is_array($path) ? $path : array_slice(func_get_args(), 1);
 
     while (list(, $key) = each($path)) {
         if (!is_array($target)) return false;
         if (!array_key_exists($key, $target)) return false;
-        $target = $target[$key];
+
+        $target =& $target[$key];
     }
 
     return $target;
+}
+
+/**
+ * 根据key路径，设置array内的值
+ *
+ * Example:
+ * array_set($test, 'a', 'b', 'c');
+ * 等于
+ * $test['a']['b'] = 'c';
+ *
+ * @param mixed $target
+ * @param mixed $path
+ * @param mixed $key
+ * @param mixed $val
+ * @access public
+ * @return void
+ */
+function array_set(&$target, $path, $key, $val) {
+    if (!is_array($target))
+        throw new \InvalidArgumentException('array_set() excepts parameter 1 to be array');
+
+    if (!is_array($path)) {
+        $path = array_slice(func_get_args(), 1);
+        list($key, $val) = array_slice($path, -2, 2);
+        array_splice($path, -2, 2);
+    }
+
+    while (list(, $p) = each($path)) {
+        if (!is_array($target)) return false;
+        if (!array_key_exists($p, $target)) $target[$p] = array();
+        $target =& $target[$p];
+    }
+
+    $target[$key] = $val;
+    return true;
 }
 
 function dbexpr($expr) {
