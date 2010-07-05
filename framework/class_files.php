@@ -18,5 +18,6 @@ return array(
     'Lysine\Response_Redirect' => './base/response.php',
     'Lysine\Router' => './base/router.php',
     'Lysine\Utils\Coll' => './utils/collection.php',
+    'Lysine\Utils\Injection' => './utils/injection.php',
     'Lysine\View' => './base/view.php',
 );

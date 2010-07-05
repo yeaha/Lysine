@@ -1,7 +1,9 @@
 <?php
 namespace Lysine;
 
-class Application {
+use Lysine\Utils\Injection;
+
+class Application extends Injection {
     static public $instance;
 
     protected $router;
