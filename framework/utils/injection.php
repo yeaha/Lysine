@@ -20,15 +20,33 @@ class Injection {
      * 注入方法
      * 注入必须以闭包的方式
      *
+     * @param mixed $fn
+     * @param Closure $closure
+     * @final
+     * @access public
+     * @return void
+     */
+    final public function inject($fn, $closure = null) {
+        if (is_array($fn)) {
+            while (list($k, $v) = each($fn)) $this->inject($k, $v);
+        } else {
+            if (!is_object($closure) OR (get_class($closure) != 'Closure'))
+                throw new \InvalidArgumentException('Container __set() parameter 2 need a closure');
+            $this->method[$fn] = $closure;
+        }
+        return $this;
+    }
+
+    /**
+     * 注入方法
+     *
      * @param string $fn
      * @param Closure $closure
      * @access public
      * @return void
      */
-    final public function inject($fn, $closure) {
-        if (!is_object($closure) OR (get_class($closure) != 'Closure'))
-            throw new \InvalidArgumentException('Container __set() parameter 2 need a closure');
-        $this->method[$fn] = $closure;
+    public function __set($fn, $closure) {
+        $this->inject($fn, $closure);
     }
 
     /**

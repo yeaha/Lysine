@@ -1,7 +1,9 @@
 <?php
 namespace Lysine;
 
-class Request {
+use Lysine\Utils\Injection;
+
+class Request extends Injection {
     static public $instance;
 
     protected $_requestUri;
