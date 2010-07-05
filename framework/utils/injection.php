@@ -2,11 +2,11 @@
 namespace Lysine\Utils;
 
 /**
- * Container类
+ * Injection类
  * 可注入自定义方法
  *
  * Example:
- * $obj = new Container();
+ * $obj = new Injection();
  * $obj->hello = function($obj, $name) { return "Hello, {$name}"; };
  * echo $obj->hello('yangyi');
  *
@@ -38,6 +38,22 @@ class Injection {
     }
 
     /**
+     * 调用注入的方法
+     *
+     * @param string $fn
+     * @param array $args
+     * @access public
+     * @return mixed
+     */
+    final public function call($fn, $args) {
+        if (!array_key_exists($fn, $this->method))
+            throw new \BadMethodCallException('Call bad injection method '. $fn);
+
+        array_unshift($args, $this);
+        return call_user_func_array($this->method[$fn], $args);
+    }
+
+    /**
      * 注入方法
      *
      * @param string $fn
@@ -58,10 +74,6 @@ class Injection {
      * @return mixed
      */
     public function __call($fn, $args) {
-        if (!array_key_exists($fn, $this->method))
-            throw new \BadMethodCallException('Call bad injection method '. $fn);
-
-        array_unshift($args, $this);
-        return call_user_func_array($this->method[$fn], $args);
+        return $this->call($fn, $args);
     }
 }
