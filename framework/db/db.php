@@ -8,27 +8,22 @@ class Db {
     const TYPE_STRING = 4;
     const TYPE_BINARY = 5;
 
-    static protected $pool_path = array('db', 'pool');
-    static protected $default_name = '__default__';
+    static protected $default_path = array('db', 'pool', '__default__');
 
-    static public function setPoolPath(array $path) {
-        self::$pool_path = $path;
+    static public function setDefaultPath(array $path) {
+        self::$default_path = $path;
     }
 
-    static public function setDefaultName($name) {
-        self::$default_name = $name;
+    static public function getDefaultPath() {
+        return self::$default_path = $path;
     }
 
-    static public function getDefaultConfigPath() {
-        $path = self::$pool_path;
-        array_push($path, $name);
-        return $path;
-    }
-
-    static public function connect($name = null) {
-        if ($name === null) $name = self::$default_name;
-        $path = self::$pool_path;
-        array_push($path, $name);
+    static public function connect($path = null) {
+        if ($path === null) {
+            $path = self::$default_path;
+        } else {
+            $path = is_array($path) ? $path : func_get_args();
+        }
         $cfg = cfg($path);
 
         if (!is_array($cfg) OR !isset($cfg['dsn']))
