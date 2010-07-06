@@ -37,8 +37,10 @@ function req() {
  * @return mixed
  */
 function array_get($target, $path) {
-    if (!is_array($target))
-        throw new \InvalidArgumentException('array_get() excepts parameter 1 to be array');
+    if (!is_array($target)) {
+        trigger_error('array_get() excepts parameter 1 to be array', E_WARNING);
+        return false;
+    }
 
     $path = is_array($path) ? $path : array_slice(func_get_args(), 1);
 
@@ -68,8 +70,10 @@ function array_get($target, $path) {
  * @return void
  */
 function array_set(&$target, $path, $key, $val) {
-    if (!is_array($target))
-        throw new \InvalidArgumentException('array_set() excepts parameter 1 to be array');
+    if (!is_array($target)) {
+        trigger_error('array_set() excepts parameter 1 to be array', E_WARNING);
+        return false;
+    }
 
     if (!is_array($path)) {
         $path = array_slice(func_get_args(), 1);
