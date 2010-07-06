@@ -64,18 +64,19 @@ function array_get($target, $path) {
  *
  * @param mixed $target
  * @param mixed $path
- * @param mixed $key
  * @param mixed $val
  * @access public
  * @return void
  */
-function array_set(&$target, $path, $key, $val) {
+function array_set(&$target, $path, $val) {
     if (!is_array($target)) {
         trigger_error('array_set() excepts parameter 1 to be array', E_WARNING);
         return false;
     }
 
-    if (!is_array($path)) {
+    if (is_array($path)) {
+        $key = array_pop($path);
+    } else {
         $path = array_slice(func_get_args(), 1);
         list($key, $val) = array_slice($path, -2, 2);
         array_splice($path, -2, 2);
