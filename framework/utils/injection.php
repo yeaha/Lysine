@@ -18,21 +18,20 @@ class Injection {
 
     /**
      * 注入方法
-     * 注入必须以闭包的方式
      *
      * @param mixed $fn
-     * @param Closure $closure
+     * @param callable $callable
      * @final
      * @access public
-     * @return void
+     * @return self
      */
-    final public function inject($fn, $closure = null) {
+    final public function inject($fn, $callable = null) {
         if (is_array($fn)) {
             while (list($k, $v) = each($fn)) $this->inject($k, $v);
         } else {
-            if (!is_object($closure) OR (get_class($closure) != 'Closure'))
-                throw new \InvalidArgumentException('Container __set() parameter 2 need a closure');
-            $this->method[$fn] = $closure;
+            if (!is_callable($callable))
+                throw new \InvalidArgumentException('Injection::inject() parameter 2 is not callable');
+            $this->method[$fn] = $callable;
         }
         return $this;
     }
