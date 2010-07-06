@@ -78,8 +78,7 @@ function array_set(&$target, $path, $val) {
         $key = array_pop($path);
     } else {
         $path = array_slice(func_get_args(), 1);
-        list($key, $val) = array_slice($path, -2, 2);
-        array_splice($path, -2, 2);
+        list($key, $val) = array_splice($path, -2, 2);
     }
 
     while (list(, $p) = each($path)) {
