@@ -19,6 +19,12 @@ class Db {
         self::$default_name = $name;
     }
 
+    static public function getDefaultConfigPath() {
+        $path = self::$pool_path;
+        array_push($path, $name);
+        return $path;
+    }
+
     static public function connect($name = null) {
         if ($name === null) $name = self::$default_name;
         $path = self::$pool_path;

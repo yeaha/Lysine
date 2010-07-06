@@ -6,35 +6,35 @@ class Row {
     protected $dirty_row = array();
     protected $table;
 
-    public function __construct(array $row = array(), Table $table = null) {
+    public function __construct(array $row, Table $table) {
         $this->row = $row;
-        if ($table) $this->table = $table;
+        $this->table = $table;
     }
 
-    public function __set() {
+    public function __set($col, $val) {
+        $this->set($col, $val);
     }
 
-    public function __get() {
+    public function __get($col) {
+        return $this->get($col);
     }
 
     public function set($col, $val = null) {
         if (is_array($col)) {
-            $this->dirty_row = array_merge($this->dirty_row, $col);
+            foreach ($col as $k => $v) $this->set($k, $v);
         } else {
+            if (array_key_exists($col, $this->row))
+                throw new \InvalidArgumentException('Invalid column name['. $col .']');
             $this->dirty_row[$col] = $val;
         }
         return $this;
     }
 
     public function get($col) {
-        if (isset($this->dirty_row[$col])) return $this->dirty_row[$col];
-        if (isset($this->row[$col])) return $this->row[$col];
-        throw \InvalidArgumentException('Invalid column '. $col);
-    }
+        if (array_key_exists($col, $this->dirty_row)) return $this->dirty_row[$col];
+        if (array_key_exists($col, $this->row)) return $this->row[$col];
 
-    public function setTable(Table $table) {
-        $this->table = $table;
-        return $this;
+        throw new \InvalidArgumentException('Invalid column name['. $col .']');
     }
 
     public function getTable() {

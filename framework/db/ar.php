@@ -2,21 +2,22 @@
 namespace Lysine\Db;
 
 abstract class ActiveRecord {
+    static protected $db_config_path;
+
     static protected $table_name;
 
-    static protected $table;
+    static protected $primary_key;
+
+    protected $table;
 
     protected $adapter;
 
     protected $row;
 
-    protected $from_db;
-
     protected $ref = array();
 
-    public function __construct(array $row = array(), $from_db = false) {
+    public function __construct(array $row = array()) {
         $this->row = $row;
-        $this->from_db = $from_db;
     }
 
     public function __get($key) {
@@ -31,7 +32,11 @@ abstract class ActiveRecord {
     }
 
     public function getAdapter() {
+        if (!$this->adapter) $this->adapter = Lysine\Db::connect();
         return $this->adapter;
+    }
+
+    public function getTable() {
     }
 
     public function save() {
@@ -47,8 +52,7 @@ abstract class ActiveRecord {
     }
 
     static public function find($id) {
-        // TODO: get primary key
-        return static::select()->where("{$pk} = ?", $id)->get(1);
+        return static::select()->where(static::primary_key .' = ?', $id)->get(1);
     }
 
     static public function select() {
@@ -63,5 +67,19 @@ abstract class ActiveRecord {
         if ($args = func_get_args()) call_user_func_array(array($select, 'where'), $args);
 
         return $select;
+    }
+}
+
+class ActiveRecord_Meta {
+    static public $instance;
+
+    protected $table = array();
+
+    static public instance() {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
+    }
+
+    public function getTable($class) {
     }
 }
