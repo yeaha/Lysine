@@ -14,7 +14,7 @@ namespace Lysine\Utils;
  * @author Yang Yi <yangyi.cn.gz@gmail.com>
  */
 class Injection {
-    protected $method;
+    protected $method = array();
 
     /**
      * 注入方法

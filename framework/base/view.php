@@ -143,7 +143,7 @@ class View {
         if (!pathinfo($file, PATHINFO_EXTENSION)) $file .= '.'. $this->file_ext;
 
         if (!is_readable($file))
-            throw new RuntimeException('View file('. $file .') is not exist or readable!');
+            throw new \RuntimeException('View file('. $file .') is not exist or readable!');
 
         return $file;
     }

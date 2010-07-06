@@ -32,7 +32,7 @@ class Db {
         $cfg = cfg($path);
 
         if (!is_array($cfg) OR !isset($cfg['dsn']))
-            throw new \InvalidArgumentException("database config[{$name}] not found!");
+            throw new \InvalidArgumentException('database config['. implode(', ', $path) .'] not found!');
 
         $dsn = $cfg['dsn'];
         $user = isset($cfg['user']) ? $cfg['user'] : null;

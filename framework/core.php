@@ -1,6 +1,6 @@
 <?php
 namespace Lysine;
-const PATH = __DIR__;
+const DIR = __DIR__;
 
 class Config {
     static protected $config = array();
@@ -23,12 +23,12 @@ class Config {
 
 function autoload($class) {
     static $files = null;
-    if ($files === null) $files = require \Lysine\PATH . '/class_files.php';
+    if ($files === null) $files = require \Lysine\DIR . '/class_files.php';
 
     if (substr($class, 0, 1) == '\\') $class = ltrim($class, '\\');
 
     if (!array_key_exists($class, $files)) return false;
-    $file = \Lysine\PATH .'/'. $files[$class];
+    $file = \Lysine\DIR .'/'. $files[$class];
     if (!is_readable($file)) return false;
 
     include $file;
@@ -36,4 +36,4 @@ function autoload($class) {
 }
 spl_autoload_register('Lysine\autoload');
 
-require \Lysine\PATH .'/base/functions.php';
+require \Lysine\DIR .'/base/functions.php';

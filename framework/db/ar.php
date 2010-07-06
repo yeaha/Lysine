@@ -75,7 +75,7 @@ class ActiveRecord_Meta {
 
     protected $table = array();
 
-    static public instance() {
+    static public function instance() {
         if (!self::$instance) self::$instance = new self();
         return self::$instance;
     }
