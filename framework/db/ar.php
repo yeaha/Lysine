@@ -179,8 +179,8 @@ abstract class ActiveRecord extends Events {
      * @access public
      * @return mixed
      */
-    public function get($col) {
-        if (array_key_exists($col, $this->dirty_row)) return $this->dirty_row[$col];
+    public function get($col, $allow_dirty = true) {
+        if ($allow_dirty AND array_key_exists($col, $this->dirty_row)) return $this->dirty_row[$col];
         if (array_key_exists($col, $this->row)) return $this->row[$col];
         return false;
     }
@@ -202,6 +202,25 @@ abstract class ActiveRecord extends Events {
         $config = $this->referer[$name];
         if (isset($config['gettter'])) {
             $result = call_user_func(array($this, $config['getter']));
+            $this->referer_result[$name] = $result;
+            return $result;
+        }
+
+        if (isset($config['class'])) {
+            $class = $config['class'];
+            if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
+                throw new \UnexpectedValueException('Referer class must be subclass of Lysine\Db\ActiveRecord');
+
+            $select = forward_static_call(array($class, 'select'));
+            if (isset($config['source_key'], $config['target_key'])) {
+                $where = "{$config['target_key']} = ?";
+                $bind = $this->get($config['source_key'], false);
+                $select->where($where, $bind);
+            }
+            if (isset($config['limit'])) $select->limit($config['limit']);
+            if (isset($config['order'])) $select->order($config['order']);
+
+            $result = $select->get();
             $this->referer_result[$name] = $result;
             return $result;
         }
@@ -334,6 +353,8 @@ abstract class ActiveRecord extends Events {
             return $row ? new $class($row, true) : new $class();
         };
 
+        // TODO: 发现一个大问题，静态方法内是拿不到object property的
+        // 看来还是需要一个ActiveRecord_Meta一类的东西
         $select = $this->getAdapter()
                        ->select($this->table_name)
                        ->setProcessor($processor);
