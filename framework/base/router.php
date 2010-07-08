@@ -77,3 +77,40 @@ class Router extends Events implements IRouter {
         return $resp;
     }
 }
+
+/**
+ * url('aa', 'bb') -> /aa/bb
+ * url('aa', 'bb', array('a' => 'A', 'b' => 'B')) -> /aa/bb?a=A&b=B
+ * url(array('aa', 'bb'), array('a' => 'A', 'b' => 'B')) -> /aa/bb?a=A&b=B
+ *
+ * @param mixed $path
+ * @access public
+ * @return string
+ */
+function url($path, $params = array()) {
+    switch (func_num_args()) {
+        case 1:
+            if (!is_array($path)) $path = array($path);
+            break;
+        case 2:
+            if (!is_array($params)) {
+                $path = array($path, $params);
+                $params = array();
+            } else {
+                if (!is_array($path)) $path = array($path);
+            }
+            break;
+        default:
+            $path = func_get_args();
+            $count = count($path);
+            if (is_array($path[$count - 1])) {
+                $params = array_pop($path);
+            } else {
+                $params = array();
+            }
+    }
+
+    $url = '/'. implode('/', $path);
+    if ($params) $url .= '?'. http_build_query($params);
+    return $url;
+}
