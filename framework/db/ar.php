@@ -6,68 +6,49 @@ use Lysine\Utils\Events;
 
 abstract class ActiveRecord extends Events {
     /**
-     * 数据库连接定义在config数据中的路径
-     *
-     * @var array
-     * @access protected
-     */
-    protected $adapter_path;
-
-    /**
-     * 数据库连接
-     *
-     * @var Adapter
-     * @access protected
-     */
-    protected $adapter;
-
-    /**
      * 对应的数据库表名
      *
      * @var string
+     * @static
      * @access protected
      */
-    protected $table_name;
+    static protected $table_name;
 
     /**
      * 主键字段名
      *
      * @var string
+     * @static
      * @access protected
      */
-    protected $primary_key;
+    static protected $primary_key;
 
     /**
      * 字段行为定义
      *
      * @var array
+     * @static
      * @access protected
      */
-    protected $row_config = array();
+    static protected $row_config = array();
 
     /**
-     * 从数据库得到的数据
+     * 数据库连接定义在config数据中的路径
      *
      * @var array
+     * @static
      * @access protected
      */
-    protected $row = array();
-
-    /**
-     * 设置后未保存过的数据
-     *
-     * @var array
-     * @access protected
-     */
-    protected $dirty_row = array();
+    static protected $adapter_path;
 
     /**
      * 引用关系定义
      *
      * @var array
+     * @static
      * @access protected
      */
-    protected $referer = array(
+    static protected $referer = array(
         /*
         'author' => array(
             'class' => 'Author',
@@ -86,6 +67,30 @@ abstract class ActiveRecord extends Events {
         ),
         */
     );
+
+    /**
+     * 数据库连接
+     *
+     * @var Adapter
+     * @access protected
+     */
+    protected $adapter;
+
+    /**
+     * 从数据库得到的数据
+     *
+     * @var array
+     * @access protected
+     */
+    protected $row = array();
+
+    /**
+     * 设置后未保存过的数据
+     *
+     * @var array
+     * @access protected
+     */
+    protected $dirty_row = array();
 
     /**
      * 保存引用关系结果
@@ -118,8 +123,9 @@ abstract class ActiveRecord extends Events {
      * @return mixed
      */
     public function id() {
-        return isset($this->row[$this->primary_key])
-             ? $this->row[$this->primary_key]
+        $pk = static::$primary_key;
+        return isset($this->row[$pk])
+             ? $this->row[$pk]
              : false;
     }
 
@@ -147,7 +153,7 @@ abstract class ActiveRecord extends Events {
         $val = $this->get($key);
         if ($val !== false) return $val;
 
-        if (array_key_exists($key, $this->referer))
+        if (array_key_exists($key, static::$referer))
             return $this->getReferer($key);
 
         return false;
@@ -196,10 +202,11 @@ abstract class ActiveRecord extends Events {
         if (array_key_exists($name, $this->referer_result))
             return $this->referer_result[$name];
 
-        if (!isset($this->referer[$name]))
+        $referer = static::$referer;
+        if (!isset($referer[$name]))
             throw new \InvalidArgumentException('Invalid referer name['. $name .']');
 
-        $config = $this->referer[$name];
+        $config = $referer[$name];
         if (isset($config['gettter'])) {
             $result = call_user_func(array($this, $config['getter']));
             $this->referer_result[$name] = $result;
@@ -246,7 +253,7 @@ abstract class ActiveRecord extends Events {
      */
     public function getAdapter() {
         if (!$this->adapter) {
-            $path = $this->adapter_path ? $this->adapter_path : Db::getDefaultPath();
+            $path = static::$adapter_path ? static::$adapter_path : Db::getDefaultPath();
             $this->adapter = Db::connect($path);
         }
         return $this->adapter;
@@ -265,16 +272,18 @@ abstract class ActiveRecord extends Events {
 
         $method = $this->id() ? 'update' : 'insert';
 
-        $pk = $this->primary_key;
+        $pk = static::$primary_key;
         $adapter = $this->getAdapter();
+        $table_name = static::$table_name;
+
         if ($method == 'insert') {
             $this->fireEvent('before insert', $this);
 
-            if ($affect = $adapter->insert($this->table_name, $this->dirty_row)) {
+            if ($affect = $adapter->insert($table_name, $this->dirty_row)) {
                 if (isset($this->dirty_row[$pk])) {
                     $this->row[$pk] = $this->dirty_row[$pk];
                 } else {
-                    $this->row[$pk] = $adapter->lastInsertId($this->table_name);
+                    $this->row[$pk] = $adapter->lastInsertId($table_name);
                 }
 
                 $this->fireEvent('after insert', $this);
@@ -283,7 +292,7 @@ abstract class ActiveRecord extends Events {
             $this->fireEvent('before update', $this);
 
             $col = $adapter->qcol($pk);
-            $affect = $adapter()->update($this->table_name, $this->dirty_row, "{$col} = ?", $this->row[$pk]);
+            $affect = $adapter()->update($table_name, $this->dirty_row, "{$col} = ?", $this->row[$pk]);
 
             if ($affect) $this->fireEvent('after update', $this);
         }
@@ -317,8 +326,8 @@ abstract class ActiveRecord extends Events {
 
         $sql = sprintf(
             'select * from %s where %s = ?',
-            $adapter->qtab($this->table_name),
-            $adapter->qcol($this->primary_key)
+            $adapter->qtab(static::$table_name),
+            $adapter->qcol(static::$primary_key)
         );
 
         $row = $adapter->execute($sql, $id)->getRow();
@@ -353,11 +362,10 @@ abstract class ActiveRecord extends Events {
             return $row ? new $class($row, true) : new $class();
         };
 
-        // TODO: 发现一个大问题，静态方法内是拿不到object property的
-        // 看来还是需要一个ActiveRecord_Meta一类的东西
-        $select = $this->getAdapter()
-                       ->select($this->table_name)
-                       ->setProcessor($processor);
+        // TODO: 需要有一个指定adapter的机制
+        $select = Db::connect()
+                      ->select(static::$table_name)
+                      ->setProcessor($processor);
         if ($args = func_get_args()) call_user_func_array(array($select, 'where'), $args);
         return $select;
     }
@@ -371,6 +379,7 @@ abstract class ActiveRecord extends Events {
      * @return ActiveRecord
      */
     static public function find($id) {
-        return static::select()->where("{$this->primary_key} = ?", $id)->get(1);
+        $pk = static::$primary_key;
+        return static::select()->where("{$pk} = ?", $id)->get(1);
     }
 }
