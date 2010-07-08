@@ -10,6 +10,8 @@ class Db {
 
     static protected $default_path = array('db', 'pool', '__default__');
 
+    static protected $adapter = array();
+
     static public function setDefaultPath(array $path) {
         self::$default_path = $path;
     }
@@ -30,12 +32,16 @@ class Db {
             throw new \InvalidArgumentException('database config['. implode(', ', $path) .'] not found!');
 
         $dsn = $cfg['dsn'];
+        if (isset(self::$adapter[$dsn])) return self::$adapter[$dsn];
+
         $user = isset($cfg['user']) ? $cfg['user'] : null;
         $pass = isset($cfg['pass']) ? $cfg['pass'] : null;
         $options = (isset($cfg['options']) AND is_array($cfg['options']))
                  ? $cfg['options']
                  : array();
-        return self::factory($dsn, $user, $pass, $options);
+        $adapter = self::factory($dsn, $user, $pass, $options);
+        self::$adapter[$dsn] = $adapter;
+        return $adapter;
     }
 
     static public function factory($dsn, $user, $pass, array $options = array()) {
