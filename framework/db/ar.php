@@ -253,7 +253,7 @@ abstract class ActiveRecord extends Events {
      */
     public function getAdapter() {
         if (!$this->adapter) {
-            $path = static::$adapter_path ? static::$adapter_path : Db::getDefaultPath();
+            $path = static::$adapter_path ? static::$adapter_path : null;
             $this->adapter = Db::connect($path);
         }
         return $this->adapter;
@@ -362,8 +362,8 @@ abstract class ActiveRecord extends Events {
             return $row ? new $class($row, true) : new $class();
         };
 
-        // TODO: 需要有一个指定adapter的机制
-        $select = Db::connect()
+        $path = static::$adapter_path ? static::$adapter_path : null;
+        $select = Db::connect($path)
                       ->select(static::$table_name)
                       ->setProcessor($processor);
         if ($args = func_get_args()) call_user_func_array(array($select, 'where'), $args);
