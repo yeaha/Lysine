@@ -33,15 +33,6 @@ abstract class ActiveRecord extends Events {
     static protected $row_config = array();
 
     /**
-     * 数据库连接定义在config数据中的路径
-     *
-     * @var array
-     * @static
-     * @access protected
-     */
-    static protected $adapter_path;
-
-    /**
      * 引用关系定义
      *
      * @var array
@@ -119,14 +110,13 @@ abstract class ActiveRecord extends Events {
      * 得到主键的值
      * 不包括刚刚设置尚未保存的主键值
      *
+     * @param boolean $allow_dirty
      * @access public
      * @return mixed
      */
-    public function id() {
+    public function id($allow_dirty = true) {
         $pk = static::$primary_key;
-        return isset($this->row[$pk])
-             ? $this->row[$pk]
-             : false;
+        return $this->get($pk, $allow_dirty);
     }
 
     /**
@@ -252,10 +242,7 @@ abstract class ActiveRecord extends Events {
      * @return Adapter
      */
     public function getAdapter() {
-        if (!$this->adapter) {
-            $path = static::$adapter_path ? static::$adapter_path : null;
-            $this->adapter = Db::connect($path);
-        }
+        if (!$this->adapter) $this->adapter = Db::connect();
         return $this->adapter;
     }
 
@@ -345,28 +332,30 @@ abstract class ActiveRecord extends Events {
      * @access public
      * @return array
      */
-    public function toArray() {
-        return array_merge($this->row, $this->dirty_row);
+    public function toArray($allow_dirty = true) {
+        return $allow_dirty ? array_merge($this->row, $this->dirty_row) : $this->row;
     }
 
     /**
      * 从数据库内查询
      *
+     * @param Adapter $adapter
      * @static
      * @access public
      * @return Select
      */
-    static public function select() {
+    static public function select(Adapter $adapter = null) {
+        if (!$adapter) $adapter = Db::connect();
+
         $class = get_called_class();
-        $processor = function($row) use ($class) {
-            return $row ? new $class($row, true) : new $class();
+        $processor = function($row) use ($class, $adapter) {
+            $ar = $row ? new $class($row, true) : new $class(array(), false);
+            $ar->setAdapter($adapter);
+            return $ar;
         };
 
-        $path = static::$adapter_path ? static::$adapter_path : null;
-        $select = Db::connect($path)
-                      ->select(static::$table_name)
-                      ->setProcessor($processor);
-        if ($args = func_get_args()) call_user_func_array(array($select, 'where'), $args);
+        $select = $adapter->select(static::$table_name)
+                          ->setProcessor($processor);
         return $select;
     }
 
@@ -374,12 +363,13 @@ abstract class ActiveRecord extends Events {
      * 根据主键值得到对象
      *
      * @param mixed $id
+     * @param Adapter $adapter
      * @static
      * @access public
      * @return ActiveRecord
      */
-    static public function find($id) {
+    static public function find($id, Adapter $adapter = null) {
         $pk = static::$primary_key;
-        return static::select()->where("{$pk} = ?", $id)->get(1);
+        return static::select($adapter)->where("{$pk} = ?", $id)->get(1);
     }
 }
