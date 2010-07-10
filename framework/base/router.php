@@ -68,9 +68,11 @@ class Router extends Events implements IRouter {
             throw new Request_Exception('Not Acceptable', 406);
         $resp = call_user_func_array(array($handle, $fn), $args);
 
-        // response数据以引用方式传递给postRun
         // 这里有机会对输出结果进行进一步处理
-        if (method_exists($handle, 'postRun')) call_user_func(array($handle, 'postRun'), &$resp);
+        if (method_exists($handle, 'postRun')) {
+            $result = call_user_func(array($handle, 'postRun'), $resp);
+            if ($result) $resp = $result;
+        }
 
         $this->fireEvent('after dispatch', $class, $args, $resp);
 
