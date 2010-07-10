@@ -25,12 +25,8 @@ abstract class Adapter {
     abstract public function qcol($column_name);
 
     public function __construct($dsn, $user, $pass, array $options = array()) {
-        $extension = 'pdo_'.
-                     strtolower(
-                         array_pop(
-                             explode('\\', get_class($this))
-                         )
-                     );
+        $explode = explode('\\', get_class($this));
+        $extension = 'pdo_'. strtolower( array_pop($explode) );
 
         if (!extension_loaded($extension))
             throw new \RuntimeException('Need '. $extension .' extension!');
