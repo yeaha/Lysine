@@ -99,11 +99,15 @@ abstract class ActiveRecord extends Events {
      * @return void
      */
     public function __construct(array $row = array(), $from_db = false) {
+        $this->__before_init();
+
         if ($from_db) {
             $this->row = $row;
         } else {
             $this->dirty_row = $row;
         }
+
+        $this->__after_init();
     }
 
     /**
@@ -255,6 +259,7 @@ abstract class ActiveRecord extends Events {
     public function save() {
         if (!$this->dirty_row) return $this;
 
+        $this->__before_save();
         $this->fireEvent('before save', $this);
 
         $method = $this->id() ? 'update' : 'insert';
@@ -264,6 +269,7 @@ abstract class ActiveRecord extends Events {
         $table_name = static::$table_name;
 
         if ($method == 'insert') {
+            $this->__before_insert();
             $this->fireEvent('before insert', $this);
 
             if ($affect = $adapter->insert($table_name, $this->dirty_row)) {
@@ -273,17 +279,23 @@ abstract class ActiveRecord extends Events {
                     $this->row[$pk] = $adapter->lastInsertId($table_name);
                 }
 
+                $this->__after_insert();
                 $this->fireEvent('after insert', $this);
             }
         } else {
+            $this->__before_update();
             $this->fireEvent('before update', $this);
 
             $col = $adapter->qcol($pk);
             $affect = $adapter()->update($table_name, $this->dirty_row, "{$col} = ?", $this->row[$pk]);
 
-            if ($affect) $this->fireEvent('after update', $this);
+            if ($affect) {
+                $this->__after_update();
+                $this->fireEvent('after update', $this);
+            }
         }
 
+        $this->__after_save();
         $this->fireEvent('after save', $this);
 
         if ($affect) $this->refersh();
@@ -372,4 +384,13 @@ abstract class ActiveRecord extends Events {
         $pk = static::$primary_key;
         return static::select($adapter)->where("{$pk} = ?", $id)->get(1);
     }
+
+    protected function __before_init() {}
+    protected function __after_init() {}
+    protected function __before_save() {}
+    protected function __after_save() {}
+    protected function __before_insert() {}
+    protected function __after_insert() {}
+    protected function __before_update() {}
+    protected function __after_update() {}
 }
