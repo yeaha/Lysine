@@ -53,6 +53,8 @@ class Router extends Events implements IRouter {
         }
 
         $handle = new $class();
+        $handle->app = app();
+        $handle->req = $req;
 
         if (method_exists($handle, 'preRun')) {
             // 如果preRun返回了内容，就直接完成动作
