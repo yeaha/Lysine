@@ -119,8 +119,7 @@ abstract class ActiveRecord extends Events {
      * @return mixed
      */
     public function id($allow_dirty = true) {
-        $pk = static::$primary_key;
-        return $this->get($pk, $allow_dirty);
+        return $this->get(static::$primary_key, $allow_dirty);
     }
 
     /**
@@ -262,7 +261,7 @@ abstract class ActiveRecord extends Events {
         $this->__before_save();
         $this->fireEvent('before save', $this);
 
-        $method = $this->id() ? 'update' : 'insert';
+        $method = $this->id(false) ? 'update' : 'insert';
 
         $pk = static::$primary_key;
         $adapter = $this->getAdapter();
@@ -309,6 +308,16 @@ abstract class ActiveRecord extends Events {
      * @return boolean
      */
     public function destroy() {
+        if (!$id = $this->id(false)) return false;
+
+        $adpater = $this->getAdapter();
+        $pk = $adapter->qcol(static::$primary_key);
+        if ($affect = $adapter->delete(static::$table_name, "{$pk} = ?", $id)) {
+            $this->row = $this->dirty_row = $this->referer_result = array();
+            $this->adapter = null;
+        }
+
+        return $affect;
     }
 
     /**
@@ -318,8 +327,7 @@ abstract class ActiveRecord extends Events {
      * @return self
      */
     public function refersh() {
-        $id = $this->id();
-        if (!$id) return $this;
+        if (!$id = $this->id()) return $this;
 
         $adapter = $this->getAdapter();
 
