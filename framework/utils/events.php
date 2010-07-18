@@ -7,7 +7,9 @@ namespace Lysine\Utils;
  * @package Utils
  * @author yangyi <yangyi@surveypie.com>
  */
-abstract class Events {
+class Events {
+    static protected $instance;
+
     /**
      * 事件列表
      *
@@ -17,87 +19,81 @@ abstract class Events {
     protected $events = array();
 
     /**
-     * 监听事件
+     * 获得单一实例
      *
-     * @param string $name
-     * @param callback $callback
+     * @static
      * @access public
-     * @return self
+     * @return Events
      */
-    public function addEvent($name, $callback) {
-        if (!is_callable($callback))
-            throw new BadFunctionCallException('Bad event callback');
-
-        if (!array_key_exists($name, $this->events))
-            $this->events[$name] = array();
-
-        $this->events[$name][] = $callback;
-
-        return $this;
+    static public function instance() {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
     }
 
     /**
-     * 监听多个事件
+     * 生成对象的唯一标示
      *
-     * @param array $events
-     * @access public
-     * @return self
+     * @param object $target
+     * @access protected
+     * @return string
      */
-    public function addEvents(array $events) {
-        while (list($name, $callback) = each($events))
-            $this->addEvent($name, $callback);
-        return $this;
+    protected function keyOf($target) {
+        return get_class($target) .'#'. spl_object_hash($target);
+    }
+
+    /**
+     * 监听事件
+     *
+     * @param object $target
+     * @param string $name
+     * @param callable $callback
+     * @access public
+     * @return void
+     */
+    public function addEvent($target, $name, $callback) {
+        if (!is_callable($callback))
+            throw new BadFunctionCallException('Bad event callback');
+
+        $key = $this->keyOf($target);
+        if (!isset($this->events[$key][$name])) $this->events[$key][$name] = array();
+
+        $this->events[$key][$name][] = $callback;
     }
 
     /**
      * 触发事件
      *
+     * @param object $target
      * @param string $name
      * @param mixed $args
      * @access public
-     * @return boolean
+     * @return void
      */
-    public function fireEvent($name, $args = null) {
-        if (!array_key_exists($name, $this->events)) return false;
+    public function fireEvent($target, $name, $args = null) {
+        $key = $this->keyOf($target);
 
-        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-        foreach ($this->events[$name] as $callback)
-            call_user_func_array($callback, $args);
-
-        return true;
+        if (isset($this->events[$key][$name])) {
+            $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
+            foreach ($this->events[$key][$name] as $callback)
+                call_user_func_array($callback, $args);
+        }
     }
 
     /**
      * 取消监听
      *
+     * @param object $target
      * @param string $name
-     * @param callback $callback
      * @access public
-     * @return boolean
+     * @return void
      */
-    public function removeEvent($name, $callback) {
-        if (!array_key_exists($name, $this->events)) return false;
+    public function clearEvent($target, $name = null) {
+        $key = $this->keyOf($target);
 
-        foreach ($this->events[$name] as $key => $fn) {
-            if ($fn === $callback) {
-                unset($this->events[$name][$key]);
-                return true;
-            }
+        if ($name) {
+            unset($this->events[$key][$name]);
+        } else {
+            unset($this->events[$key]);
         }
-
-        return false;
-    }
-
-    /**
-     * 取消多个监听
-     *
-     * @param array $events
-     * @access public
-     * @return self
-     */
-    public function removeEvents(array $events) {
-        while (list($name, $callback) = each($events))
-            $this->removeEvent($name, $callback);
-        return $this;
     }
 }

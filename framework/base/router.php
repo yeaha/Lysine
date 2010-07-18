@@ -4,7 +4,7 @@ namespace Lysine;
 use Lysine\IRouter;
 use Lysine\Utils\Events;
 
-class Router extends Events implements IRouter {
+class Router implements IRouter {
     protected $base_namespace;
     protected $map;
 
@@ -36,7 +36,7 @@ class Router extends Events implements IRouter {
         if (!class_exists($class))
             throw new Request_Exception('Page Not Found', 404);
 
-        $this->fireEvent('before dispatch', $class, $args);
+        Events::instance()->fireEvent($this, 'before dispatch', $class, $args);
 
         if ($params) $args = array_merge($args, $params);
 
@@ -76,7 +76,7 @@ class Router extends Events implements IRouter {
             if ($result) $resp = $result;
         }
 
-        $this->fireEvent('after dispatch', $class, $args, $resp);
+        Events::instance()->fireEvent($this, 'after dispatch', $class, $args, $resp);
 
         return $resp;
     }
