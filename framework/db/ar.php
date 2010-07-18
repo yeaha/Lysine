@@ -1,8 +1,8 @@
 <?php
 namespace Lysine\Db;
 
-use Lysine\Db as Db;
-use Lysine\Utils;
+use Lysine\Db;
+use Lysine\Utils\Events;
 
 abstract class ActiveRecord {
     /**
@@ -110,7 +110,22 @@ abstract class ActiveRecord {
      * @return void
      */
     public function __construct(array $row = array(), $from_db = false) {
-        $this->__before_init();
+        $events = Events::instance();
+        $events->addEvent($this, 'before init', array($this, '__before_init'));
+        $events->addEvent($this, 'after init', array($this, '__after_init'));
+
+        $events->addEvent($this, 'before save', array($this, '__before_save'));
+        $events->addEvent($this, 'after save', array($this, '__after_save'));
+
+        $events->addEvent($this, 'before insert', array($this, '__before_insert'));
+        $events->addEvent($this, 'after insert', array($this, '__after_insert'));
+
+        $events->addEvent($this, 'before update', array($this, '__before_update'));
+        $events->addEvent($this, 'after update', array($this, '__after_update'));
+
+        $events->addEvent($this, 'before destroy', array($this, '__before_destroy'));
+        $events->addEvent($this, 'after destroy', array($this, '__after_destroy'));
+
         $this->fireEvent('before init');
 
         if ($from_db) {
@@ -119,8 +134,11 @@ abstract class ActiveRecord {
             $this->dirty_row = $row;
         }
 
-        $this->__after_init();
         $this->fireEvent('after init');
+    }
+
+    public function __destruct() {
+        Events::instance()->clearEvent($this);
     }
 
     /**
@@ -271,7 +289,6 @@ abstract class ActiveRecord {
     public function save() {
         if (!$this->dirty_row) return $this;
 
-        $this->__before_save();
         $this->fireEvent('before save');
 
         $method = $this->id(false) ? 'update' : 'insert';
@@ -281,7 +298,6 @@ abstract class ActiveRecord {
         $table_name = static::$table_name;
 
         if ($method == 'insert') {
-            $this->__before_insert();
             $this->fireEvent('before insert');
 
             if ($affect = $adapter->insert($table_name, $this->dirty_row)) {
@@ -291,23 +307,19 @@ abstract class ActiveRecord {
                     $this->row[$pk] = $adapter->lastInsertId($table_name);
                 }
 
-                $this->__after_insert();
                 $this->fireEvent('after insert');
             }
         } else {
-            $this->__before_update();
             $this->fireEvent('before update');
 
             $col = $adapter->qcol($pk);
             $affect = $adapter()->update($table_name, $this->dirty_row, "{$col} = ?", $this->row[$pk]);
 
             if ($affect) {
-                $this->__after_update();
                 $this->fireEvent('after update');
             }
         }
 
-        $this->__after_save();
         $this->fireEvent('after save');
 
         if ($affect) $this->refersh();
@@ -323,12 +335,16 @@ abstract class ActiveRecord {
     public function destroy() {
         if (!$id = $this->id(false)) return false;
 
+        $this->fireEvent('before destroy');
+
         $adpater = $this->getAdapter();
         $pk = $adapter->qcol(static::$primary_key);
         if ($affect = $adapter->delete(static::$table_name, "{$pk} = ?", $id)) {
             $this->row = $this->dirty_row = $this->referer_result = array();
             $this->adapter = null;
         }
+
+        $this->fireEvent('after destroy');
 
         return $affect;
     }
@@ -359,8 +375,27 @@ abstract class ActiveRecord {
         return $this;
     }
 
-    public function fireEvent($event) {
-        ActiveRecord\Events::instance(__CLASS__)->fireEvent($event, $this);
+    /**
+     * 监听事件
+     *
+     * @param string $name
+     * @param callable $callback
+     * @access public
+     * @return void
+     */
+    public function addEvent($name, $callback) {
+        Events::instance()->addEvent($this, $name, $callback);
+    }
+
+    /**
+     * 触发事件
+     *
+     * @param string $name
+     * @access protected
+     * @return void
+     */
+    protected function fireEvent($name) {
+        Events::instance()->fireEvent($this, $name);
     }
 
     /**
@@ -410,86 +445,14 @@ abstract class ActiveRecord {
         return static::select($adapter)->where("{$pk} = ?", $id)->get(1);
     }
 
-    protected function __before_init() {}
-    protected function __after_init() {}
-    protected function __before_save() {}
-    protected function __after_save() {}
-    protected function __before_insert() {}
-    protected function __after_insert() {}
-    protected function __before_update() {}
-    protected function __after_update() {}
-}
-
-namespace Lysine\Db\ActiveRecord;
-
-class Events extends Utils\Events {
-    static protected $instance = array();
-
-    protected $class;
-
-    public function __construct($class) {
-        $this->class = $class;
-
-        $behavior = $class::$behavior;
-        foreach ($behavior as $config) {
-            if (is_array($config)) {
-                list($class, $setting) = $config;
-            } else {
-                $class = $config;
-                $setting = array();
-            }
-
-            $instance = new $class($this, $setting);
-            $instance->bind();
-        }
-    }
-
-    public function fireEvent($event, $ar) {
-        $this->fireEvent($event, $ar);
-    }
-
-    static public function instance($class) {
-        if (isset(self::$instance[$class])) return self::$instance[$class];
-
-        if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
-            throw new \UnexpectedValueException($class .' must be subclass of Lysine\Db\ActiveRecord');
-
-        self::$instance[$class] = new self($clas);
-        return self::$instance[$class];
-    }
-}
-
-abstract class Behavior {
-    abstract public function bind();
-
-    protected $activerecord_events;
-
-    protected $setting = array();
-
-    public function __construct($activerecord_events, array $setting = array()) {
-        $this->activerecord_events = $activerecord_events;
-        $this->setting = $setting;
-    }
-
-    public function addEvent($event, $callback) {
-        $this->activerecord_events->addEvent($event, $callback);
-    }
-}
-
-namespace Lysine\Db\ActiveRecord\Behavior;
-
-use Lysine\Db\ActiveRecord;
-
-class PgsqlArray extends Behavior {
-    public function bind() {
-        $this->addEvent('after init', array($this, 'decode'));
-        $this->addEvent('before save', array($this, 'encode'));
-        $this->addEvent('after save', array($this, 'decode'));
-    }
-
-    public function encode() {
-    }
-
-    public function decode() {
-    }
+    public function __before_init() {}
+    public function __after_init() {}
+    public function __before_save() {}
+    public function __after_save() {}
+    public function __before_insert() {}
+    public function __after_insert() {}
+    public function __before_update() {}
+    public function __after_update() {}
+    public function __before_destroy() {}
+    public function __after_destroy() {}
 }
