@@ -38,14 +38,12 @@ namespace Lysine {
 
         /**
          * 读取缓存
-         * 如果没有获得数据会调用$callback
          *
          * @param string $key
-         * @param callable $callback
          * @access public
          * @return mixed
          */
-        public function get($key, $callback = null);
+        public function get($key);
 
         /**
          * 删除缓存
