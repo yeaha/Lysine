@@ -99,6 +99,7 @@ class Events {
 
     /**
      * 魔法方法，函数风格调用
+     * 等效于fireEvent
      *
      * $event = Events::instance();
      * $event($target, 'event name');
