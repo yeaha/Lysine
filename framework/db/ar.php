@@ -59,17 +59,6 @@ abstract class ActiveRecord {
         */
     );
 
-    static public $behavior = array(
-        /*
-        'My\Behavior\Uuid', // only behavior class
-
-        array(              // behavior class and setting
-            'Lysine\Db\ActiveRecord\Behavior\Pgsqlarray',
-            array('col1', 'col2')
-        ),
-        */
-    );
-
     /**
      * 数据库连接
      *
@@ -137,6 +126,12 @@ abstract class ActiveRecord {
         $this->fireEvent('after init');
     }
 
+    /**
+     * 解构函数
+     *
+     * @access public
+     * @return void
+     */
     public function __destruct() {
         Events::instance()->clearEvent($this);
     }
