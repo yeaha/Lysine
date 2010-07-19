@@ -96,4 +96,18 @@ class Events {
             unset($this->events[$key]);
         }
     }
+
+    /**
+     * 魔法方法，函数风格调用
+     *
+     * $event = Events::instance();
+     * $event($target, 'event name');
+     *
+     * @access public
+     * @return void
+     */
+    public function __invoke() {
+        $args = func_get_args();
+        call_user_func_array(array($this, 'fireEvent'), $args);
+    }
 }
