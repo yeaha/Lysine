@@ -148,4 +148,7 @@ class Request extends Injection {
 }
 
 class Request_Exception extends \Exception {
+    public function getHeader() {
+        return Response::httpStatus($this->getCode());
+    }
 }
