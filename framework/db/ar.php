@@ -45,6 +45,7 @@ abstract class ActiveRecord {
             'class' => 'Author',
             'source_key' => 'author_id',
             'target_key' => 'id',
+            'where' => 'is_deleted = 0',
             'limit' => 1
         ),
         'books' => array(
