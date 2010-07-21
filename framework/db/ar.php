@@ -76,7 +76,7 @@ abstract class ActiveRecord {
     protected $row = array();
 
     /**
-     * 设置后未保存过的数据
+     * 保持被改变过的字段名
      *
      * @var array
      * @access protected
@@ -117,11 +117,8 @@ abstract class ActiveRecord {
 
         $this->fireEvent('before init');
 
-        if ($from_db) {
-            $this->row = $row;
-        } else {
-            $this->dirty_row = $row;
-        }
+        $this->row = $row;
+        if (!$from_db) $this->dirty_row = array_keys($row);
 
         $this->fireEvent('after init');
     }
@@ -138,14 +135,12 @@ abstract class ActiveRecord {
 
     /**
      * 得到主键的值
-     * 不包括刚刚设置尚未保存的主键值
      *
-     * @param boolean $allow_dirty
      * @access public
      * @return mixed
      */
-    public function id($allow_dirty = true) {
-        return $this->get(static::$primary_key, $allow_dirty);
+    public function id() {
+        return $this->get(static::$primary_key);
     }
 
     /**
@@ -157,7 +152,7 @@ abstract class ActiveRecord {
      * @return void
      */
     public function __set($key, $val) {
-        $this->set($col, $val);
+        $this->set($key, $val);
     }
 
     /**
@@ -183,29 +178,39 @@ abstract class ActiveRecord {
      *
      * @param mixed $col
      * @param mixed $val
+     * @param boolean $direct
      * @access public
      * @return self
      */
-    public function set($col, $val = null) {
-        // TODO: 根据row_config的情况更新
+    public function set($col, $val = null, $direct = false) {
         if (is_array($col)) {
-            $this->dirty_row = array_merge($this->dirty_row, $col);
+            $direct = (boolean)$val;
         } else {
-            $this->dirty_row[$col] = $val;
+            $col = array($col => $val);
         }
+
+        $pk = static::$primary_key;
+        while (list($key, $val) = each($col)) {
+            if ($key == $pk && $this->row[$pk]) {
+                trigger_error(__CLASS__ .': primary key refuse update', E_USER_WARNING);
+            } else {
+                $this->row[$key] = $val;
+                if (!$direct) $this->dirty_row[] = $key;
+            }
+        }
+        if (!$direct) $this->dirty_row = array_unique($this->dirty_row);
+
         return $this;
     }
 
     /**
      * 得到字段的值
-     * 未保存的值或者已经保存的值
      *
      * @param string $col
      * @access public
      * @return mixed
      */
-    public function get($col, $allow_dirty = true) {
-        if ($allow_dirty AND array_key_exists($col, $this->dirty_row)) return $this->dirty_row[$col];
+    public function get($col) {
         if (array_key_exists($col, $this->row)) return $this->row[$col];
         return false;
     }
@@ -226,7 +231,7 @@ abstract class ActiveRecord {
             throw new \InvalidArgumentException('Invalid referer name['. $name .']');
 
         $config = $referer[$name];
-        if (isset($config['gettter'])) {
+        if (isset($config['getter'])) {
             $result = call_user_func(array($this, $config['getter']));
             $this->referer_result[$name] = $result;
             return $result;
@@ -282,25 +287,28 @@ abstract class ActiveRecord {
      * @return self
      */
     public function save() {
-        if (!$this->dirty_row) return $this;
-
-        $this->fireEvent('before save');
-
-        $method = $this->id(false) ? 'update' : 'insert';
-
         $pk = static::$primary_key;
         $adapter = $this->getAdapter();
         $table_name = static::$table_name;
 
+        $row = $this->row;
+        if (!$this->dirty_row && !$row[$pk]) return $this;
+
+        $this->fireEvent('before save');
+
+        if ($row[$pk]) {
+            $method = 'update';
+            if (in_array($pk, $this->dirty_row)) $method = 'insert';
+        } else {
+            $method = 'insert';
+        }
+
         if ($method == 'insert') {
             $this->fireEvent('before insert');
 
-            if ($affect = $adapter->insert($table_name, $this->dirty_row)) {
-                if (isset($this->dirty_row[$pk])) {
-                    $this->row[$pk] = $this->dirty_row[$pk];
-                } else {
-                    $this->row[$pk] = $adapter->lastInsertId($table_name);
-                }
+            if ($affect = $adapter->insert($table_name, $this->row)) {
+                if (!isset($row[$pk]))
+                    $this->set($pk, $adapter->lastInsertId($table_name), true);
 
                 $this->fireEvent('after insert');
             }
@@ -308,11 +316,9 @@ abstract class ActiveRecord {
             $this->fireEvent('before update');
 
             $col = $adapter->qcol($pk);
-            $affect = $adapter()->update($table_name, $this->dirty_row, "{$col} = ?", $this->row[$pk]);
+            $affect = $adapter()->update($table_name, $row, "{$col} = ?", $row[$pk]);
 
-            if ($affect) {
-                $this->fireEvent('after update');
-            }
+            if ($affect) $this->fireEvent('after update');
         }
 
         $this->fireEvent('after save');
@@ -328,7 +334,7 @@ abstract class ActiveRecord {
      * @return boolean
      */
     public function destroy() {
-        if (!$id = $this->id(false)) return false;
+        if (!$id = $this->id()) return false;
 
         $this->fireEvent('before destroy');
 
@@ -399,8 +405,8 @@ abstract class ActiveRecord {
      * @access public
      * @return array
      */
-    public function toArray($allow_dirty = true) {
-        return $allow_dirty ? array_merge($this->row, $this->dirty_row) : $this->row;
+    public function toArray() {
+        return $this->row;
     }
 
     /**
