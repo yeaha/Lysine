@@ -51,6 +51,7 @@ abstract class ActiveRecord {
             'class' => 'Book',
             'source_key' => 'id',
             'target_key' => 'author_id',
+            'where' => array('is_deleted = ?', 0),
             'order' => 'create_time DESC',
         ),
         'orders' => array(
@@ -248,6 +249,15 @@ abstract class ActiveRecord {
                 $bind = $this->get($config['source_key'], false);
                 $select->where($where, $bind);
             }
+
+            if (isset($config['where'])) {
+                if (is_array($config['where'])) {
+                    call_user_func_array(array($select, 'where'), $config['where']);
+                } else {
+                    $select->where($config['where']);
+                }
+            }
+
             if (isset($config['limit'])) $select->limit($config['limit']);
             if (isset($config['order'])) $select->order($config['order']);
 
