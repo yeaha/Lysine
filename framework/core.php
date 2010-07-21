@@ -1,5 +1,5 @@
 <?php
-namespace Lysine
+namespace Lysine;
 
 use Lysine\Db;
 use Lysine\Utils;
@@ -40,4 +40,4 @@ function autoload($class) {
 }
 spl_autoload_register('Lysine\autoload');
 
-require DIR .'./functions.php';
+require DIR .'/functions.php';
