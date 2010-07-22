@@ -59,7 +59,7 @@ class Pool {
      * @access public
      * @return self
      */
-    public function use($name) {
+    public function useDb($name) {
         $this->current = $name;
         return $this;
     }
