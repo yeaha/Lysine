@@ -30,6 +30,16 @@ class Pool {
     }
 
     /**
+     * 解构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct() {
+        $this->adapter = array();
+    }
+
+    /**
      * 调用数据库连接
      *
      * @param string $fn
