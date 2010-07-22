@@ -8,6 +8,7 @@ return array(
     'Lysine\Db\Adapter' => './db/adapter.php',
     'Lysine\Db\Adapter\Pgsql' => './db/adapter/pgsql.php',
     'Lysine\Db\Expr' => './db/expr.php',
+    'Lysine\Db\Pool' => './db/pool.php',
     'Lysine\Db\Select' => './db/select.php',
     'Lysine\Db\Statement' => './db/statement.php',
     'Lysine\ICache' => './base/interfaces.php',
