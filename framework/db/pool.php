@@ -84,7 +84,7 @@ class Pool {
 
             $user = isset($config['user']) ? $config['user'] : null;
             $pass = isset($config['pass']) ? $config['pass'] : null;
-            $option = (isset($config['options']) && is_array($config['options']))
+            $options = (isset($config['options']) && is_array($config['options']))
                     ? $config['options']
                     : array();
 
