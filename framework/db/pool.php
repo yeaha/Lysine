@@ -98,7 +98,7 @@ class Pool {
      * @return self
      */
     public function addServer($name, array $config) {
-        $this->server[$name] = Db::parseConfig($config);
+        $this->servers[$name] = Db::parseConfig($config);
         return $this;
     }
 
