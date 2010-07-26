@@ -12,7 +12,9 @@ use Lysine\Db;
 class Pool {
     static protected $instance;
 
-    protected $config;
+    protected $servers = array();
+
+    protected $dispatcher = array();
 
     protected $adapter = array();
 
@@ -26,7 +28,8 @@ class Pool {
      * @return void
      */
     public function __construct(array $config = null) {
-        $this->config = $config ? $config : cfg('db', 'pool');
+        if (!$config) $config = cfg('db', 'pool');
+        if ($config) $this->addServers($config);
     }
 
     /**
@@ -72,26 +75,76 @@ class Pool {
      * @return Lysine\Db\Adapter
      */
     public function getAdapter($name = null) {
-        if (!$name) $name = $this->current;
+        if ($name === null) $name = $this->current;
 
         if (!isset($this->adapter[$name])) {
-            if (!isset($this->config[$name]))
-                throw new \RuntimeException();
+            if (!isset($this->servers[$name]))
+                throw new \InvalidArgumentException('Adapter ['. $name .'] not found');
 
-            $config = $this->config[$name];
-            if (!isset($config['dsn']))
-                throw new \RuntimeException();
+            list($dsn, $user, $pass, $options) = $this->servers[$name];
 
-            $user = isset($config['user']) ? $config['user'] : null;
-            $pass = isset($config['pass']) ? $config['pass'] : null;
-            $options = (isset($config['options']) && is_array($config['options']))
-                    ? $config['options']
-                    : array();
-
-            $this->adapter[$name] = Db::factory($config['dsn'], $user, $pass, $options);
+            $this->adapter[$name] = Db::factory($dsn, $user, $pass, $options);
         }
 
         return $this->adapter[$name];
+    }
+
+    /**
+     * 添加一个server到列表里
+     *
+     * @param mixed $string
+     * @param array $config
+     * @access public
+     * @return self
+     */
+    public function addServer($name, array $config) {
+        $this->server[$name] = Db::parseConfig($config);
+        return $this;
+    }
+
+    /**
+     * 添加多个server到列表里
+     *
+     * @param array $servers
+     * @access public
+     * @return self
+     */
+    public function addServers(array $servers) {
+        foreach ($servers as $name => $config) $this->addServer($name, $config);
+        return $this;
+    }
+
+    /**
+     * 添加一个新的路由器
+     *
+     * @param string $group
+     * @param callable $dispatcher
+     * @access public
+     * @return self
+     */
+    public function addDispatcher($group, $dispatcher) {
+        if (!is_callable($dispatcher))
+            throw new \UnexpectedValueException('Dispatcher is not callable');
+
+        $this->dispatcher[$group] = $dispatcher;
+        return $this;
+    }
+
+    /**
+     * 使用指定的路由获得adapter
+     *
+     * @param string $group
+     * @param mixed $token
+     * @access public
+     * @return Lysine\Db\Adapter
+     */
+    public function dispatch($group, $token) {
+        if (!isset($this->dispatcher[$group]))
+            throw new \InvalidArgumentException('Group ['. $group .'] not found');
+
+        $fn = $this->dispatcher[$group];
+        $name = call_user_func($fn, $token);
+        return $this->getAdapter($name);
     }
 
     /**
