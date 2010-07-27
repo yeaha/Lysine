@@ -35,7 +35,7 @@ abstract class Adapter {
     }
 
     public function __call($fn, $args) {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
 
         if (method_exists($this->dbh, $fn))
             return call_user_func_array(array($this->dbh, $fn), $args);
@@ -114,7 +114,7 @@ abstract class Adapter {
      * @return void
      */
     public function handle() {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
         return $this->dbh;
     }
 
@@ -125,7 +125,7 @@ abstract class Adapter {
      * @return void
      */
     public function begin() {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
         $this->dbh->beginTransaction();
     }
 
@@ -158,7 +158,7 @@ abstract class Adapter {
      * @return mixed
      */
     public function execute($sql, $bind = null) {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
         $sth = $this->dbh->prepare($sql);
@@ -193,7 +193,7 @@ abstract class Adapter {
      * @return integer
      */
     public function insert($table, array $row) {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
 
         $cols = array_keys($row);
         $vals = array_values($row);
@@ -228,7 +228,7 @@ abstract class Adapter {
      * @return integer
      */
     public function update($table, array $row, $where = null) {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
 
         // 先解析where
         $where_bind = array();
@@ -280,7 +280,7 @@ abstract class Adapter {
      * @return integer
      */
     public function delete($table, $where = null) {
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
 
         $bind = array();
 
@@ -315,7 +315,7 @@ abstract class Adapter {
         if (is_numeric($val)) return $val;
         if (is_null($val)) return 'NULL';
 
-        if (!$this->isConnected()) $this->connect();
+        $this->connect();
         return $this->dbh->quote($val);
     }
 
