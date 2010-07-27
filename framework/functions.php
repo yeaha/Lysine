@@ -47,6 +47,10 @@ function cookie() {
     return call_user_func_array(array(req(), 'cookie'), $args);
 }
 
+function db($node_name = null) {
+    return \Lysine\Db\Pool::instance()->getAdapter($node_name);
+}
+
 /**
  * 根据key路径，在array中找出结果
  * 如果key路径不存在，返回false

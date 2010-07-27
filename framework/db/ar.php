@@ -1,7 +1,7 @@
 <?php
 namespace Lysine\Db;
 
-use Lysine\Db;
+use Lysine\Db\Pool;
 use Lysine\Utils\Events;
 
 abstract class ActiveRecord {
@@ -287,7 +287,7 @@ abstract class ActiveRecord {
      * @return Adapter
      */
     public function getAdapter() {
-        if (!$this->adapter) $this->adapter = Db::connect();
+        if (!$this->adapter) $this->adapter = Pool::instance()->getAdapter();
         return $this->adapter;
     }
 
@@ -429,7 +429,7 @@ abstract class ActiveRecord {
      * @return Select
      */
     static public function select(Adapter $adapter = null) {
-        if (!$adapter) $adapter = Db::connect();
+        if (!$adapter) $adapter = Pool::instance()->getAdapter();
 
         $class = get_called_class();
         $processor = function($row) use ($class, $adapter) {

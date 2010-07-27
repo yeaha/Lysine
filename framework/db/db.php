@@ -8,18 +8,6 @@ class Db {
     const TYPE_STRING = 4;
     const TYPE_BINARY = 5;
 
-    static protected $default_path = array('db', 'pool', '__default__');
-
-    static protected $adapter = array();
-
-    static public function setDefaultPath(array $path) {
-        self::$default_path = $path;
-    }
-
-    static public function getDefaultPath() {
-        return self::$default_path = $path;
-    }
-
     static public function parseConfig(array $cfg) {
         if (!isset($cfg['dsn']))
             throw new \InvalidArgumentException('Invalid database config');
@@ -33,22 +21,6 @@ class Db {
                  : array();
 
         return array($dsn, $user, $pass, $options);
-    }
-
-    static public function connect($path = null) {
-        if ($path === null) {
-            $path = self::$default_path;
-        } else {
-            $path = is_array($path) ? $path : func_get_args();
-        }
-        $cfg = cfg($path);
-
-        list($dsn, $user, $pass, $options) = self::parseConfig($cfg);
-        if (isset(self::$adapter[$dsn])) return self::$adapter[$dsn];
-
-        $adapter = self::factory($dsn, $user, $pass, $options);
-        self::$adapter[$dsn] = $adapter;
-        return $adapter;
     }
 
     static public function factory($dsn, $user, $pass, array $options = array()) {
