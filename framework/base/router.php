@@ -1,10 +1,58 @@
 <?php
 namespace Lysine;
 
-use Lysine\IRouter;
 use Lysine\Utils\Events;
 
-class Router implements IRouter {
+abstract class Router_Abstract {
+    /**
+     * 分发请求
+     *
+     * @param string $url
+     * @param array $params
+     * @access public
+     * @return mixed
+     */
+    abstract public function dispatch($url, array $params = array());
+
+    /**
+     * url('aa', 'bb') -> /aa/bb
+     * url('aa', 'bb', array('a' => 'A', 'b' => 'B')) -> /aa/bb?a=A&b=B
+     * url(array('aa', 'bb'), array('a' => 'A', 'b' => 'B')) -> /aa/bb?a=A&b=B
+     *
+     * @param mixed $actions
+     * @access public
+     * @return string
+     */
+    static public function url($actions, $params = array()) {
+        switch (func_num_args()) {
+            case 1:
+                if (!is_array($actions)) $actions = array($actions);
+                break;
+            case 2:
+                if (!is_array($actions)) $actions = array($actions);
+
+                if (!is_array($params)) {
+                    array_push($actions, $params);
+                    $params = array();
+                }
+                break;
+            default:
+                $actions = func_get_args();
+                $count = count($actions);
+                if (is_array($actions[$count - 1])) {
+                    $params = array_pop($actions);
+                } else {
+                    $params = array();
+                }
+        }
+
+        $url = '/'. implode('/', $actions);
+        if ($params) $url .= '?'. http_build_query($params);
+        return $url;
+    }
+}
+
+class Router extends Router_Abstract {
     protected $base_namespace;
     protected $map;
 
@@ -80,41 +128,4 @@ class Router implements IRouter {
 
         return $resp;
     }
-}
-
-/**
- * url('aa', 'bb') -> /aa/bb
- * url('aa', 'bb', array('a' => 'A', 'b' => 'B')) -> /aa/bb?a=A&b=B
- * url(array('aa', 'bb'), array('a' => 'A', 'b' => 'B')) -> /aa/bb?a=A&b=B
- *
- * @param mixed $path
- * @access public
- * @return string
- */
-function url($path, $params = array()) {
-    switch (func_num_args()) {
-        case 1:
-            if (!is_array($path)) $path = array($path);
-            break;
-        case 2:
-            if (!is_array($params)) {
-                $path = array($path, $params);
-                $params = array();
-            } else {
-                if (!is_array($path)) $path = array($path);
-            }
-            break;
-        default:
-            $path = func_get_args();
-            $count = count($path);
-            if (is_array($path[$count - 1])) {
-                $params = array_pop($path);
-            } else {
-                $params = array();
-            }
-    }
-
-    $url = '/'. implode('/', $path);
-    if ($params) $url .= '?'. http_build_query($params);
-    return $url;
 }

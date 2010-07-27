@@ -1,24 +1,6 @@
 <?php
 namespace Lysine {
     /**
-     * url路由
-     *
-     * @package base
-     * @author yangyi <yangyi@surveypie.com>
-     */
-    interface IRouter {
-        /**
-         * 分发请求
-         *
-         * @param string $url
-         * @param array $params
-         * @access public
-         * @return mixed
-         */
-        public function dispatch($url, array $params = array());
-    }
-
-    /**
      * 缓存类接口
      *
      * @package base

@@ -51,6 +51,14 @@ function db($node_name = null) {
     return \Lysine\Db\Pool::instance()->getAdapter($node_name);
 }
 
+function url() {
+    static $router_class;
+    if (!$router_class) $router_class = get_class(app()->getRouter());
+
+    $args = func_get_args();
+    return forward_static_call_array(array($router_class, 'url'), $args);
+}
+
 /**
  * 根据key路径，在array中找出结果
  * 如果key路径不存在，返回false

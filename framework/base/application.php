@@ -21,7 +21,7 @@ class Application extends Injection {
         spl_autoload_register(array($this, 'autoload'));
     }
 
-    public function setRouter(IRouter $router = null) {
+    public function setRouter(Router_Abstract $router = null) {
         $this->router = $router;
         return $this;
     }
