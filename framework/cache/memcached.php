@@ -21,7 +21,7 @@ class Memcached implements ICache {
         } elseif ($servers = array_get($config, 'servers')) {
             $memcached->addServers($servers);
         } else {
-            $memcached->addServer($this->default_server);
+            call_user_func_array(array($memcached, 'addServer'), $this->default_server);
         }
 
         if ($options = array_get($config, 'options')) {
