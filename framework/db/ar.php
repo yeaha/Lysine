@@ -423,13 +423,23 @@ abstract class ActiveRecord {
     /**
      * 从数据库内查询
      *
-     * @param Adapter $adapter
+     * @param mixed $adapter
      * @static
      * @access public
      * @return Select
      */
-    static public function select(Adapter $adapter = null) {
-        if (!$adapter) $adapter = Pool::instance()->getAdapter();
+    static public function select($adapter = null) {
+        $table_name = static::$table_name;
+
+        if (!$adapter) {
+            $adapter = Pool::instance()->getAdapter();
+            $select = $adapter->select($table_name);
+        } elseif ($adapter instanceof Adapter) {
+            $select = $adapter->select($table_name);
+        } elseif ($adapter instanceof Select) {
+            $select = $adapter;
+            $adapter = $select->adapter();
+        }
 
         $class = get_called_class();
         $processor = function($row) use ($class, $adapter) {
@@ -438,8 +448,7 @@ abstract class ActiveRecord {
             return $ar;
         };
 
-        $select = $adapter->select(static::$table_name)
-                          ->setProcessor($processor);
+        $select->setProcessor($processor);
         return $select;
     }
 
