@@ -13,7 +13,7 @@ use ArrayAccess;
 class Pool implements ArrayAccess {
     static protected $instance;
 
-    protected $servers = array();
+    protected $nodes = array();
 
     protected $dispatcher = array();
 
@@ -30,7 +30,7 @@ class Pool implements ArrayAccess {
      */
     public function __construct(array $config = null) {
         if (!$config) $config = cfg('db', 'pool');
-        if ($config) $this->addServers($config);
+        if ($config) $this->addNodes($config);
     }
 
     /**
@@ -79,10 +79,10 @@ class Pool implements ArrayAccess {
         if ($node_name === null) $node_name = $this->current_node;
 
         if (!isset($this->adapter[$node_name])) {
-            if (!isset($this->servers[$node_name]))
+            if (!isset($this->nodes[$node_name]))
                 throw new \InvalidArgumentException('Adapter ['. $node_name .'] not found');
 
-            list($dsn, $user, $pass, $options) = $this->servers[$node_name];
+            list($dsn, $user, $pass, $options) = $this->nodes[$node_name];
 
             $this->adapter[$node_name] = Db::factory($dsn, $user, $pass, $options);
         }
@@ -91,39 +91,39 @@ class Pool implements ArrayAccess {
     }
 
     /**
-     * 添加一个server到列表里
+     * 添加一个节点到列表里
      *
      * @param string $node_name
      * @param array $config
      * @access public
      * @return self
      */
-    public function addServer($node_name, array $config) {
-        $this->servers[$node_name] = Db::parseConfig($config);
+    public function addNode($node_name, array $config) {
+        $this->nodes[$node_name] = Db::parseConfig($config);
         return $this;
     }
 
     /**
-     * 添加多个server到列表里
+     * 添加多个节点到列表里
      *
-     * @param array $servers
+     * @param array $nodes
      * @access public
      * @return self
      */
-    public function addServers(array $servers) {
-        foreach ($servers as $node_name => $config) $this->addServer($node_name, $config);
+    public function addNodes(array $nodes) {
+        foreach ($nodes as $node_name => $config) $this->addNode($node_name, $config);
         return $this;
     }
 
     /**
-     * 从列表里删除指定server
+     * 从列表里删除指定节点
      *
      * @param string $node_name
      * @access public
-     * @return void
+     * @return self
      */
-    public function removeServer($node_name) {
-        unset($this->servers[$node_name], $this->adapter[$node_name]);
+    public function removeNode($node_name) {
+        unset($this->nodes[$node_name], $this->adapter[$node_name]);
         return $this;
     }
 
@@ -168,7 +168,7 @@ class Pool implements ArrayAccess {
      * @return boolean
      */
     public function offsetExists($node_name) {
-        return array_key_exists($node_name, $this->servers);
+        return array_key_exists($node_name, $this->nodes);
     }
 
     /**
@@ -191,7 +191,7 @@ class Pool implements ArrayAccess {
      * @return void
      */
     public function offsetSet($node_name, $config) {
-        $this->addServer($node_name, $config);
+        $this->addNode($node_name, $config);
     }
 
     /**
@@ -202,7 +202,7 @@ class Pool implements ArrayAccess {
      * @return void
      */
     public function offsetUnset($node_name) {
-        $this->removeServer($node_name);
+        $this->removeNode($node_name);
     }
 
     /**
