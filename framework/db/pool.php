@@ -19,7 +19,7 @@ class Pool implements ArrayAccess {
 
     protected $adapter = array();
 
-    protected $current_node = '__default__';
+    protected $default_node = '__default__';
 
     /**
      * 构造函数
@@ -44,6 +44,18 @@ class Pool implements ArrayAccess {
     }
 
     /**
+     * 设置默认节点名
+     *
+     * @param string $node_name
+     * @access public
+     * @return self
+     */
+    public function setDefaultNode($node_name) {
+        $this->default_node = $node_name;
+        return $this;
+    }
+
+    /**
      * 调用数据库连接
      *
      * @param string $fn
@@ -57,18 +69,6 @@ class Pool implements ArrayAccess {
     }
 
     /**
-     * 切换数据库连接
-     *
-     * @param string $node_name
-     * @access public
-     * @return self
-     */
-    public function useNode($node_name) {
-        $this->current_node = $node_name;
-        return $this;
-    }
-
-    /**
      * 获得数据库连接
      *
      * @param mixed $node_name
@@ -76,7 +76,7 @@ class Pool implements ArrayAccess {
      * @return Lysine\Db\Adapter
      */
     public function getAdapter($node_name = null) {
-        if ($node_name === null) $node_name = $this->current_node;
+        if ($node_name === null) $node_name = $this->default_node;
 
         if (!isset($this->adapter[$node_name])) {
             if (!isset($this->nodes[$node_name]))
