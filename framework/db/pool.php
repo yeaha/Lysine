@@ -148,6 +148,18 @@ class Pool {
     }
 
     /**
+     * 魔法方法
+     *
+     * @param string $node_name
+     * @access public
+     * @return self
+     */
+    public function __invoke($node_name) {
+        $this->useNode($node_name);
+        return $this;
+    }
+
+    /**
      * 获得唯一实例
      *
      * @static
