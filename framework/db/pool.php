@@ -2,6 +2,7 @@
 namespace Lysine\Db;
 
 use Lysine\Db;
+use ArrayAccess;
 
 /**
  * 多数据库连接切换类
@@ -9,7 +10,7 @@ use Lysine\Db;
  * @package Db
  * @author yangyi <yangyi@surveypie.com>
  */
-class Pool {
+class Pool implements ArrayAccess {
     static protected $instance;
 
     protected $servers = array();
@@ -115,6 +116,18 @@ class Pool {
     }
 
     /**
+     * 从列表里删除指定server
+     *
+     * @param string $node_name
+     * @access public
+     * @return void
+     */
+    public function removeServer($node_name) {
+        unset($this->servers[$node_name], $this->adapter[$node_name]);
+        return $this;
+    }
+
+    /**
      * 添加一个新的路由器
      *
      * @param string $group
@@ -148,15 +161,59 @@ class Pool {
     }
 
     /**
+     * ArrayAccess接口方法
+     *
+     * @param string $node_name
+     * @access public
+     * @return boolean
+     */
+    public function offsetExists($node_name) {
+        return array_key_exists($node_name, $this->servers);
+    }
+
+    /**
+     * ArrayAccess接口方法
+     *
+     * @param string $node_name
+     * @access public
+     * @return Lysine\Db\Adapter
+     */
+    public function offsetGet($node_name) {
+        return $this->getAdapter($node_name);
+    }
+
+    /**
+     * ArrayAccess接口方法
+     *
+     * @param string $node_name
+     * @param array $config
+     * @access public
+     * @return void
+     */
+    public function offsetSet($node_name, $config) {
+        $this->addServer($node_name, $config);
+    }
+
+    /**
+     * ArrayAccess接口方法
+     *
+     * @param string $node_name
+     * @access public
+     * @return void
+     */
+    public function offsetUnset($node_name) {
+        $this->removeServer($node_name);
+    }
+
+    /**
      * 魔法方法
      *
      * @param string $node_name
      * @access public
      * @return self
      */
-    public function __invoke($node_name) {
-        $this->useNode($node_name);
-        return $this;
+    public function __invoke($node_name = null) {
+        return $this->getAdapter($node_name);
     }
 
     /**
