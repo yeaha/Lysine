@@ -6,6 +6,8 @@ use Lysine\Utils\Injection;
 class Request extends Injection {
     static public $instance;
 
+    protected $method;
+
     protected $_requestUri;
 
     public function __get($key) {
@@ -59,8 +61,18 @@ class Request extends Injection {
     }
 
     public function method() {
+        if ($this->method) return $this->method;
+
         $method = $this->header('x-http-method-override');
-        return strtolower( $method ? $method : $this->server('request_method') );
+        // 某些js库的ajax封装使用这种方式
+        if (!$method) {
+            $method = $this->post('_method');
+            // 不知道去掉这个参数是否画蛇添足，应该问题不大
+            if ($method) unset($_POST['_method']);
+        }
+
+        $this->method = strtolower( $method ? $method : $this->server('request_method') );
+        return $this->method;
     }
 
     public function requestUri() {
