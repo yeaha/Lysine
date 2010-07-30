@@ -296,10 +296,11 @@ class Coll {
      *
      * @param integer $offset
      * @param integer $length
+     * @param mixed $replace
      * @access public
      * @return Ly_Coll
      */
-    public function splice($offset, $length = 0) {
+    public function splice($offset, $length = 0, $replace = null) {
         $args = func_get_args();
         if (count($args) > 2) {
             $replace = $args[2];
