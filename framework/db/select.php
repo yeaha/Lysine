@@ -22,6 +22,8 @@ class Select {
     protected $limit;
     protected $offset;
 
+    protected $union;
+
     protected $processor;
 
     /**
@@ -183,6 +185,19 @@ class Select {
     }
 
     /**
+     * sql UNION
+     *
+     * @param mixed $relation
+     * @param boolean $all
+     * @access public
+     * @return self
+     */
+    public function union($relation, $all = true) {
+        $this->union = array($relation, $all);
+        return $this;
+    }
+
+    /**
      * 生成sql语句的where部分
      *
      * @access protected
@@ -226,6 +241,18 @@ class Select {
         if ($this->order) $sql .= ' ORDER BY '. $this->order;
         if ($this->limit) $sql .= ' LIMIT '. $this->limit;
         if ($this->offset) $sql .= ' OFFSET '. $this->offset;
+
+        if ($this->union) {
+            list($relation, $all) = $this->union;
+            // 某些数据库可能不支持union all语法
+            $sql .= $all ? ' UNION ALL ' : ' UNION ';
+
+            if ($relation instanceof Select) {
+                list($relation, $relation_bind) = $relation->compile();
+                $bind = array_splice($bind, count($bind), 0, $relation_bind);
+            }
+            $sql .= $relation;
+        }
 
         return array($sql, $bind);
     }
