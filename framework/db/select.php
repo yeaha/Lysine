@@ -1,6 +1,8 @@
 <?php
 namespace Lysine\Db;
 
+use Lysine\Utils\Coll;
+
 class Select {
     protected $adapter;
 
@@ -136,8 +138,8 @@ class Select {
             $result = $sth->getRow();
             return $processor ? call_user_func($processor, $result) : $result;
         } else {
-            $result = $sth->getAll();
-            return $processor ? array_map($processor, $result) : $result;
+            $result = new Coll($sth->getAll());
+            return $processor ? $result->each($processor) : $result;
         }
     }
 }
