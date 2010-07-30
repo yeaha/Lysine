@@ -31,11 +31,11 @@ class Select {
     /**
      * 构造函数
      *
-     * @param Adapter $adapter
+     * @param IAdapter $adapter
      * @access public
      * @return void
      */
-    public function __construct(Adapter $adapter) {
+    public function __construct(IAdapter $adapter) {
         $this->adapter = $adapter;
     }
 
@@ -72,7 +72,7 @@ class Select {
      * 获得数据库连接
      *
      * @access public
-     * @return Lysine\Db\Adapter
+     * @return Lysine\Db\IAdapter
      */
     public function getAdapter() {
         return $this->adapter;
@@ -277,7 +277,7 @@ class Select {
      * 返回db statement对象
      *
      * @access public
-     * @return Lysine\Db\Statement
+     * @return Lysine\Db\IStatement
      */
     public function execute() {
         list($sql, $bind) = $this->compile();

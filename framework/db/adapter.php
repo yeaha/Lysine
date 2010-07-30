@@ -3,7 +3,7 @@ namespace Lysine\Db;
 
 use \PDO;
 
-abstract class Adapter {
+abstract class Adapter implements IAdapter {
     /**
      * 数据库连接配置
      *
@@ -19,10 +19,6 @@ abstract class Adapter {
      * @access protected
      */
     protected $dbh;
-
-    abstract public function qtab($table_name);
-
-    abstract public function qcol($column_name);
 
     public function __construct($dsn, $user, $pass, array $options = array()) {
         $explode = explode('\\', get_class($this));
@@ -113,7 +109,7 @@ abstract class Adapter {
      * @access public
      * @return void
      */
-    public function handle() {
+    public function getHandle() {
         $this->connect();
         return $this->dbh;
     }
@@ -187,12 +183,12 @@ abstract class Adapter {
     /**
      * 插入一条记录
      *
-     * @param string $table
+     * @param string $table_name
      * @param array $row
      * @access public
      * @return integer
      */
-    public function insert($table, array $row) {
+    public function insert($table_name, array $row) {
         $this->connect();
 
         $cols = array_keys($row);
@@ -205,7 +201,7 @@ abstract class Adapter {
 
         $sql = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
-            $this->qtab($table),
+            $this->qtab($table_name),
             implode(',', $this->qcol($cols)),
             implode(',', $place)
         );
@@ -221,13 +217,14 @@ abstract class Adapter {
      * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', array(':id' => 1));
      * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', 1);
      *
-     * @param string $table
+     * @param string $table_name
      * @param array $row
      * @param mixed $where
+     * @param mixed $bind
      * @access public
      * @return integer
      */
-    public function update($table, array $row, $where = null) {
+    public function update($table_name, array $row, $where = null, $bind = null) {
         $this->connect();
 
         // 先解析where
@@ -259,7 +256,7 @@ abstract class Adapter {
         }
         $bind = array_merge($bind, $where_bind);
 
-        $sql = sprintf('UPDATE %s SET %s', $this->qtab($table), implode(',', $set));
+        $sql = sprintf('UPDATE %s SET %s', $this->qtab($table_name), implode(',', $set));
         if ($where) $sql .= ' WHERE '. $where;
 
         return $this->execute($sql, $bind);
@@ -274,17 +271,18 @@ abstract class Adapter {
      * $adapter->delete('table', 'a = :a and b = :b', array(':a' => 'a1', ':b' => 'b1'));
      * $adapter->delete('table', 'a = :a and b = :b', 'a1', 'b1');
      *
-     * @param string $table
+     * @param string $table_name
      * @param mixed $where
+     * @param mixed $bind
      * @access public
      * @return integer
      */
-    public function delete($table, $where = null) {
+    public function delete($table_name, $where = null, $bind = null) {
         $this->connect();
 
         $bind = array();
 
-        $sql = 'DELETE FROM '. $this->qtab($table);
+        $sql = 'DELETE FROM '. $this->qtab($table_name);
         if (is_null($where)) {
             $where = $bind = null;
         } elseif (is_array($where)) {

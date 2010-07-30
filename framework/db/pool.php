@@ -149,7 +149,7 @@ class Pool implements ArrayAccess {
      * @param string $group
      * @param mixed $token
      * @access public
-     * @return Lysine\Db\Adapter
+     * @return Lysine\Db\IAdapter
      */
     public function dispatch($group, $token) {
         if (!isset($this->dispatcher[$group]))
@@ -176,7 +176,7 @@ class Pool implements ArrayAccess {
      *
      * @param string $node_name
      * @access public
-     * @return Lysine\Db\Adapter
+     * @return Lysine\Db\IAdapter
      */
     public function offsetGet($node_name) {
         return $this->getAdapter($node_name);

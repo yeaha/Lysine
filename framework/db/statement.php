@@ -3,7 +3,7 @@ namespace Lysine\Db;
 
 use \PDO;
 
-class Statement extends \PDOStatement {
+class Statement extends \PDOStatement implements IStatement {
     /**
      * 一行
      *

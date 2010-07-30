@@ -64,7 +64,7 @@ abstract class ActiveRecord {
     /**
      * 数据库连接
      *
-     * @var Adapter
+     * @var IAdapter
      * @access protected
      */
     protected $adapter;
@@ -273,11 +273,11 @@ abstract class ActiveRecord {
     /**
      * 设置数据库连接
      *
-     * @param Adapter $adapter
+     * @param IAdapter $adapter
      * @access public
      * @return self
      */
-    public function setAdapter(Adapter $adapter) {
+    public function setAdapter(IAdapter $adapter) {
         $this->adapter = $adapter;
         return $this;
     }
@@ -286,7 +286,7 @@ abstract class ActiveRecord {
      * 得到数据库连接
      *
      * @access public
-     * @return Adapter
+     * @return IAdapter
      */
     public function getAdapter() {
         if (!$this->adapter) $this->adapter = Pool::instance()->getAdapter();
@@ -425,12 +425,12 @@ abstract class ActiveRecord {
     /**
      * 从数据库内查询
      *
-     * @param Adapter $adapter
+     * @param IAdapter $adapter
      * @static
      * @access public
      * @return Select
      */
-    static public function select(Adapter $adapter = null) {
+    static public function select(IAdapter $adapter = null) {
         if (!$adapter)$adapter = Pool::instance()->getAdapter();
 
         $class = get_called_class();
@@ -450,12 +450,12 @@ abstract class ActiveRecord {
      * 根据主键值得到对象
      *
      * @param mixed $id
-     * @param Adapter $adapter
+     * @param IAdapter $adapter
      * @static
      * @access public
      * @return ActiveRecord
      */
-    static public function find($id, Adapter $adapter = null) {
+    static public function find($id, IAdapter $adapter = null) {
         $select = static::select($adapter);
         $adapter = $select->getAdapter();
         $pk = $adapter->qcol(static::$primary_key);
