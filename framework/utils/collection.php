@@ -269,13 +269,28 @@ class Coll {
      * @return Ly_Coll
      */
     public function call($fn, $args = null) {
-        $args = array_slice(func_get_args(), 1);
+        if (!is_array($args)) {
+            $args = func_get_args();
+            $args = array_slice($args, 1);
+        }
 
         $result = array();
         foreach ($this->coll as $key => $el) {
             $result[$key] = call_user_func_array(array($el, $fn), $args);
         }
         return new self($result);
+    }
+
+    /**
+     * 魔法方法
+     *
+     * @param string $fn
+     * @param array $args
+     * @access public
+     * @return Ly_Coll
+     */
+    public function __call($fn, $args) {
+        return $this->call($fn, $args);
     }
 
     /**
