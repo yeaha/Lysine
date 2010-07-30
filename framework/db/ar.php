@@ -244,10 +244,12 @@ abstract class ActiveRecord {
             if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
                 throw new \UnexpectedValueException('Referer class must be subclass of Lysine\Db\ActiveRecord');
 
-            $select = forward_static_call(array($class, 'select'));
+            $adapter = $this->getAdapter();
+            $select = forward_static_call(array($class, 'select'), $adapter);
             if (isset($config['source_key'], $config['target_key'])) {
-                $where = "{$config['target_key']} = ?";
-                $bind = $this->get($config['source_key'], false);
+                $target_key = $adapter->qcol($config['target_key']);
+                $where = "{$target_key} = ?";
+                $bind = $this->get($config['source_key']);
                 $select->where($where, $bind);
             }
 
@@ -452,8 +454,11 @@ abstract class ActiveRecord {
      * @return ActiveRecord
      */
     static public function find($id, Adapter $adapter = null) {
-        $pk = static::$primary_key;
-        return static::select($adapter)->where("{$pk} = ?", $id)->get(1);
+        $select = static::select($adapter);
+        $adapter = $select->getAdapter();
+        $pk = $adapter->qcol(static::$primary_key);
+
+        return $select->where("{$pk} = ?", $id)->get(1);
     }
 
     public function __before_init() {}
