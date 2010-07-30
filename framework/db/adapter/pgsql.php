@@ -6,6 +6,62 @@ use Lysine\Db\Adapter as Adapter;
 
 class Pgsql extends Adapter {
     /**
+     * 根据表名和字段名生成序列名
+     *
+     * @param string $table_name
+     * @param string $column
+     * @access protected
+     * @return string
+     */
+    protected function seqName($table_name, $column) {
+        list($schema, $seq_name) = $this->parseTableName($table_name);
+        $seq_name .= '_'. $column .'_seq';
+        return $schema ? sprintf('"%s"."%s"', $schema, $seq_name) : $this->qcol($seq_name);
+    }
+
+    /**
+     * 最后一次生成的自增长序列的值
+     *
+     * @param string $table_name
+     * @param string $column
+     * @access public
+     * @return integer
+     */
+    public function lastInsertId($table_name = null, $column = null) {
+        if (!$table_name) {
+            try {
+                return $this->execute('SELECT LASTVAL()')->fetchCol();
+            } catch (Exception $ex) {
+                return false;
+            }
+        }
+
+        $seq_name = $this->seqName($table_name, $column);
+        try {
+            return $this->execute("SELECT CURRVAL('{$seq_name}')")->fetchCol();
+        } catch (Exception $ex) {
+            return false;
+        }
+    }
+
+    /**
+     * 下一个自增长序列的值
+     *
+     * @param string $table_name
+     * @param string $column
+     * @access public
+     * @return integer
+     */
+    public function nextId($table_name, $column) {
+        $seq_name = $this->seqName($table_name, $column);
+        try {
+            return $this->execute("SELECT NEXTVAL('{$seq_name}')")->fetchCol();
+        } catch (Exception $ex) {
+            return false;
+        }
+    }
+
+    /**
      * 把表名称的数据库名称、schame名称和表名称解析为数组返回
      * 解析出来的名称都已经用trim()处理过
      *
