@@ -94,12 +94,16 @@ class Pool implements ArrayAccess {
      * 添加一个节点到列表里
      *
      * @param string $node_name
-     * @param array $config
+     * @param mixed $config
      * @access public
      * @return self
      */
-    public function addNode($node_name, array $config) {
-        $this->nodes[$node_name] = Db::parseConfig($config);
+    public function addNode($node_name, $config) {
+        if ($config instanceof IAdapter) {
+            $this->adapter[$node_name] = $config;
+        } else {
+            $this->nodes[$node_name] = Db::parseConfig($config);
+        }
         return $this;
     }
 
