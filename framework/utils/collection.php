@@ -184,11 +184,16 @@ class Coll {
      * 把所有的返回值以Ly_Coll方式返回
      *
      * @param callback $callback
+     * @param array $args
      * @access public
      * @return Ly_Coll
      */
-    public function map($callback) {
-        return new self(array_map($callback, $this->coll));
+    public function map($callback, array $args = null) {
+        if ($args) {
+            return new self(array_map($callback, $this->coll, $args));
+        } else {
+            return new self(array_map($callback, $this->coll));
+        }
     }
 
     /**
@@ -197,11 +202,16 @@ class Coll {
      * each是会修改自身
      *
      * @param callback $callback
+     * @param mixed $more
      * @access public
      * @return Ly_Coll
      */
-    public function each($callback) {
-        array_walk($this->coll, $callback);
+    public function each($callback, $more = null) {
+        if ($more) {
+            array_walk($this->coll, $callback, $more);
+        } else {
+            array_walk($this->coll, $callback);
+        }
         return $this;
     }
 
