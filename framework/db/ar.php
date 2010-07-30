@@ -440,7 +440,9 @@ abstract class ActiveRecord {
             return $ar;
         };
 
-        $select = $adapter->select(static::$table_name)->setProcessor($processor);
+        $select = $adapter->select(static::$table_name)
+                          ->setProcessor($processor)
+                          ->setKeyColumn(static::$primary_key);
         return $select;
     }
 

@@ -24,6 +24,8 @@ class Select {
 
     protected $union;
 
+    protected $key_column;
+
     protected $processor;
 
     /**
@@ -101,6 +103,19 @@ class Select {
 
         while (list(, $c) = each($col)) $cols[] = $c;
         $this->cols = array_unique($cols);
+        return $this;
+    }
+
+    /**
+     * 指定返回的查询数组中，以哪个字段的值为key
+     * 注意：如果指定的字段不是主键字段，可能会造成返回数据不完整的情况
+     *
+     * @param string $column_name
+     * @access public
+     * @return self
+     */
+    public function setKeyColumn($column_name) {
+        $this->key_column = $column_name;
         return $this;
     }
 
@@ -300,8 +315,8 @@ class Select {
             $result = $sth->getRow();
             return $processor ? call_user_func($processor, $result) : $result;
         } else {
-            $result = new Coll($sth->getAll());
-            return $processor ? $result->each($processor) : $result;
+            $result = $sth->getAll($this->key_column);
+            return new Coll($processor ? array_map($processor, $result) : $result);
         }
     }
 
