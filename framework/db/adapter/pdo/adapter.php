@@ -1,9 +1,9 @@
 <?php
-namespace Lysine\Db;
+namespace Lysine\Db\Adapter;
 
-use \PDO;
+use Lysine\Db\IAdapter;
 
-abstract class Adapter implements IAdapter {
+abstract class Pdo implements IAdapter {
     /**
      * 数据库连接配置
      *
@@ -60,7 +60,7 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     protected function isConnected() {
-        return $this->dbh instanceof PDO;
+        return $this->dbh instanceof \PDO;
     }
 
     /**
@@ -74,15 +74,15 @@ abstract class Adapter implements IAdapter {
 
         list($dsn, $user, $pass, $options) = $this->cfg;
 
-        $dbh = new PDO($dsn, $user, $pass, $options);
+        $dbh = new \PDO($dsn, $user, $pass, $options);
 
         // 出错时抛出异常
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         // 这里允许通过构造时传递的options定义自己的statement class
-        list($statement_class) = $dbh->getAttribute(PDO::ATTR_STATEMENT_CLASS);
+        list($statement_class) = $dbh->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
         if ($statement_class == 'PDOStatement') {
-            $dbh->setAttribute(PDO::ATTR_STATEMENT_CLASS, array(__NAMESPACE__ .'\Statement'));
+            $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Db\Statement\Pdo'));
         }
 
         $this->dbh = $dbh;
@@ -161,7 +161,7 @@ abstract class Adapter implements IAdapter {
         $sth->execute($bind);
 
         if (strtolower(substr($sql, 0, 6)) == 'select') {
-            $sth->setFetchMode(PDO::FETCH_ASSOC);
+            $sth->setFetchMode(\PDO::FETCH_ASSOC);
             return $sth;
         }
 

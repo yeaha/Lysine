@@ -1,9 +1,7 @@
 <?php
-namespace Lysine\Db;
+namespace Lysine\Db\Statement;
 
-use \PDO;
-
-class Statement extends \PDOStatement implements IStatement {
+class Pdo extends \PDOStatement implements IStatement {
     /**
      * 一行
      *
@@ -22,7 +20,7 @@ class Statement extends \PDOStatement implements IStatement {
      * @return mixed
      */
     public function getCol($col_number = 0) {
-        return $this->fetch(PDO::FETCH_COLUMN, $col_number);
+        return $this->fetch(\PDO::FETCH_COLUMN, $col_number);
     }
 
     /**
@@ -33,7 +31,7 @@ class Statement extends \PDOStatement implements IStatement {
      * @return array
      */
     public function getCols($col_number = 0) {
-        return $this->fetchAll(PDO::FETCH_COLUMN, $col_number);
+        return $this->fetchAll(\PDO::FETCH_COLUMN, $col_number);
     }
 
     /**
