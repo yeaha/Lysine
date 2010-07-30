@@ -207,10 +207,10 @@ class Coll {
      * @return Ly_Coll
      */
     public function each($callback, $more = null) {
-        if ($more) {
-            array_walk($this->coll, $callback, $more);
-        } else {
+        if ($more === null) {
             array_walk($this->coll, $callback);
+        } else {
+            array_walk($this->coll, $callback, $more);
         }
         return $this;
     }
