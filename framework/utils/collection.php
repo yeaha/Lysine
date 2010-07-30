@@ -188,8 +188,7 @@ class Coll {
      * @return Ly_Coll
      */
     public function map($callback) {
-        $map = array_map($callback, $this->coll);
-        return new self($map);
+        return new self(array_map($callback, $this->coll));
     }
 
     /**
@@ -256,5 +255,47 @@ class Coll {
             $result[$key] = call_user_func_array(array($el, $fn), $args);
         }
         return new self($result);
+    }
+
+    /**
+     * array_slice方法
+     *
+     * @param integer $offset
+     * @param integer $length
+     * @param boolean $preserve_keys
+     * @access public
+     * @return Ly_Coll
+     */
+    public function slice($offset, $length = null, $preserve_keys = false) {
+        return new self(array_slice($this->coll, $offset, $length, $preserve_keys));
+    }
+
+    /**
+     * array_splice方法
+     *
+     * @param integer $offset
+     * @param integer $length
+     * @access public
+     * @return Ly_Coll
+     */
+    public function splice($offset, $length = 0) {
+        $args = func_get_args();
+        if (count($args) > 2) {
+            $replace = $args[2];
+            return new self(array_splice($this->coll, $offset, $length, $replace));
+        }
+        return new self(array_splice($this->coll, $offset, $length));
+    }
+
+    /**
+     * array_reduce方法
+     *
+     * @param callable $function
+     * @param mixed $initial
+     * @access public
+     * @return mixed
+     */
+    public function reduce($function, $initial = null) {
+        return array_reduce($this->coll, $function, $initial);
     }
 }
