@@ -315,8 +315,8 @@ class Select {
             $result = $sth->getRow();
             return $processor ? call_user_func($processor, $result) : $result;
         } else {
-            $result = $sth->getAll($this->key_column);
-            return new Coll($processor ? array_map($processor, $result) : $result);
+            $result = new Coll($sth->getAll($this->key_column));
+            return $processor ? $result->each($processor) : $result;
         }
     }
 

@@ -215,13 +215,13 @@ class Coll {
      * @return Ly_Coll
      */
     public function each($callback, $more = null) {
-        $args = func_get_args();
+        $more = is_array($more) ? $more : array_slice(func_get_args(), 1);
 
-        if (count($args) > 1) {
-            $more = $args[1];
-            array_walk($this->coll, $callback, $more);
-        } else {
-            array_walk($this->coll, $callback);
+        foreach ($this->coll as $key => $val) {
+            $args = array($val, $key);
+            if ($more) $args = array_merge($args, $more);
+
+            $this->coll[$key] = call_user_func_array($callback, $args);
         }
         return $this;
     }
