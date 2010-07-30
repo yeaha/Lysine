@@ -3,6 +3,13 @@ namespace Lysine\Db;
 
 use Lysine\Utils\Coll;
 
+/**
+ * 这个类只管组装sql语句，并对查询结果进行简单处理
+ * 尽量只做字符串处理
+ *
+ * @package db
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 class Select {
     protected $adapter;
 
@@ -17,30 +24,75 @@ class Select {
 
     protected $processor;
 
+    /**
+     * 构造函数
+     *
+     * @param Adapter $adapter
+     * @access public
+     * @return void
+     */
     public function __construct(Adapter $adapter) {
         $this->adapter = $adapter;
     }
 
+    /**
+     * 直接调用查询结果对象
+     *
+     * 获得结果的第2行
+     * $select->getCols(1)
+     *
+     * @param string $fn
+     * @param mixed $args
+     * @access public
+     * @return mixed
+     */
     public function __call($fn, $args) {
         if (substr($fn, 0, 3) == 'get')
             $sth = $this->execute();
             return call_user_func_array(array($sth, $fn), $args);
     }
 
+    /**
+     * sql FROM
+     *
+     * @param string $table
+     * @access public
+     * @return self
+     */
     public function from($table) {
         $this->from = $table;
         return $this;
     }
 
-    public function adapter() {
+    /**
+     * 获得数据库连接
+     *
+     * @access public
+     * @return Lysine\Db\Adapter
+     */
+    public function getAdapter() {
         return $this->adapter;
     }
 
+    /**
+     * 指定结果字段
+     *
+     * @param mixed $cols
+     * @access public
+     * @return self
+     */
     public function setCols($cols = null) {
         $this->cols = is_array($cols) ? $cols : func_get_args();
         return $this;
     }
 
+    /**
+     * 增加结果字段
+     *
+     * @param mixed $col
+     * @access public
+     * @return self
+     */
     public function addCol($col = null) {
         $cols = $this->cols;
         if (!is_array($col)) $col = func_get_args();
@@ -50,37 +102,111 @@ class Select {
         return $this;
     }
 
+    /**
+     * 增加一个查询条件
+     * 所有通过这里添加的条件都是AND关系
+     *
+     * 如果需要OR关系，可以这样写
+     * $select->where('expr1 or expr2')
+     * $select->where('expr3 or expr4')
+     * 结果等于(expor1 or expr2) and (expr3 or expr4)
+     *
+     * @param string $where
+     * @param mixed $bind
+     * @access public
+     * @return self
+     */
     public function where($where, $bind = null) {
         $args = func_get_args();
         $this->where[] = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
         return $this;
     }
 
+    /**
+     * sql GROUP
+     *
+     * @param string $group_by
+     * @access public
+     * @return self
+     */
     public function group($group_by) {
         $this->group = $group_by;
         return $this;
     }
 
+    /**
+     * sql HAVING
+     *
+     * @param string $having
+     * @access public
+     * @return self
+     */
     public function having($having) {
         $this->having = $having;
         return $this;
     }
 
+    /**
+     * sql ORDER
+     *
+     * @param string $order_by
+     * @access public
+     * @return self
+     */
     public function order($order_by) {
         $this->order = $order_by;
         return $this;
     }
 
+    /**
+     * sql LIMIT
+     *
+     * @param integer $limit
+     * @access public
+     * @return self
+     */
     public function limit($limit) {
         $this->limit = abs((int)$limit);
         return $this;
     }
 
+    /**
+     * sql OFFSET
+     *
+     * @param integer $offset
+     * @access public
+     * @return self
+     */
     public function offset($offset) {
         $this->offset = abs((int)$offset);
         return $this;
     }
 
+    /**
+     * 生成sql语句的where部分
+     *
+     * @access protected
+     * @return array
+     */
+    protected function compileWhere() {
+        $where = $bind = array();
+        foreach ($this->where as $w) {
+            list($where_sql, $where_bind) = $w;
+            $where[] = $where_sql;
+            $bind = array_merge($bind, $where_bind);
+        }
+
+        $where = $where ? '('. implode(') AND (', $where) .')' : '';
+
+        return array($where, $bind);
+    }
+
+    /**
+     * 生成sql语句
+     *
+     * @access public
+     * @return array
+     */
     public function compile() {
         $adapter = $this->adapter;
 
@@ -89,14 +215,9 @@ class Select {
 
         $sql = sprintf('SELECT %s FROM %s', $cols, $adapter->qtab($this->from));
 
-        $where = $bind = array();
-        foreach ($this->where as $w) {
-            list($where_sql, $where_bind) = $w;
-            $where[] = $where_sql;
-            $bind = array_merge($bind, $where_bind);
-        }
+        list($where, $bind) = $this->compileWhere();
+        if ($where) $sql .= sprintf(' WHERE %s', $where);
 
-        if ($where) $sql .= sprintf(' WHERE %s', '('. implode(') AND (', $where) .')');
         if ($this->group) {
             $sql .= ' GROUP BY '. $this->group;
             if ($this->having) $sql .= ' HAVING '. $this->having;
@@ -109,6 +230,13 @@ class Select {
         return array($sql, $bind);
     }
 
+    /**
+     * 执行数据库查询
+     * 返回db statement对象
+     *
+     * @access public
+     * @return Lysine\Db\Statement
+     */
     public function execute() {
         list($sql, $bind) = $this->compile();
         return $this->adapter->execute($sql, $bind);
@@ -127,6 +255,13 @@ class Select {
         return $this;
     }
 
+    /**
+     * 返回查询数据
+     *
+     * @param integer $limit
+     * @access public
+     * @return mixed
+     */
     public function get($limit = null) {
         if (is_int($limit)) $this->limit($limit);
 
@@ -141,5 +276,38 @@ class Select {
             $result = new Coll($sth->getAll());
             return $processor ? $result->each($processor) : $result;
         }
+    }
+
+    /**
+     * 删除数据
+     *
+     * @access public
+     * @return integer
+     */
+    public function delete() {
+        list($where, $bind) = $this->compileWhere();
+
+        // 在这里，不允许没有任何条件的delete
+        if (!$where)
+            throw new \UnexpectedValueException('Must specify WHERE condition before delete');
+
+        return $this->adapter->delete($this->from, $where, $bind);
+    }
+
+    /**
+     * 更新数据
+     *
+     * @param array $set
+     * @access public
+     * @return integer
+     */
+    public function update(array $set) {
+        list($where, $bind) = $this->compileWhere();
+
+        // 在这里，不允许没有任何条件的update
+        if (!$where)
+            throw new \UnexpectedValueException('Must specify WHERE condition before update');
+
+        return $this->adapter->update($this->from, $set, $where, $bind);
     }
 }
