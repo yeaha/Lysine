@@ -321,7 +321,7 @@ abstract class ActiveRecord {
 
             if ($affect = $adapter->insert($table_name, $this->row)) {
                 if (!isset($row[$pk]))
-                    $this->set($pk, $adapter->lastInsertId($table_name, $pk), true);
+                    $this->set($pk, $adapter->lastId($table_name, $pk), true);
 
                 $this->fireEvent('after insert');
             }

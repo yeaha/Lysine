@@ -30,6 +30,7 @@ namespace Lysine\Db {
         public function qtab($table_name);
         public function qcol($column_name);
         public function qstr($val);
+        public function lastId($table_name = null, $column = null);
     }
 
     interface IStatement {

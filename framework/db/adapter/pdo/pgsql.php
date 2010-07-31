@@ -27,7 +27,7 @@ class Pgsql extends Pdo {
      * @access public
      * @return integer
      */
-    public function lastInsertId($table_name = null, $column = null) {
+    public function lastId($table_name = null, $column = null) {
         if (!$table_name) {
             try {
                 return $this->execute('SELECT LASTVAL()')->fetchCol();
