@@ -5,7 +5,7 @@ return array(
     'Lysine\Config' => './core.php',
     'Lysine\Db' => './db/db.php',
     'Lysine\Db\ActiveRecord' => './db/ar.php',
-    'Lysine\Db\Adapter\Pdo' => './db/adapter/pdo/adapter.php',
+    'Lysine\Db\Adapter\Pdo' => './db/adapter/pdo.php',
     'Lysine\Db\Adapter\Pdo\Pgsql' => './db/adapter/pdo/pgsql.php',
     'Lysine\Db\Expr' => './db/expr.php',
     'Lysine\Db\IAdapter' => './db/db.php',
