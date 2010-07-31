@@ -7,35 +7,17 @@ namespace Lysine {
         const TYPE_STRING = 4;
         const TYPE_BINARY = 5;
 
-        static public function parseConfig(array $cfg) {
-            if (!isset($cfg['dsn']))
-                throw new \InvalidArgumentException('Invalid database config');
-
-            $dsn = $cfg['dsn'];
-
-            $user = isset($cfg['user']) ? $cfg['user'] : null;
-            $pass = isset($cfg['pass']) ? $cfg['pass'] : null;
-            $options = (isset($cfg['options']) AND is_array($cfg['options']))
-                     ? $cfg['options']
-                     : array();
-
-            return array($dsn, $user, $pass, $options);
-        }
-
-        static public function factory($dsn, $user, $pass, array $options = array()) {
-            if (!preg_match('/^([a-z]+):.+/i', $dsn, $match))
-                throw new \InvalidArgumentException('Invalid dsn');
-
-            $adapter = $match[1];
-
-            $class = __NAMESPACE__ .'\Db\Adapter\\'. ucfirst($adapter);
-            return new $class($dsn, $user, $pass, $options);
+        static public function factory($class, array $config) {
+            if (substr($class, 0, 1) != '\\')
+                $class = '\Lysine\Db\Adapter\\'. $class;
+            return new $class($config);
         }
     }
 }
 
 namespace Lysine\Db {
     interface IAdapter {
+        public function __construct(array $config);
         public function getHandle();
         public function begin();
         public function rollback();

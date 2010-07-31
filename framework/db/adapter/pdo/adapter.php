@@ -2,6 +2,7 @@
 namespace Lysine\Db\Adapter;
 
 use Lysine\Db\IAdapter;
+use Lysine\Db\Select;
 
 abstract class Pdo implements IAdapter {
     /**
@@ -20,14 +21,14 @@ abstract class Pdo implements IAdapter {
      */
     protected $dbh;
 
-    public function __construct($dsn, $user, $pass, array $options = array()) {
+    public function __construct(array $config) {
         $explode = explode('\\', get_class($this));
         $extension = 'pdo_'. strtolower( array_pop($explode) );
 
         if (!extension_loaded($extension))
             throw new \RuntimeException('Need '. $extension .' extension!');
 
-        $this->cfg = array($dsn, $user, $pass, $options);
+        $this->cfg = self::parseConfig($config);
     }
 
     public function __call($fn, $args) {
@@ -342,5 +343,28 @@ abstract class Pdo implements IAdapter {
             throw new \InvalidArgumentException('Missing sql statement parameter');
 
         return array($sql, array_combine($place, $bind));
+    }
+
+    /**
+     * 解析pdo adapter配置信息
+     *
+     * @param array $cfg
+     * @static
+     * @access public
+     * @return array
+     */
+    static public function parseConfig(array $cfg) {
+        if (!isset($cfg['dsn']))
+            throw new \InvalidArgumentException('Invalid database config');
+
+        $dsn = $cfg['dsn'];
+
+        $user = isset($cfg['user']) ? $cfg['user'] : null;
+        $pass = isset($cfg['pass']) ? $cfg['pass'] : null;
+        $options = (isset($cfg['options']) AND is_array($cfg['options']))
+                 ? $cfg['options']
+                 : array();
+
+        return array($dsn, $user, $pass, $options);
     }
 }

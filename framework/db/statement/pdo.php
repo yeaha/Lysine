@@ -1,6 +1,8 @@
 <?php
 namespace Lysine\Db\Statement;
 
+use Lysine\Db\IStatement;
+
 class Pdo extends \PDOStatement implements IStatement {
     /**
      * 一行

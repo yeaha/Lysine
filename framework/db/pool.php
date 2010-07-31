@@ -82,9 +82,13 @@ class Pool implements ArrayAccess {
             if (!isset($this->nodes[$node_name]))
                 throw new \InvalidArgumentException('Adapter ['. $node_name .'] not found');
 
-            list($dsn, $user, $pass, $options) = $this->nodes[$node_name];
+            $config = $this->nodes[$node_name];
+            if (!isset($config['class']))
+                throw new \UnexpectedValueException('Must specify Adapter class name in database config');
+            $class = $config['class'];
+            unset($config['class']);
 
-            $this->adapter[$node_name] = Db::factory($dsn, $user, $pass, $options);
+            $this->adapter[$node_name] = Db::factory($class, $config);
         }
 
         return $this->adapter[$node_name];
@@ -102,7 +106,7 @@ class Pool implements ArrayAccess {
         if ($config instanceof IAdapter) {
             $this->adapter[$node_name] = $config;
         } else {
-            $this->nodes[$node_name] = Db::parseConfig($config);
+            $this->nodes[$node_name] = $config;
         }
         return $this;
     }
