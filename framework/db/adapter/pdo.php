@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Db\Adapter;
 
+use Lysine\Db;
 use Lysine\Db\IAdapter;
 use Lysine\Db\Select;
 
@@ -158,8 +159,17 @@ abstract class Pdo implements IAdapter {
         $this->connect();
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
-        $sth = $this->dbh->prepare($sql);
-        $sth->execute($bind);
+        try {
+            $sth = $this->dbh->prepare($sql);
+            $sth->execute($bind);
+        } catch (\PDOException $ex) {
+            throw new Db\Exception(
+                $ex->getMesssage(),
+                $ex->getCode(),
+                $ex,
+                $ex->errorInfo[0]
+            );
+        }
 
         if (strtolower(substr($sql, 0, 6)) == 'select') {
             $sth->setFetchMode(\PDO::FETCH_ASSOC);

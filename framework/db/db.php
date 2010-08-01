@@ -204,4 +204,35 @@ namespace Lysine\Db {
          */
         public function getAll($col = null);
     }
+
+    /**
+     * 数据库sql执行异常
+     *
+     * @package DB
+     * @author yangyi <yangyi.cn.gz@gmail.com>
+     */
+    class Exception extends \Exception {
+        /**
+         * 数据库原生错误代码
+         *
+         * @var mixed
+         * @access protected
+         */
+        protected $native_code;
+
+        public function __construct($message = '', $code = 0, $previous = null, $native_code = null) {
+            parent::__construct($message, $code, $previous);
+            $this->native_code = $native_code;
+        }
+
+        /**
+         * 获得数据库原生错误代码
+         *
+         * @access public
+         * @return void
+         */
+        public function getNativeCode() {
+            return $this->native_code;
+        }
+    }
 }

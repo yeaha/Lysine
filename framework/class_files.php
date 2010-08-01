@@ -7,6 +7,7 @@ return array(
     'Lysine\Db\ActiveRecord' => './db/ar.php',
     'Lysine\Db\Adapter\Pdo' => './db/adapter/pdo.php',
     'Lysine\Db\Adapter\Pdo\Pgsql' => './db/adapter/pdo/pgsql.php',
+    'Lysine\Db\Exception' => './db/db.php',
     'Lysine\Db\Expr' => './db/expr.php',
     'Lysine\Db\IAdapter' => './db/db.php',
     'Lysine\Db\IStatement' => './db/db.php',
