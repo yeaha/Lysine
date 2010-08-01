@@ -460,7 +460,12 @@ abstract class ActiveRecord {
         $adapter = $select->getAdapter();
         $pk = $adapter->qcol(static::$primary_key);
 
-        return $select->where("{$pk} = ?", $id)->get(1);
+        if (is_array($id)) {
+            $where = sprintf('%s in (%s)', $pk, implode(',', $adapter->qstr($id)));
+            return $select->where($where)->get();
+        } else {
+            return $select->where("{$pk} = ?", $id)->get(1);
+        }
     }
 
     public function __before_init() {}
