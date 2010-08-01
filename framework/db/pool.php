@@ -164,7 +164,8 @@ class Pool implements ArrayAccess {
             throw new \InvalidArgumentException('Group ['. $group .'] not found');
 
         $fn = $this->dispatcher[$group];
-        $node_name = call_user_func($fn, $token);
+        $args = array_slice(func_get_args(), 1);
+        $node_name = call_user_func_array($fn, $args);
         return $this->getAdapter($node_name);
     }
 
