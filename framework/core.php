@@ -1,9 +1,6 @@
 <?php
 namespace Lysine;
 
-use Lysine\Db;
-use Lysine\Utils;
-
 const DIR = __DIR__;
 
 class Config {
