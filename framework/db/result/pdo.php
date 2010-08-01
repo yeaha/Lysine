@@ -1,9 +1,9 @@
 <?php
-namespace Lysine\Db\Statement;
+namespace Lysine\Db\Result;
 
-use Lysine\Db\IStatement;
+use Lysine\Db\IResult;
 
-class Pdo extends \PDOStatement implements IStatement {
+class Pdo extends \PDOStatement implements IResult {
     /**
      * 一行
      *

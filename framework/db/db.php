@@ -66,14 +66,14 @@ namespace Lysine\Db {
         public function commit();
 
         /**
-         * 执行sql语句并返回IStatement实例
+         * 执行sql语句并返回IResult实例
          * 如果此adapter要使用Lysine db select和active record
-         * 就必须返回IStatement才行
+         * 就必须返回IResult才行
          *
          * @param string $sql
          * @param mixed $bind
          * @access public
-         * @return Lysine\Db\IStatement
+         * @return Lysine\Db\IResult
          */
         public function execute($sql, $bind = null);
 
@@ -168,7 +168,7 @@ namespace Lysine\Db {
      * @package DB
      * @author yangyi <yangyi.cn.gz@gmail.com>
      */
-    interface IStatement {
+    interface IResult {
         /**
          * 获得一行数据
          *

@@ -274,10 +274,10 @@ class Select {
 
     /**
      * 执行数据库查询
-     * 返回db statement对象
+     * 返回db result对象
      *
      * @access public
-     * @return Lysine\Db\IStatement
+     * @return Lysine\Db\IResult
      */
     public function execute() {
         list($sql, $bind) = $this->compile();

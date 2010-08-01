@@ -81,10 +81,10 @@ abstract class Pdo implements IAdapter {
         // 出错时抛出异常
         $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        // 这里允许通过构造时传递的options定义自己的statement class
-        list($statement_class) = $dbh->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
-        if ($statement_class == 'PDOStatement') {
-            $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Db\Statement\Pdo'));
+        // 这里允许通过构造时传递的options定义自己的result class
+        list($result_class) = $dbh->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
+        if ($result_class == 'PDOStatement') {
+            $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Db\Result\Pdo'));
         }
 
         $this->dbh = $dbh;
