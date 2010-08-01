@@ -14,7 +14,9 @@ use ArrayAccess;
 class Pool implements ArrayAccess {
     static protected $instance;
 
-    protected $nodes = array();
+    static public $configPath = array('db', 'pool');
+
+    protected $config = array();
 
     protected $dispatcher = array();
 
@@ -30,7 +32,7 @@ class Pool implements ArrayAccess {
      * @return void
      */
     public function __construct(array $config = null) {
-        if (!$config) $config = cfg('db', 'pool');
+        if (!$config) $config = cfg(self::$configPath);
         if ($config) $this->addNodes($config);
     }
 
@@ -80,10 +82,10 @@ class Pool implements ArrayAccess {
         if ($node_name === null) $node_name = $this->default_node;
 
         if (!isset($this->adapter[$node_name])) {
-            if (!isset($this->nodes[$node_name]))
+            if (!isset($this->config[$node_name]))
                 throw new \InvalidArgumentException('Adapter ['. $node_name .'] not found');
 
-            $config = $this->nodes[$node_name];
+            $config = $this->config[$node_name];
             list($dsn, $user, $pass, $options) = Adapter::parseConfig($config);
 
             $this->adapter[$node_name] = Db::factory($dsn, $user, $pass, $options);
@@ -104,7 +106,7 @@ class Pool implements ArrayAccess {
         if ($config instanceof IAdapter) {
             $this->adapter[$node_name] = $config;
         } else {
-            $this->nodes[$node_name] = $config;
+            $this->config[$node_name] = $config;
         }
         return $this;
     }
@@ -112,12 +114,12 @@ class Pool implements ArrayAccess {
     /**
      * 添加多个节点到列表里
      *
-     * @param array $nodes
+     * @param array $config_set
      * @access public
      * @return self
      */
-    public function addNodes(array $nodes) {
-        foreach ($nodes as $node_name => $config) $this->addNode($node_name, $config);
+    public function addNodes(array $config_set) {
+        foreach ($config_set as $node_name => $config) $this->addNode($node_name, $config);
         return $this;
     }
 
@@ -129,7 +131,7 @@ class Pool implements ArrayAccess {
      * @return self
      */
     public function removeNode($node_name) {
-        unset($this->nodes[$node_name], $this->adapter[$node_name]);
+        unset($this->config[$node_name], $this->adapter[$node_name]);
         return $this;
     }
 
@@ -174,7 +176,7 @@ class Pool implements ArrayAccess {
      * @return boolean
      */
     public function offsetExists($node_name) {
-        return array_key_exists($node_name, $this->nodes);
+        return array_key_exists($node_name, $this->config);
     }
 
     /**
