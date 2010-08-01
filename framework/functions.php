@@ -136,7 +136,7 @@ function dump($var) {
 
 function coll() {
     $elements = func_get_args();
-    return new Utils\Coll($elements);
+    return new \Lysine\Utils\Coll($elements);
 }
 
 /**
