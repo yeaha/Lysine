@@ -1,11 +1,10 @@
 <?php
-namespace Lysine\Db\Adapter;
+namespace Lysine\Db;
 
-use Lysine\Db;
 use Lysine\Db\IAdapter;
 use Lysine\Db\Select;
 
-abstract class Pdo implements IAdapter {
+abstract class Adapter implements IAdapter {
     /**
      * 数据库连接配置
      *
@@ -22,14 +21,14 @@ abstract class Pdo implements IAdapter {
      */
     protected $dbh;
 
-    public function __construct(array $config) {
+    public function __construct($dsn, $user, $pass, array $options = array()) {
         $explode = explode('\\', get_class($this));
         $extension = 'pdo_'. strtolower( array_pop($explode) );
 
         if (!extension_loaded($extension))
             throw new \RuntimeException('Need '. $extension .' extension!');
 
-        $this->cfg = self::parseConfig($config);
+        $this->cfg = array($dsn, $user, $pass, $options);
     }
 
     public function __call($fn, $args) {
@@ -84,7 +83,7 @@ abstract class Pdo implements IAdapter {
         // 这里允许通过构造时传递的options定义自己的result class
         list($result_class) = $dbh->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
         if ($result_class == 'PDOStatement') {
-            $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Db\Result\Pdo'));
+            $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Db\Result'));
         }
 
         $this->dbh = $dbh;

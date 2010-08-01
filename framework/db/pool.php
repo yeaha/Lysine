@@ -2,6 +2,7 @@
 namespace Lysine\Db;
 
 use Lysine\Db;
+use Lysine\Db\Adapter;
 use ArrayAccess;
 
 /**
@@ -83,12 +84,9 @@ class Pool implements ArrayAccess {
                 throw new \InvalidArgumentException('Adapter ['. $node_name .'] not found');
 
             $config = $this->nodes[$node_name];
-            if (!isset($config['class']))
-                throw new \UnexpectedValueException('Must specify Adapter class name in database config');
-            $class = $config['class'];
-            unset($config['class']);
+            list($dsn, $user, $pass, $options) = Adapter::parseConfig($config);
 
-            $this->adapter[$node_name] = Db::factory($class, $config);
+            $this->adapter[$node_name] = Db::factory($dsn, $user, $pass, $options);
         }
 
         return $this->adapter[$node_name];

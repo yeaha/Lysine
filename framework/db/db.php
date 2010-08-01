@@ -7,10 +7,14 @@ namespace Lysine {
         const TYPE_STRING = 4;
         const TYPE_BINARY = 5;
 
-        static public function factory($class, array $config) {
-            if (substr($class, 0, 1) != '\\')
-                $class = '\Lysine\Db\Adapter\\'. $class;
-            return new $class($config);
+        static public function factory($dsn, $user, $pass, array $options = array()) {
+            if (!preg_match('/^([a-z]+):.+/i', $dsn, $match))
+                throw new \InvalidArgumentException('Invalid dsn');
+
+            $adapter = $match[1];
+
+            $class = __NAMESPACE__ .'\Db\Adapter\\'. ucfirst($adapter);
+            return new $class($dsn, $user, $pass, $options);
         }
     }
 }
@@ -27,11 +31,14 @@ namespace Lysine\Db {
         /**
          * 构造函数
          *
-         * @param array $config
+         * @param string $dsn
+         * @param string $user
+         * @param string $pass
+         * @param array $options
          * @access public
          * @return void
          */
-        public function __construct(array $config);
+        public function __construct($dsn, $user, $pass, array $options = array());
 
         /**
          * 返回实际的数据库连接句柄

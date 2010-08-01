@@ -1,10 +1,10 @@
 <?php
-namespace Lysine\Db\Adapter\Pdo;
+namespace Lysine\Db\Adapter;
 
-use Lysine\Db as Db;
-use Lysine\Db\Adapter\Pdo;
+use Lysine\Db;
+use Lysine\Db\Adapter;
 
-class Pgsql extends Pdo {
+class Pgsql extends Adapter {
     /**
      * 根据表名和字段名生成序列名
      *
