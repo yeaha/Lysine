@@ -24,7 +24,7 @@ class View {
      * @var string
      * @access protected
      */
-    protected $inherit_file;
+    protected $extends_file;
 
     /**
      * 视图数据
@@ -72,7 +72,7 @@ class View {
      * @return void
      */
     public function reset() {
-        $this->inherit_file = null;
+        $this->extends_file = null;
         $this->vars = array();
 
         $this->current_block = null;
@@ -173,12 +173,12 @@ class View {
         $output = ob_get_clean();
 
         // 如果没有继承其它视图，就直接输出结果
-        if (!$this->inherit_file) return $output;
+        if (!$this->extends_file) return $output;
 
-        $inherit_file = $this->findFile($this->inherit_file);
+        $extends_file = $this->findFile($this->extends_file);
 
-        $this->inherit_file = null;
-        return $this->fetch($inherit_file);
+        $this->extends_file = null;
+        return $this->fetch($extends_file);
     }
 
     /**
@@ -204,8 +204,8 @@ class View {
      * @access protected
      * @return void
      */
-    protected function inherit($file) {
-        $this->inherit_file = $file;
+    protected function extends($file) {
+        $this->extends_file = $file;
     }
 
     /**
@@ -251,7 +251,7 @@ class View {
         }
 
         // 如果继承了其它视图，把输出内容放到$this->blocks内
-        if ($this->inherit_file) {
+        if ($this->extends_file) {
             $this->blocks[$block_name] = $output;
         } else {
             unset($this->blocks[$block_name]);
