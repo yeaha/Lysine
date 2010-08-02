@@ -24,7 +24,7 @@ class View {
      * @var string
      * @access protected
      */
-    protected $extends_file;
+    protected $extend_file;
 
     /**
      * 视图数据
@@ -72,7 +72,7 @@ class View {
      * @return void
      */
     public function reset() {
-        $this->extends_file = null;
+        $this->extend_file = null;
         $this->vars = array();
 
         $this->current_block = null;
@@ -173,12 +173,12 @@ class View {
         $output = ob_get_clean();
 
         // 如果没有继承其它视图，就直接输出结果
-        if (!$this->extends_file) return $output;
+        if (!$this->extend_file) return $output;
 
-        $extends_file = $this->findFile($this->extends_file);
+        $extend_file = $this->findFile($this->extend_file);
 
-        $this->extends_file = null;
-        return $this->fetch($extends_file);
+        $this->extend_file = null;
+        return $this->fetch($extend_file);
     }
 
     /**
@@ -204,8 +204,8 @@ class View {
      * @access protected
      * @return void
      */
-    protected function extends($file) {
-        $this->extends_file = $file;
+    protected function extend($file) {
+        $this->extend_file = $file;
     }
 
     /**
@@ -251,11 +251,36 @@ class View {
         }
 
         // 如果继承了其它视图，把输出内容放到$this->blocks内
-        if ($this->extends_file) {
+        if ($this->extend_file) {
             $this->blocks[$block_name] = $output;
         } else {
             unset($this->blocks[$block_name]);
             echo $output;
         }
+    }
+
+    /**
+     * 过滤掉指定的tag
+     * 和strip_tags()相反，strip_tags()可以声明保留哪些tag
+     * 这个只过滤指定的tag
+     *
+     * @param string $str
+     * @param mixed $tags
+     * @param boolean $stripContent
+     * @access protected
+     * @return string
+     */
+    protected function stripTags($str, $tags, $stripContent = false) {
+        $content = '';
+        if(!is_array($tags)) {
+            $tags = (strpos($str, '>') !== false ? explode('>', str_replace('<', '', $tags)) : array($tags));
+            if(end($tags) == '') array_pop($tags);
+        }
+        foreach($tags as $tag) {
+            if ($stripContent)
+                 $content = '(.+</'.$tag.'[^>]*>|)';
+             $str = preg_replace('#</?'.$tag.'[^>]*>'.$content.'#is', '', $str);
+        }
+        return $str;
     }
 }
