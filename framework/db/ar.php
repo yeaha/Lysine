@@ -54,6 +54,11 @@ abstract class ActiveRecord {
             'target_key' => 'author_id',
             'where' => array('is_deleted = ?', 0),
             'order' => 'create_time DESC',
+            'dispatcher' => array(
+                'group' => 'book',
+                'by_column => 'pk',
+                'other' => array(),
+            ),
         ),
         'orders' => array(
             'getter' => 'getOrders',
@@ -218,6 +223,37 @@ abstract class ActiveRecord {
     }
 
     /**
+     * 得到引用数据的adapter
+     *
+     * @param array $referer_config
+     * @access protected
+     * @return IAdapter
+     */
+    protected function getRefererAdapter(array $referer_config) {
+        if (!isset($referer_config['dispatcher'])) return $this->getAdapter();
+        $dconfig = $referer_config['dispatcher'];
+
+        if (!isset($dconfig['group']))
+            throw new \UnexpectedValueException('Please specify referer dispatcher group name');
+        $args = array($dconfig['group']);
+
+        $column = isset($dconfig['by_column'])
+                ? $dconfig['by_column']
+                : static::$primary_key;
+        $args[] = $this->get($column);
+
+        if (isset($dconfig['other'])) {
+            if (is_array($dconfig['other'])) {
+                $args = array_merge($args, $dconfig['other']);
+            } else {
+                $args[] = $dconfig['other'];
+            }
+        }
+
+        return call_user_func_array(array(Pool::instance(), 'dispatch'), $args);
+    }
+
+    /**
      * 得到引用的数据
      *
      * @param string $name
@@ -244,7 +280,8 @@ abstract class ActiveRecord {
             if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
                 throw new \UnexpectedValueException('Referer class must be subclass of Lysine\Db\ActiveRecord');
 
-            $adapter = $this->getAdapter();
+            $adapter = $this->getRefererAdapter($config);
+
             $select = forward_static_call(array($class, 'select'), $adapter);
             if (isset($config['source_key'], $config['target_key'])) {
                 $target_key = $adapter->qcol($config['target_key']);
