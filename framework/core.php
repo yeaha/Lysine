@@ -11,9 +11,9 @@ class Config {
     }
 
     static public function set() {
-        $args = func_get_args();
-        array_unshift(self::$config);
-        return call_user_func_array('array_set', $args);
+        $path = func_get_args();
+        $val = array_pop($path);
+        return array_set(self::$config, $path, $val);
     }
 
     static public function get() {
