@@ -9,9 +9,9 @@ abstract class Adapter implements IAdapter {
      * 数据库连接配置
      *
      * @var mixed
-     * @access protected
+     * @access private
      */
-    protected $cfg;
+    private $cfg;
 
     /**
      * pdo连接对象

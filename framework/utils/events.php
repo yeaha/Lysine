@@ -16,7 +16,7 @@ class Events {
      * @var array
      * @access protected
      */
-    protected $events = array();
+    private $events = array();
 
     /**
      * 获得单一实例
@@ -30,6 +30,12 @@ class Events {
         return self::$instance;
     }
 
+    private function __construct() {
+    }
+
+    private function __clone() {
+    }
+
     /**
      * 生成对象的唯一标示
      *
@@ -37,7 +43,7 @@ class Events {
      * @access protected
      * @return string
      */
-    protected function keyOf($target) {
+    final protected function keyOf($target) {
         return get_class($target) .'#'. spl_object_hash($target);
     }
 
@@ -50,7 +56,7 @@ class Events {
      * @access public
      * @return void
      */
-    public function addEvent($target, $name, $callback) {
+    final public function addEvent($target, $name, $callback) {
         if (!is_callable($callback))
             throw new BadFunctionCallException('Bad event callback');
 
@@ -69,7 +75,7 @@ class Events {
      * @access public
      * @return void
      */
-    public function fireEvent($target, $name, $args = null) {
+    final public function fireEvent($target, $name, $args = null) {
         $key = $this->keyOf($target);
 
         if (isset($this->events[$key][$name])) {
@@ -87,7 +93,7 @@ class Events {
      * @access public
      * @return void
      */
-    public function clearEvent($target, $name = null) {
+    final public function clearEvent($target, $name = null) {
         $key = $this->keyOf($target);
 
         if ($name) {
