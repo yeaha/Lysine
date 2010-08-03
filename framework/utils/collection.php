@@ -339,4 +339,16 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     public function reduce($function, $initial = null) {
         return array_reduce($this->coll, $function, $initial);
     }
+
+    /**
+     * 自定义排序
+     *
+     * @param callable $cmp_function
+     * @access public
+     * @return Lysine\Utils\Coll
+     */
+    public function usort($cmp_function) {
+        usort($this->coll, $cmp_function);
+        return $this;
+    }
 }
