@@ -359,14 +359,19 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      * 返回新的collection
      *
      * @param callable $key_function
+     * @param boolean $replace 是否覆盖相同key的元素
      * @access public
      * @return Lysine\Utils\Coll
      */
-    public function groupBy($key_function) {
+    public function groupBy($key_function, $replace = false) {
         $group = array();
         foreach ($this->coll as $el) {
             $key = call_user_func($key_function, $el);
-            $group[$key][] = $el;
+            if ($replace) {
+                $group[$key] = $el;
+            } else {
+                $group[$key][] = $el;
+            }
         }
 
         return new self($group);
