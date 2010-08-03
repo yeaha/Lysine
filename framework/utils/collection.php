@@ -182,6 +182,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     /**
      * 把每个元素作为参数传递给callback
      * 把所有的返回值以Lysine\Utils\Coll方式返回
+     * 返回新的collection
      *
      * @param callback $callback
      * @param mixed $more
@@ -229,6 +230,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     /**
      * 把数组中的每个元素作为参数传递给callback
      * 找出符合条件的值
+     * 返回新的collection
      *
      * @param callback $callback
      * @access public
@@ -246,6 +248,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     /**
      * 把数组中的每个元素作为参数传递给callback
      * 过滤掉不符合条件的值
+     * 修改当前collection
      *
      * @param callback $callback
      * @access public
@@ -262,6 +265,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     /**
      * 调用每个元素的方法
      * 把每次调用的结果以Lysine\Utils\Coll类型返回
+     * 返回新的collection
      *
      * @param string $fn
      * @param mixed $args
