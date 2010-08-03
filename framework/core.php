@@ -16,8 +16,8 @@ class Config {
         return array_set(self::$config, $path, $val);
     }
 
-    static public function get() {
-        $path = func_get_args();
+    static public function get($path) {
+        $path = is_array($path) ? $path : func_get_args();
         return $path ? array_get(self::$config, $path) : self::$config;
     }
 }
