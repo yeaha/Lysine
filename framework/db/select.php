@@ -11,6 +11,16 @@ use Lysine\Utils\Coll;
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 class Select {
+    /**
+     * get()方法返回的多行数据是否使用Lysine\Utils\Coll类包装
+     * 影响到所有的实例
+     *
+     * @var boolean
+     * @access public
+     * @static
+     */
+    static public $enableCollection = true;
+
     protected $adapter;
 
     protected $from;
@@ -29,14 +39,25 @@ class Select {
     protected $processor;
 
     /**
+     * get()方法返回的多行数据是否使用Lysine\Utils\Coll类包装
+     * 只影响当前实例
+     *
+     * @var boolean
+     * @access protected
+     */
+    protected $return_collection;
+
+    /**
      * 构造函数
      *
      * @param IAdapter $adapter
+     * @param boolean $return_collection
      * @access public
      * @return void
      */
-    public function __construct(IAdapter $adapter) {
+    public function __construct(IAdapter $adapter, $return_collection = true) {
         $this->adapter = $adapter;
+        $this->return_collection = $return_collection;
     }
 
     /**
@@ -315,8 +336,10 @@ class Select {
             $result = $sth->getRow();
             return $processor ? call_user_func($processor, $result) : $result;
         } else {
-            $result = new Coll($sth->getAll($this->key_column));
-            return $processor ? $result->each($processor) : $result;
+            $result = $sth->getAll($this->key_column);
+            if ($processor) $result = array_map($processor, $result);
+            if (self::$enableCollection && $this->return_collection) $result = new Coll($result);
+            return $result;
         }
     }
 
