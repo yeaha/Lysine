@@ -1,7 +1,7 @@
 <?php
 namespace Lysine\Utils;
 
-class Coll {
+class Coll implements \ArrayAccess, \Countable, \Iterator {
     protected $coll;
 
     /**
