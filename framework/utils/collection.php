@@ -351,4 +351,24 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
         usort($this->coll, $cmp_function);
         return $this;
     }
+
+    /**
+     * 自定义分组
+     * 使用自定义callback方法依次掉用每个元素
+     * 根据返回的key把所有元素重新分组
+     * 返回新的collection
+     *
+     * @param callable $key_function
+     * @access public
+     * @return Lysine\Utils\Coll
+     */
+    public function groupBy($key_function) {
+        $group = array();
+        foreach ($this->coll as $el) {
+            $key = call_user_func($key_function, $el);
+            $group[$key][] = $el;
+        }
+
+        return new self($group);
+    }
 }
