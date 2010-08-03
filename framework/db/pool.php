@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Db;
 
+use Lysine\Config;
 use Lysine\Db;
 use Lysine\Db\Adapter;
 use ArrayAccess;
@@ -28,12 +29,11 @@ class Pool implements ArrayAccess {
      * 构造函数
      *
      * @param array $config
-     * @access public
+     * @access private
      * @return void
      */
-    public function __construct(array $config = null) {
-        if (!$config) $config = cfg(self::$configPath);
-        if ($config) $this->addNodes($config);
+    private function __construct() {
+        if ($config = Config::get(self::$configPath)) $this->addNodes($config);
     }
 
     /**

@@ -17,7 +17,7 @@ class Application extends Injection {
         return self::$instance;
     }
 
-    public function __construct() {
+    private function __construct() {
         spl_autoload_register(array($this, 'autoload'));
     }
 
