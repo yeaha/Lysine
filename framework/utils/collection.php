@@ -354,7 +354,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
 
     /**
      * 自定义分组
-     * 使用自定义callback方法依次掉用每个元素
+     * 使用自定义callback方法依次调用每个元素
      * 根据返回的key把所有元素重新分组
      * 返回新的collection
      *
