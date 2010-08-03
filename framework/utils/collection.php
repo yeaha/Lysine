@@ -138,7 +138,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      *
      * @param mixed $element
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function unshift($element) {
         $args = array_reverse(func_get_args());
@@ -161,7 +161,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      *
      * @param mixed $element
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function push($element) {
         $args = func_get_args();
@@ -181,12 +181,12 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
 
     /**
      * 把每个元素作为参数传递给callback
-     * 把所有的返回值以Ly_Coll方式返回
+     * 把所有的返回值以Lysine\Utils\Coll方式返回
      *
      * @param callback $callback
      * @param mixed $more
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function map($callback, $more = null) {
         $args = func_get_args();
@@ -206,13 +206,13 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
 
     /**
      * 把每个元素作为参数传递给callback
-     * 和map不同，map会创建一个新的Ly_Coll
+     * 和map不同，map会创建一个新的Lysine\Utils\Coll
      * each是会修改自身
      *
      * @param callback $callback
      * @param mixed $more
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function each($callback, $more = null) {
         $more = is_array($more) ? $more : array_slice(func_get_args(), 1);
@@ -232,7 +232,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      *
      * @param callback $callback
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function find($callback) {
         $find = array();
@@ -249,7 +249,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      *
      * @param callback $callback
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function filter($callback) {
         foreach ($this->coll as $key => $el) {
@@ -261,12 +261,12 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
 
     /**
      * 调用每个元素的方法
-     * 把每次调用的结果以Ly_Coll类型返回
+     * 把每次调用的结果以Lysine\Utils\Coll类型返回
      *
      * @param string $fn
      * @param mixed $args
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function call($fn, $args = null) {
         if (!is_array($args)) {
@@ -287,7 +287,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      * @param string $fn
      * @param array $args
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function __call($fn, $args) {
         return $this->call($fn, $args);
@@ -300,7 +300,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      * @param integer $length
      * @param boolean $preserve_keys
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function slice($offset, $length = null, $preserve_keys = false) {
         return new self(array_slice($this->coll, $offset, $length, $preserve_keys));
@@ -313,7 +313,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      * @param integer $length
      * @param mixed $replace
      * @access public
-     * @return Ly_Coll
+     * @return Lysine\Utils\Coll
      */
     public function splice($offset, $length = 0, $replace = null) {
         $args = func_get_args();
