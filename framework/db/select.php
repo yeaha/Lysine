@@ -161,6 +161,59 @@ class Select {
     }
 
     /**
+     * 添加一个子查询
+     * 和其它的查询条件是and关系
+     *
+     * @param string $col
+     * @param mixed $relation
+     * @param boolean $in
+     * @access protected
+     * @return self
+     */
+    protected function whereSub($col, $relation, $in) {
+        if ($relation instanceof Select) {
+            list($where, $bind) = $relation->compile();
+        } else {
+            if (!is_array($relation)) $relation = array($relation);
+            $adapter = $this->getAdapter();
+            $where = implode(',', $adapter->qstr($relation));
+            $bind = array();
+        }
+
+        if ($in) {
+            $where = sprintf('%s IN (%s)', $col, $where);
+        } else {
+            $where = sprintf('%s NOT IN (%s)', $col, $where);
+        }
+        $this->where[] = array($where, $bind);
+        return $this;
+    }
+
+    /**
+     * 添加一个WHERE IN子查询
+     *
+     * @param string $col
+     * @param mixed $relation
+     * @access public
+     * @return self
+     */
+    public function whereIn($col, $relation) {
+        return $this->whereSub($col, $relation, true);
+    }
+
+    /**
+     * 添加一个WHERE NOT IN子查询
+     *
+     * @param string $col
+     * @param mixed $relation
+     * @access public
+     * @return self
+     */
+    public function whereNotIn($col, $relation) {
+        return $this->whereSub($col, $relation, false);
+    }
+
+    /**
      * sql GROUP
      *
      * @param string $group_by
