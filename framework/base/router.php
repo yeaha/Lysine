@@ -3,9 +3,17 @@ namespace Lysine;
 
 use Lysine\Utils\Events;
 
+/**
+ * http路由基类
+ *
+ * @abstract
+ * @package MVC
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 abstract class Router_Abstract {
     /**
      * 分发请求
+     * 返回值可以是字符串或者实现了__toString()方法的类实例
      *
      * @param string $url
      * @param array $params
@@ -52,10 +60,39 @@ abstract class Router_Abstract {
     }
 }
 
+/**
+ * Lysine默认路由
+ * webpy风格
+ *
+ * @uses Router_Abstract
+ * @package MVC
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 class Router extends Router_Abstract {
+    /**
+     * Controller类的名字空间
+     *
+     * @var mixed
+     * @access protected
+     */
     protected $base_namespace;
-    protected $map;
 
+    /**
+     * url regex => controller 映射
+     * 使用正则表达式匹配当前请求的url
+     * dispatch到对应的controller
+     *
+     * @var array
+     * @access protected
+     */
+    protected $map = array();
+
+    /**
+     * 构造函数
+     *
+     * @access public
+     * @return void
+     */
     public function __construct() {
         $cfg = cfg('app', 'router');
         $cfg = is_array($cfg) ? $cfg : array();
@@ -67,6 +104,13 @@ class Router extends Router_Abstract {
                               : 'Controller';
     }
 
+    /**
+     * 正则匹配查询
+     *
+     * @param string $url
+     * @access protected
+     * @return array
+     */
     protected function match($url) {
         foreach ($this->map as $re => $class) {
             if (preg_match($re, $url, $match))
@@ -78,6 +122,15 @@ class Router extends Router_Abstract {
         return array($this->base_namespace .'\\'. $class, array());
     }
 
+    /**
+     * 分发请求到对应的controller
+     * 执行并返回结果
+     *
+     * @param string $url
+     * @param array $params
+     * @access public
+     * @return mixed
+     */
     public function dispatch($url, array $params = array()) {
         list($class, $args) = $this->match($url);
 
