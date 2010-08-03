@@ -12,7 +12,7 @@ function req() {
     static $instance;
     if (!$instance) {
         $class = cfg('app', 'request_class');
-        $instance = $class ? new $class() : new \Lysine\Request();
+        $instance = $class ? new $class() : \Lysine\Request::instance();
     }
     return $instance;
 }

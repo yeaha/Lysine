@@ -4,11 +4,20 @@ namespace Lysine;
 use Lysine\Utils\Injection;
 
 class Request extends Injection {
-    static public $instance;
+    static private $instance;
 
     protected $method;
 
     protected $_requestUri;
+
+    /* 需要php 5.3.3+才不会出现重复声明构造函数的错误
+    private function __construct() {}
+    */
+
+    static public function instance() {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
+    }
 
     public function __get($key) {
         return $this->request($key);
