@@ -228,7 +228,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     /**
      * 把每个元素作为参数传递给callback
      * 和map不同，map会创建一个新的Lysine\Utils\Coll
-     * each是会修改自身
+     * each会修改自身
      *
      * @param callback $callback
      * @param mixed $more
@@ -307,6 +307,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
 
     /**
      * 魔法方法
+     * 依次调用每个元素的方法
      *
      * @param string $fn
      * @param array $args
@@ -315,6 +316,20 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      */
     public function __call($fn, $args) {
         return $this->call($fn, $args);
+    }
+
+    /**
+     * 魔法方法
+     * 依次获取每个元素的属性
+     *
+     * @param string $k
+     * @access public
+     * @return Lysine\Utils\Coll
+     */
+    public function __get($k) {
+        $result = array();
+        foreach ($this->coll as $key => $el) $result[$key] = $el->$k;
+        return new self($result);
     }
 
     /**
