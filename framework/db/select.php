@@ -21,23 +21,109 @@ class Select {
      */
     static public $enableCollection = true;
 
+    /**
+     * 数据库连接
+     *
+     * @var IAdapter
+     * @access protected
+     */
     protected $adapter;
 
+    /**
+     * sql FROM
+     *
+     * @var string
+     * @access protected
+     */
     protected $from;
+
+    /**
+     * 结果字段
+     *
+     * @var array
+     * @access protected
+     */
     protected $cols = array();
+
+    /**
+     * where 条件表达式
+     *
+     * @var array
+     * @access protected
+     */
     protected $where = array();
+
+    /**
+     * sql GROUP
+     *
+     * @var string
+     * @access protected
+     */
     protected $group;
+
+    /**
+     * sql HAVING
+     *
+     * @var string
+     * @access protected
+     */
     protected $having;
+
+    /**
+     * sql ORDER BY
+     *
+     * @var string
+     * @access protected
+     */
     protected $order;
+
+    /**
+     * sql LIMIT
+     *
+     * @var integer
+     * @access protected
+     */
     protected $limit;
+
+    /**
+     * sql OFFSET
+     *
+     * @var integer
+     * @access protected
+     */
     protected $offset;
 
+    /**
+     * sql UNION
+     *
+     * @var mixed
+     * @access protected
+     */
     protected $union;
 
+    /**
+     * 返回数组中作为key的字段
+     *
+     * @var string
+     * @access protected
+     */
     protected $key_column;
 
+    /**
+     * 返回值处理器
+     * get()方法返回的每条数据都会传递给处理器处理一次
+     *
+     * @var callback
+     * @access protected
+     */
     protected $processor;
 
+    /**
+     * where表达式之间的逻辑关系 AND或OR
+     *
+     * @var string
+     * @access protected
+     */
     protected $where_relation = 'AND';
 
     /**
@@ -65,8 +151,12 @@ class Select {
     /**
      * 直接调用查询结果对象
      *
+     * <code>
      * 获得结果的第2行
-     * $select->getCols(1)
+     * $select->getCols(1);
+     * 等于
+     * $select->execute()->getCols(1);
+     * </code>
      *
      * @param string $fn
      * @param mixed $args
@@ -84,7 +174,7 @@ class Select {
      *
      * @param string $table
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function from($table) {
         $this->from = $table;
@@ -106,7 +196,7 @@ class Select {
      *
      * @param mixed $cols
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function setCols($cols = null) {
         $this->cols = is_array($cols) ? $cols : func_get_args();
@@ -118,7 +208,7 @@ class Select {
      *
      * @param mixed $col
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function addCol($col = null) {
         $cols = $this->cols;
@@ -135,7 +225,7 @@ class Select {
      *
      * @param string $column_name
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function setKeyColumn($column_name) {
         $this->key_column = $column_name;
@@ -154,7 +244,7 @@ class Select {
      * @param string $where
      * @param mixed $bind
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function where($where, $bind = null) {
         $args = func_get_args();
@@ -170,7 +260,7 @@ class Select {
      * @param mixed $relation
      * @param boolean $in
      * @access protected
-     * @return self
+     * @return Lysine\Db\Select
      */
     protected function whereSub($col, $relation, $in) {
         if ($relation instanceof Select) {
@@ -194,10 +284,18 @@ class Select {
     /**
      * 添加一个WHERE IN子查询
      *
+     * <code>
+     * // select * from user where id in (1, 2, 3)
+     * $user_select->whereIn('id', array(1, 2, 3));
+     *
+     * // select * from other where user_id in (select id from user where id in (1, 2, 3))
+     * $other_select->whereIn('user_id', $user_select->setCols('id'));
+     * </code>
+     *
      * @param string $col
      * @param mixed $relation
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function whereIn($col, $relation) {
         return $this->whereSub($col, $relation, true);
@@ -209,17 +307,24 @@ class Select {
      * @param string $col
      * @param mixed $relation
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function whereNotIn($col, $relation) {
         return $this->whereSub($col, $relation, false);
     }
 
+    /**
+     * 设置where表达式之间的逻辑关系
+     *
+     * @param string $relation
+     * @access public
+     * @return Lysine\Db\Select
+     */
     public function setWhereRelation($relation) {
         $relation = strtoupper($relation);
 
         if ($relation != 'AND' AND $relation != 'OR')
-            throw new \UnexpectedValueException();
+            throw new \UnexpectedValueException('relation of where condition must be AND or OR');
         $this->where_relation = $relation;
         return $this;
     }
@@ -229,7 +334,7 @@ class Select {
      *
      * @param string $group_by
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function group($group_by) {
         $this->group = $group_by;
@@ -241,7 +346,7 @@ class Select {
      *
      * @param string $having
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function having($having) {
         $this->having = $having;
@@ -253,7 +358,7 @@ class Select {
      *
      * @param string $order_by
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function order($order_by) {
         $this->order = $order_by;
@@ -265,7 +370,7 @@ class Select {
      *
      * @param integer $limit
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function limit($limit) {
         $this->limit = abs((int)$limit);
@@ -277,7 +382,7 @@ class Select {
      *
      * @param integer $offset
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function offset($offset) {
         $this->offset = abs((int)$offset);
@@ -287,10 +392,21 @@ class Select {
     /**
      * sql UNION
      *
+     * <code>
+     * // select * from table1 where id = 1
+     * $select1 = $adapter->select('table1')->where('id = ?', 1);
+     * $select2 = $adapter->select('table1')->where('id = ?', 2);
+     *
+     * // select * from table1 where id = 1
+     * // union all
+     * // select * from table1 where id = 2
+     * $select1->union($select2);
+     * </code>
+     *
      * @param mixed $relation
      * @param boolean $all
      * @access public
-     * @return self
+     * @return Lysine\Db\Select
      */
     public function union($relation, $all = true) {
         $this->union = array($relation, $all);
