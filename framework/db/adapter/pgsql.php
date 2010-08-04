@@ -3,6 +3,7 @@ namespace Lysine\Db\Adapter;
 
 use Lysine\Db;
 use Lysine\Db\Adapter;
+use Lysine\Db\Expr;
 
 class Pgsql extends Adapter {
     /**
@@ -185,7 +186,7 @@ class Pgsql extends Adapter {
             return $col_name;
         }
 
-        if ($col_name instanceof Ly_Db_Expr) return $col_name->__toString();
+        if ($col_name instanceof Expr) return $col_name->__toString();
         if (substr($col_name, 0, 1) == '"') return $col_name;
         if (strpos($col_name, '.') === false) return '"'. $col_name .'"';
 
