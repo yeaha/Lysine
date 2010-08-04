@@ -38,6 +38,8 @@ class Select {
 
     protected $processor;
 
+    protected $where_relation = 'AND';
+
     /**
      * get()方法返回的多行数据是否使用Lysine\Utils\Coll类包装
      * 只影响当前实例
@@ -213,6 +215,15 @@ class Select {
         return $this->whereSub($col, $relation, false);
     }
 
+    public function setWhereRelation($relation) {
+        $relation = strtoupper($relation);
+
+        if ($relation != 'AND' AND $relation != 'OR')
+            throw new \UnexpectedValueException();
+        $this->where_relation = $relation;
+        return $this;
+    }
+
     /**
      * sql GROUP
      *
@@ -300,7 +311,7 @@ class Select {
             $bind = array_merge($bind, $where_bind);
         }
 
-        $where = $where ? '('. implode(') AND (', $where) .')' : '';
+        $where = $where ? '('. implode(') '. $this->where_relation .' (', $where) .')' : '';
 
         return array($where, $bind);
     }
