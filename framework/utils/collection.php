@@ -124,6 +124,26 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
     }
 
     /**
+     * 获得第一个元素
+     *
+     * @access public
+     * @return mixed
+     */
+    public function first() {
+        return reset($this->coll);
+    }
+
+    /**
+     * 获得最后一个元素
+     *
+     * @access public
+     * @return mixed
+     */
+    public function last() {
+        return end($this->coll);
+    }
+
+    /**
      * 返回并删除第一个元素
      *
      * @access public
