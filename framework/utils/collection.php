@@ -161,8 +161,8 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      * @return Lysine\Utils\Coll
      */
     public function unshift($element) {
-        $args = array_reverse(func_get_args());
-        foreach ($args as $arg) array_unshift($this->coll, $arg);
+        $args = func_get_args();
+        array_splice($this->coll, 0, 0, $args);
         return $this;
     }
 
@@ -185,7 +185,7 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      */
     public function push($element) {
         $args = func_get_args();
-        foreach ($args as $arg) array_push($this->coll, $arg);
+        array_splice($this->coll, count($this->coll), 0, $args);
         return $this;
     }
 
