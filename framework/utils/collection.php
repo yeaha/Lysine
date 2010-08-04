@@ -1,69 +1,35 @@
 <?php
 namespace Lysine\Utils;
 
-class Coll implements \ArrayAccess, \Countable, \Iterator {
+class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
+    /**
+     * collection元素数组
+     *
+     * @var mixed
+     * @access array
+     */
     protected $coll;
 
     /**
-     * Interator接口
+     * 构造函数
      *
-     * @var mixed
-     * @access protected
+     * @param array $elements
+     * @access public
+     * @return void
      */
-    protected $has_next = false;
-
     public function __construct(array $elements = array()) {
         $this->coll = $elements;
     }
 
     /**
-     * Iterator接口
+     * IteratorAggregate接口
+     * 返回迭代子
      *
      * @access public
-     * @return miexed
+     * @return ArrayIterator
      */
-    public function current() {
-        return current($this->coll);
-    }
-
-    /**
-     * Iterator接口
-     *
-     * @access public
-     * @return mixed
-     */
-    public function key() {
-        return key($this->coll);
-    }
-
-    /**
-     * Iterator接口
-     *
-     * @access public
-     * @return void
-     */
-    public function next() {
-        $this->has_next = (next($this->coll) !== false);
-    }
-
-    /**
-     * Iterator接口
-     *
-     * @access public
-     * @return void
-     */
-    public function rewind() {
-        $this->has_next = (reset($this->coll) !== false);
-    }
-
-    /**
-     * Iterator接口
-     *
-     * @access public
-     * @return void
-     */
-    public function valid() {
-        return $this->has_next;
+    public function getIterator() {
+        return new \ArrayIterator($this->coll);
     }
 
     /**
