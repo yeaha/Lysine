@@ -6,6 +6,7 @@ return array(
     'Lysine\Db' => './db/db.php',
     'Lysine\Db\ActiveRecord' => './db/ar.php',
     'Lysine\Db\Adapter' => './db/adapter/adapter.php',
+    'Lysine\Db\Adapter\Mysql' => './db/adapter/mysql.php',
     'Lysine\Db\Adapter\Pgsql' => './db/adapter/pgsql.php',
     'Lysine\Db\Exception' => './db/db.php',
     'Lysine\Db\Expr' => './db/expr.php',
