@@ -191,32 +191,33 @@ abstract class Adapter implements IAdapter {
     }
 
     /**
-     * 插入一条记录
+     * 插入记录
      *
      * @param string $table_name
-     * @param array $row
+     * @param array $rowset
+     * @param boolean $batch true = 插入多条记录
      * @access public
      * @return integer
      */
-    public function insert($table_name, array $row) {
+    public function insert($table_name, array $rowset, $batch = false) {
+        if (!$rowset) return 0;
+
         $this->connect();
 
-        $cols = array_keys($row);
-        $vals = array_values($row);
+        if (!$batch) $rowset = array($rowset);
 
-        $place = array();
-        foreach ($cols as $col) {
-            $place[] = ':'. $col;
-        }
-
+        $row = reset($rowset);
+        $columns = array_keys($row);
         $sql = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
-            $this->qtab($table_name),
-            implode(',', $this->qcol($cols)),
-            implode(',', $place)
+            $this->qtable($table_name),
+            implode(',', $this->qcol($colunms)),
+            implode(',', array_fill(0, count($columns), '?'))
         );
 
-        return $this->execute($sql, $vals);
+        $sth = $this->dbh->prepare($sql);
+        foreach ($rowset as $row) $sth->execute(array_values($row));
+        return $sth->rowCount();
     }
 
     /**
