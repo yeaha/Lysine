@@ -6,6 +6,77 @@ use Lysine\Db\Adapter;
 
 class Pgsql extends Adapter {
     /**
+     * savepoint序号
+     *
+     * @var integer
+     * @access private
+     */
+    private $savepoint = 0;
+
+    /**
+     * 是否处于事务中
+     *
+     * @var boolean
+     * @access private
+     */
+    private $in_transaction = false;
+
+    /**
+     * 开始事务
+     *
+     * @access public
+     * @return boolean
+     */
+    public function begin() {
+        if ($this->in_transaction) {
+            $savepoint = 'savepoint_'. ++$this->savepoint;
+            $this->execute('SAVEPOINT '. $savepoint);
+        } else {
+            $this->execute('BEGIN');
+            $this->in_transaction = true;
+        }
+        return true;
+    }
+
+    /**
+     * 回滚事务
+     *
+     * @access public
+     * @return boolean
+     */
+    public function rollback() {
+        if (!$this->in_transaction) return false;
+
+        if ($this->savepoint) {
+            $savepoint = 'savepoint_'. $this->savepoint--;
+            $this->execute('ROLLBACK TO SAVEPOINT '. $savepoint);
+        } else {
+            $this->execute('ROLLBACK');
+            $this->in_transaction = false;
+        }
+        return true;
+    }
+
+    /**
+     * 提交事务
+     *
+     * @access public
+     * @return boolean
+     */
+    public function commit() {
+        if (!$this->in_transaction) return false;
+
+        if ($this->savepoint) {
+            $savepoint = 'savepoint_'. $this->savepoint--;
+            $this->execute('RELEASE SAVEPOINT '. $savepoint);
+        } else {
+            $this->execute('COMMIT');
+            $this->in_transaction = false;
+        }
+        return true;
+    }
+
+    /**
      * 根据表名和字段名生成序列名
      *
      * @param string $table_name

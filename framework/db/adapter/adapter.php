@@ -119,31 +119,31 @@ abstract class Adapter implements IAdapter {
      * 开始事务
      *
      * @access public
-     * @return void
+     * @return boolean
      */
     public function begin() {
         $this->connect();
-        $this->dbh->beginTransaction();
+        return $this->dbh->beginTransaction();
     }
 
     /**
      * 回滚事务
      *
      * @access public
-     * @return void
+     * @return boolean
      */
     public function rollback() {
-        $this->dbh->rollBack();
+        return $this->dbh->rollBack();
     }
 
     /**
      * 提交事务
      *
      * @access public
-     * @return void
+     * @return boolean
      */
     public function commit() {
-        $this->dbh->commit();
+        return $this->dbh->commit();
     }
 
     /**
