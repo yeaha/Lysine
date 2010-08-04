@@ -365,12 +365,12 @@ class Coll implements \ArrayAccess, \Countable, \Iterator {
      */
     public function groupBy($key_function, $replace = false) {
         $group = array();
-        foreach ($this->coll as $el) {
+        foreach ($this->coll as $idx => $el) {
             $key = call_user_func($key_function, $el);
             if ($replace) {
                 $group[$key] = $el;
             } else {
-                $group[$key][] = $el;
+                $group[$key][$idx] = $el;
             }
         }
 
