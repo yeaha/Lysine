@@ -59,19 +59,6 @@ class Pool implements ArrayAccess {
     }
 
     /**
-     * 调用数据库连接
-     *
-     * @param string $fn
-     * @param array $args
-     * @access public
-     * @return mixed
-     */
-    public function __call($fn, $args) {
-        $adapter = $this->getAdapter();
-        return call_user_func_array(array($adapter, $fn), $args);
-    }
-
-    /**
      * 获得数据库连接
      *
      * @param mixed $node_name
