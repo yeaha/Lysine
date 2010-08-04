@@ -264,6 +264,7 @@ class Select {
      */
     protected function whereSub($col, $relation, $in) {
         if ($relation instanceof Select) {
+            $relation->order(false); // 子查询不需要order
             list($where, $bind) = $relation->compile();
         } else {
             if (!is_array($relation)) $relation = array($relation);
