@@ -29,14 +29,6 @@ class Application extends Injection {
     protected $router;
 
     /**
-     * 类 => 文件 映射关系
-     *
-     * @var array
-     * @access protected
-     */
-    protected $class_map = array();
-
-    /**
      * 文件搜索路径
      *
      * @var array
@@ -81,7 +73,7 @@ class Application extends Injection {
      * @access public
      * @return Lysine\Application
      */
-    public function setRouter(Router_Abstract $router = null) {
+    public function setRouter(Router_Abstract $router) {
         $this->router = $router;
         return $this;
     }
@@ -90,23 +82,11 @@ class Application extends Injection {
      * 获得当前使用的路由类
      *
      * @access public
-     * @return Lysine\Application
+     * @return Lysine\Router_Abstract
      */
     public function getRouter() {
         if (!$this->router) $this->router = new Router();
         return $this->router;
-    }
-
-    /**
-     * 包含类 => 文件 映射关系
-     *
-     * @param array $map
-     * @access public
-     * @return Lysine\Application
-     */
-    public function includeClassMap(array $map) {
-        $this->class_map = array_merge($this->class_map, $map);
-        return $this;
     }
 
     /**
@@ -139,6 +119,9 @@ class Application extends Injection {
      * @return Lysine\Application
      */
     public function setAutoloader($loader, $throw = true, $prepend = false) {
+        if (!is_callable($loader))
+            throw new \InvalidArgumentException('Invalid auto loader');
+
         spl_autoload_unregister(array($this, 'autoload'));
         spl_autoload_register($loader, $throw, $prepend);
         return $this;
@@ -147,23 +130,19 @@ class Application extends Injection {
     /**
      * 默认的autoloader
      *
+     * \Controller\User => controller/user.php
+     * \Controller\User\Login => controller/user/login.php
+     * \Controller\User_Login => controller/user.php
+     *
      * @param string $class
      * @access protected
      * @return boolean
      */
     protected function autoload($class) {
-        // 从class_map数组中查询
-        $class_map = $this->class_map;
-        if (array_key_exists($class, $class_map)) {
-            $file = $class_map[$class];
-
-            if (is_readable($file)) include $file;
-            if (class_exists($class, false) OR interface_exists($class, false)) return true;
-        }
-
         $pos = strpos($class, '_', strrpos($class, '\\'));
         $find = ($pos === false) ? $class : substr($class, 0, $pos);
         $find = str_replace('\\', '/', strtolower($find)) .'.php';
+
         foreach ($this->include_path as $path) {
             $file = $path .'/'. $find;
             if (!is_readable($file)) continue;
