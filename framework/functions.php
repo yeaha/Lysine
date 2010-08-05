@@ -51,6 +51,10 @@ function db($node_name = null) {
     return \Lysine\Db\Pool::instance()->getAdapter($node_name);
 }
 
+function dbexpr($expr) {
+    return new \Lysine\Db\Expr($expr);
+}
+
 function url() {
     static $router_class;
     if (!$router_class) $router_class = get_class(app()->getRouter());
