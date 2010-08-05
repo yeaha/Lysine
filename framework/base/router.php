@@ -105,6 +105,16 @@ class Router extends Router_Abstract {
     }
 
     /**
+     * 返回controller所在的namespace名字
+     *
+     * @access public
+     * @return string
+     */
+    public function getNamespace() {
+        return $this->namespace;
+    }
+
+    /**
      * 设定url regex => controller映射关系
      *
      * @param array $map
