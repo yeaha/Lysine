@@ -75,7 +75,7 @@ class Router extends Router_Abstract {
      * @var mixed
      * @access protected
      */
-    protected $base_namespace;
+    protected $namespace;
 
     /**
      * url regex => controller 映射
@@ -99,8 +99,8 @@ class Router extends Router_Abstract {
 
         $this->dispatch_map = isset($cfg['map']) ? $cfg['map'] : array();
 
-        $this->base_namespace = isset($cfg['base_namespace'])
-                              ? $cfg['base_namespace']
+        $this->namespace = isset($cfg['namespace'])
+                              ? $cfg['namespace']
                               : 'Controller';
     }
 
@@ -117,7 +117,7 @@ class Router extends Router_Abstract {
     }
 
     /**
-     * 正则匹配查询
+     * 解析url，返回对应的controller
      *
      * @param string $url
      * @access protected
@@ -129,9 +129,11 @@ class Router extends Router_Abstract {
                 return array($class, array_slice($match, 1));
         }
 
+        // url: /user/login
+        // controller: \Controller\User\Login
         $class = str_replace('/', '\\', trim($url, '/'));
         if (!$class) $class = 'index';
-        return array($this->base_namespace .'\\'. $class, array());
+        return array($this->namespace .'\\'. $class, array());
     }
 
     /**
