@@ -266,7 +266,7 @@ abstract class ActiveRecord {
 
         $referer = static::$referer;
         if (!isset($referer[$name]))
-            throw new \InvalidArgumentException('Invalid referer name['. $name .']');
+            throw new \InvalidArgumentException('Undefined referer name['. $name .']');
 
         $config = $referer[$name];
         if (isset($config['getter'])) {
