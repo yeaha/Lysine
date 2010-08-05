@@ -146,52 +146,46 @@ class Router extends Router_Abstract {
      * @return mixed
      */
     public function dispatch($url, array $params = array()) {
-        list($class, $args) = $this->match($url);
+        list($classname, $args) = $this->match($url);
 
-        if (!class_exists($class))
+        if (!class_exists($classname))
             throw new Request_Exception('Page Not Found', 404);
 
-        Events::instance()->fireEvent($this, 'before dispatch', $class, $args);
-
         if ($params) $args = array_merge($args, $params);
+        Events::instance()->fireEvent($this, 'before dispatch', $classname, $args);
 
-        $req = req();
-        $method = $req->method();
+        // 反射对象，检查controller类
+        $class = new \ReflectionClass($classname);
+        $controller = new $classname();
 
-        $fn = $method;
-        if ($req->isAJAX()) {
-            if (method_exists($class, 'ajax_'. $method)) {
-                $fn = 'ajax_'. $method;
-            } elseif (method_exists($class, 'ajax')) {
-                $fn = 'ajax';
+        $method = req()->method();
+        if (req()->isAJAX()) {
+            if ($class->hasMethod('ajax_'. $method)) {
+                $method = 'ajax_'. $method;
+            } elseif ($class->hasMethod('ajax')) {
+                $method = 'ajax';
             }
         }
 
-        $handle = new $class();
-        $handle->app = app();
-        $handle->req = $req;
-
-        if (method_exists($handle, 'preRun')) {
-            // 如果preRun返回了内容，就直接完成动作
+        if ($class->hasMethod('beforeRun')) {
+            // 如果beforeRun返回了内容，就直接完成动作
             // 可以在这里进行某些阻断操作
             // 正常的内容不应该通过这里输出
-            $resp = call_user_func_array(array($handle, 'preRun'), $args);
+            $resp = call_user_func_array(array($controller, 'beforeRun'), $args);
             if ($resp) return $resp;
         }
 
-        // 不使用method_exists()检查，用is_callable()
+        // 执行controller动作并返回结果
+        // 不检查method是否存在，用is_callable()
         // 保留__call()重载方法的方式
-        if (!is_callable(array($handle, $fn)))
+        if (!is_callable(array($controller, $method)))
             throw new Request_Exception('Not Acceptable', 406);
-        $resp = call_user_func_array(array($handle, $fn), $args);
+        $resp = call_user_func_array(array($controller, $method), $args);
 
         // 这里有机会对输出结果进行进一步处理
-        if (method_exists($handle, 'postRun')) {
-            $result = call_user_func(array($handle, 'postRun'), $resp);
-            if ($result) $resp = $result;
-        }
+        if ($class->hasMethod('afterRun')) $controller->afterRun($resp);
 
-        Events::instance()->fireEvent($this, 'after dispatch', $class, $args, $resp);
+        Events::instance()->fireEvent($this, 'after dispatch', $classname, $args, $resp);
 
         return $resp;
     }
