@@ -194,6 +194,16 @@ class Select {
     /**
      * 指定结果字段
      *
+     * <code>
+     * // SELECT user, passwd
+     * $select->setCols('user', 'passwd');
+     * $select->setCols(array('user', 'passwd'));
+     *
+     * // SELECT user as u, passwd as p
+     * $select->setCols(dbexpr('user as u'), dbexpr('passwd as p'));
+     * $select->setCols( array(dbexpr('user as u'), dbexpr('passwd as p')) );
+     * </code>
+     *
      * @param mixed $cols
      * @access public
      * @return Lysine\Db\Select
@@ -205,6 +215,7 @@ class Select {
 
     /**
      * 增加结果字段
+     * 参数格式见setCols()
      *
      * @param mixed $col
      * @access public
@@ -234,12 +245,18 @@ class Select {
 
     /**
      * 增加一个查询条件
-     * 所有通过这里添加的条件都是AND关系
      *
-     * 如果需要OR关系，可以这样写
-     * $select->where('expr1 or expr2')
-     * $select->where('expr3 or expr4')
-     * 结果等于(expor1 or expr2) and (expr3 or expr4)
+     * <code>
+     * // WHERE user = 'dev' AND 'passwd' = 'abc'
+     * $select->where('user = ?', 'dev')->where('passwd = ?', 'abc');
+     * // WHERE user = 'dev' OR 'passwd' = 'abc'
+     * $select->setWhereRelation('or')->where('user = ?', 'dev')->where('passwd = ?', 'abc');
+     *
+     * $select->where('user = ? and passwd = ?', 'dev', 'abc');
+     * $select->where('user = :user and passwd = :passwd', 'dev', 'abc');
+     * // WHERE date_trunc('day', 'create_time') = '2010-08-05'
+     * $select->where("date_trunc('day', 'create_time') = ?", '2010-08-05');
+     * </code>
      *
      * @param string $where
      * @param mixed $bind
@@ -254,7 +271,6 @@ class Select {
 
     /**
      * 添加一个子查询
-     * 和其它的查询条件是and关系
      *
      * @param string $col
      * @param mixed $relation
@@ -355,6 +371,12 @@ class Select {
 
     /**
      * sql ORDER
+     *
+     * <code>
+     * $select->order('create_time');
+     * $select->order('create_time DESC');
+     * $select->order('random()');
+     * </code>
      *
      * @param string $order_by
      * @access public
