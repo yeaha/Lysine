@@ -186,7 +186,7 @@ abstract class Adapter implements IAdapter {
      * @param string $sql
      * @param mixed $bind
      * @access public
-     * @return mixed
+     * @return Lysine\Db\IResult
      */
     public function execute($sql, $bind = null) {
         $this->connect();
@@ -200,8 +200,8 @@ abstract class Adapter implements IAdapter {
                 $sth = $this->dbh->query($sql);
             }
         } catch (\PDOException $ex) {
-            throw new Db\Exception(
-                $ex->getMesssage(),
+            throw new Exception(
+                $ex->getMessage(),
                 $ex->getCode(),
                 $ex,
                 $ex->errorInfo[0]
