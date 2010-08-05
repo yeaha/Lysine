@@ -22,6 +22,16 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct() {
+        $this->coll = null;
+    }
+
+    /**
      * IteratorAggregate接口
      * 返回迭代子
      *
@@ -153,6 +163,24 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
         $args = func_get_args();
         array_splice($this->coll, count($this->coll), 0, $args);
         return $this;
+    }
+
+    /**
+     * array_merge
+     * 返回新的collection
+     *
+     * @param mixed $others
+     * @access public
+     * @return Lysine\Utils\Coll
+     */
+    public function merge($others) {
+        $args = func_get_args();
+        foreach ($args as $k => $arg)
+            if ($arg instanceof Coll) $args[$k] = $arg->toArray();
+
+        array_unshift($args, $this->coll);
+        $result = call_user_func_array('array_merge', $args);
+        return new self($result);
     }
 
     /**
