@@ -70,7 +70,7 @@ class Pool implements ArrayAccess {
 
         if (!isset($this->adapter[$node_name])) {
             if (!isset($this->config[$node_name]))
-                throw new \InvalidArgumentException('Adapter ['. $node_name .'] not found');
+                throw new \InvalidArgumentException('Undefined Adapter ['. $node_name .']');
 
             $config = $this->config[$node_name];
             list($dsn, $user, $pass, $options) = Adapter::parseConfig($config);
@@ -148,7 +148,7 @@ class Pool implements ArrayAccess {
      */
     public function dispatch($group, $token) {
         if (!isset($this->dispatcher[$group]))
-            throw new \InvalidArgumentException('Group ['. $group .'] not found');
+            throw new \InvalidArgumentException('Undefined adapter dispatcher ['. $group .']');
 
         $fn = $this->dispatcher[$group];
         $args = array_slice(func_get_args(), 1);
