@@ -133,7 +133,7 @@ class View {
      * @return string
      */
     protected function findFile($file) {
-        if (!$file) throw new InvalidArgumentException('Invalid view file');
+        if (!$file) throw new \InvalidArgumentException('Invalid view file');
 
         // 没有以/开头的是相对路径，转换为view dir下的文件
         if (substr($file, 0, 1) != '/')

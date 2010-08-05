@@ -384,7 +384,7 @@ abstract class Adapter implements IAdapter {
         $place = $match[0];
 
         if (count($place) != count($bind))
-            throw new \InvalidArgumentException('Missing sql statement parameter');
+            throw new \UnexpectedValueException('Missing sql statement parameter');
 
         return array($sql, array_combine($place, $bind));
     }
