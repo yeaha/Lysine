@@ -31,9 +31,9 @@ class Pgsql extends Adapter {
     public function begin() {
         if ($this->in_transaction) {
             $savepoint = 'savepoint_'. ++$this->savepoint;
-            $this->execute('SAVEPOINT '. $savepoint);
+            $this->exec('SAVEPOINT '. $savepoint);
         } else {
-            $this->execute('BEGIN');
+            $this->exec('BEGIN');
             $this->in_transaction = true;
         }
         return true;
@@ -50,9 +50,9 @@ class Pgsql extends Adapter {
 
         if ($this->savepoint) {
             $savepoint = 'savepoint_'. $this->savepoint--;
-            $this->execute('ROLLBACK TO SAVEPOINT '. $savepoint);
+            $this->exec('ROLLBACK TO SAVEPOINT '. $savepoint);
         } else {
-            $this->execute('ROLLBACK');
+            $this->exec('ROLLBACK');
             $this->in_transaction = false;
         }
         return true;
@@ -69,9 +69,9 @@ class Pgsql extends Adapter {
 
         if ($this->savepoint) {
             $savepoint = 'savepoint_'. $this->savepoint--;
-            $this->execute('RELEASE SAVEPOINT '. $savepoint);
+            $this->exec('RELEASE SAVEPOINT '. $savepoint);
         } else {
-            $this->execute('COMMIT');
+            $this->exec('COMMIT');
             $this->in_transaction = false;
         }
         return true;

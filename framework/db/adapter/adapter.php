@@ -4,6 +4,15 @@ namespace Lysine\Db;
 use Lysine\Db\IAdapter;
 use Lysine\Db\Select;
 
+/**
+ * PDO数据库连接
+ * 对pdo连接对象加了一些装饰方法
+ *
+ * @uses IAdapter
+ * @abstract
+ * @package DB
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 abstract class Adapter implements IAdapter {
     /**
      * 数据库连接配置
@@ -21,6 +30,16 @@ abstract class Adapter implements IAdapter {
      */
     protected $dbh;
 
+    /**
+     * 构造函数
+     *
+     * @param string $dsn
+     * @param string $user
+     * @param string $pass
+     * @param array $options
+     * @access public
+     * @return void
+     */
     public function __construct($dsn, $user, $pass, array $options = array()) {
         $explode = explode('\\', get_class($this));
         $extension = 'pdo_'. strtolower( array_pop($explode) );
@@ -31,6 +50,15 @@ abstract class Adapter implements IAdapter {
         $this->cfg = array($dsn, $user, $pass, $options);
     }
 
+    /**
+     * 魔法方法
+     * 直接调用PDO连接对象
+     *
+     * @param string $fn
+     * @param array $args
+     * @access public
+     * @return mixed
+     */
     public function __call($fn, $args) {
         $this->connect();
 
@@ -52,6 +80,16 @@ abstract class Adapter implements IAdapter {
     public function __invoke() {
         $args = func_get_args();
         return call_user_func_array(array($this, 'execute'), $args);
+    }
+
+    /**
+     * 魔法方法
+     *
+     * @access public
+     * @return void
+     */
+    public function __sleep() {
+        $this->disconnect();
     }
 
     /**
@@ -98,10 +136,6 @@ abstract class Adapter implements IAdapter {
      */
     protected function disconnect() {
         $this->dbh = null;
-    }
-
-    public function __sleep() {
-        $this->disconnect();
     }
 
     /**
@@ -159,8 +193,12 @@ abstract class Adapter implements IAdapter {
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
         try {
-            $sth = $this->dbh->prepare($sql);
-            $sth->execute($bind);
+            if ($bind) {
+                $sth = $this->dbh->prepare($sql);
+                $sth->execute($bind);
+            } else {
+                $sth = $this->dbh->query($sql);
+            }
         } catch (\PDOException $ex) {
             throw new Db\Exception(
                 $ex->getMesssage(),
@@ -170,12 +208,8 @@ abstract class Adapter implements IAdapter {
             );
         }
 
-        if (strtolower(substr($sql, 0, 6)) == 'select') {
-            $sth->setFetchMode(\PDO::FETCH_ASSOC);
-            return $sth;
-        }
-
-        return $sth->rowCount();
+        $sth->setFetchMode(\PDO::FETCH_ASSOC);
+        return $sth;
     }
 
     /**
@@ -270,7 +304,7 @@ abstract class Adapter implements IAdapter {
         $sql = sprintf('UPDATE %s SET %s', $this->qtab($table_name), implode(',', $set));
         if ($where) $sql .= ' WHERE '. $where;
 
-        return $this->execute($sql, $bind);
+        return $this->execute($sql, $bind)->rowCount();
     }
 
     /**
@@ -305,7 +339,7 @@ abstract class Adapter implements IAdapter {
 
         if ($where) $sql .= ' WHERE '. $where;
 
-        return $this->execute($sql, $bind);
+        return $this->execute($sql, $bind)->rowCount();
     }
 
     /**
