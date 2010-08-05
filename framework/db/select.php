@@ -563,7 +563,7 @@ class Select {
 
         // 在这里，不允许没有任何条件的delete
         if (!$where)
-            throw new \UnexpectedValueException('Must specify WHERE condition before delete');
+            throw new \LogicException('MUST specify WHERE condition before delete');
 
         // 见方法注释
         if ($this->limit OR $this->offset)
@@ -585,7 +585,7 @@ class Select {
 
         // 在这里，不允许没有任何条件的update
         if (!$where)
-            throw new \UnexpectedValueException('Must specify WHERE condition before update');
+            throw new \LogicException('MUST specify WHERE condition before update');
 
         // 见delete()方法注释
         if ($this->limit OR $this->offset)
