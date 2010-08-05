@@ -264,7 +264,6 @@ class Select {
      */
     protected function whereSub($col, $relation, $in) {
         if ($relation instanceof Select) {
-            $relation->order(false); // 子查询不需要order
             list($where, $bind) = $relation->compile();
         } else {
             if (!is_array($relation)) $relation = array($relation);
@@ -475,6 +474,17 @@ class Select {
     }
 
     /**
+     * 魔法方法
+     *
+     * @access public
+     * @return string
+     */
+    public function __toString() {
+        list($sql, $bind) = $this->compile();
+        return $sql;
+    }
+
+    /**
      * 执行数据库查询
      * 返回db result对象
      *
@@ -527,6 +537,24 @@ class Select {
     /**
      * 删除数据
      *
+     * 注意：直接利用select删除数据可能不是你想要的结果
+     * <code>
+     * // 找出符合条件的前5条
+     * // select * from "users" where id > 100 order by create_time desc limit 5
+     * $select = $adapter->select('users')->where('id > ?', 100)->order('create_time desc')->limit(5);
+     *
+     * // 因为DELETE语句不支持order by / limit / offset
+     * // 删除符合条件的，不仅仅是前5条
+     * // delete from "users" where id > 100
+     * $select->delete()
+     *
+     * // 如果要删除符合条件的前5条
+     * // delete from "users" where id in (select id from "users" where id > 100 order by create_time desc limit 5)
+     * $adapter->select('users')->whereIn('id', $select->setCols('id'))->delete();
+     * </code>
+     * 这里很容易犯错，考虑是否不提供delete()和update()方法
+     * 或者发现定义了limit / offset就抛出异常中止
+     *
      * @access public
      * @return integer
      */
@@ -537,11 +565,16 @@ class Select {
         if (!$where)
             throw new \UnexpectedValueException('Must specify WHERE condition before delete');
 
+        // 见方法注释
+        if ($this->limit OR $this->offset)
+            throw new \LogicException('CAN NOT DELETE while specify LIMIT or OFFSET');
+
         return $this->adapter->delete($this->from, $where, $bind);
     }
 
     /**
      * 更新数据
+     * 注意事项见delete()
      *
      * @param array $set
      * @access public
@@ -553,6 +586,10 @@ class Select {
         // 在这里，不允许没有任何条件的update
         if (!$where)
             throw new \UnexpectedValueException('Must specify WHERE condition before update');
+
+        // 见delete()方法注释
+        if ($this->limit OR $this->offset)
+            throw new \LogicException('CAN NOT UPDATE while specify LIMIT or OFFSET');
 
         return $this->adapter->update($this->from, $set, $where, $bind);
     }
