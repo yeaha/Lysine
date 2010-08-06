@@ -279,11 +279,13 @@ class Select {
      * @return Lysine\Db\Select
      */
     protected function whereSub($col, $relation, $in) {
+        $adapter = $this->getAdapter();
+        $col = $adapter->qcol($adapter);
+
         if ($relation instanceof Select) {
             list($where, $bind) = $relation->compile();
         } else {
             if (!is_array($relation)) $relation = array($relation);
-            $adapter = $this->getAdapter();
             $where = implode(',', $adapter->qstr($relation));
             $bind = array();
         }

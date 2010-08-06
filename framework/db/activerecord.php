@@ -276,11 +276,15 @@ abstract class ActiveRecord {
 
         $referer = static::$referer;
         if (!isset($referer[$name]))
-            throw new \InvalidArgumentException('Undefined referer name['. $name .']');
+            throw new \InvalidArgumentException('Undefined activerecord referer name['. $name .']');
 
         $config = $referer[$name];
         if (isset($config['getter'])) {
-            $result = call_user_func(array($this, $config['getter']));
+            $getter = $config['getter'];
+            if (!method_exists($this, $getter))
+                throw new \UnexpectedValueException('Activerecord referer getter['. $getter .'] not exist');
+
+            $result = $this->$getter();
             $this->referer_result[$name] = $result;
             return $result;
         }
@@ -288,7 +292,7 @@ abstract class ActiveRecord {
         if (isset($config['class'])) {
             $class = $config['class'];
             if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
-                throw new \UnexpectedValueException('Referer class must be subclass of Lysine\Db\ActiveRecord');
+                throw new \UnexpectedValueException('Activerecord referer class must be subclass of Lysine\Db\ActiveRecord');
 
             $select = forward_static_call(array($class, 'select'), $this->getRefererAdapter($config));
             $adapter = $select->getAdapter();
@@ -298,6 +302,8 @@ abstract class ActiveRecord {
                 $where = "{$target_key} = ?";
                 $bind = $this->get($config['source_key']);
                 $select->where($where, $bind);
+            } else {
+                throw new \UnexpectedValueException('MUST specify activerecord referer source_key AND target_key');
             }
 
             if (isset($config['where'])) {
@@ -343,32 +349,40 @@ abstract class ActiveRecord {
     /**
      * 保存进数据库
      *
+     * @param boolean $refresh 保存成功后重新获取数据
      * @access public
      * @return self
      */
-    public function save() {
+    public function save($refresh = true) {
         $pk = static::$primary_key;
         $adapter = $this->getAdapter();
         $table_name = static::$table_name;
 
         $row = $this->row;
+        // 没有任何字段被改动过，而且主键值不为空
+        // 说明这是从数据库中获得的数据，而且没改过，不需要保存
         if (!$this->dirty_row && !$row[$pk]) return $this;
 
         $this->fireEvent('before save');
 
         if ($row[$pk]) {
             $method = 'update';
+            // 有被改动过的主键值
+            // 说明是新建数据，然后指定的主键，需要insert
+            // 这个类的主键是不允许update的
+            // 所以不可能出现主键值被改了，需要update的情况
             if (in_array($pk, $this->dirty_row)) $method = 'insert';
         } else {
+            // 没有主键值，肯定是新建数据，需要insert
             $method = 'insert';
         }
 
         if ($method == 'insert') {
             $this->fireEvent('before insert');
 
-            if ($affect = $adapter->insert($table_name, $this->row)) {
+            if ($affected = $adapter->insert($table_name, $this->row)) {
                 if (!isset($row[$pk]))
-                    $this->set($pk, $adapter->lastId($table_name, $pk), true);
+                    $this->set($pk, $adapter->lastId($table_name, $pk), /* direct */true);
 
                 $this->fireEvent('after insert');
             }
@@ -376,14 +390,14 @@ abstract class ActiveRecord {
             $this->fireEvent('before update');
 
             $col = $adapter->qcol($pk);
-            $affect = $adapter()->update($table_name, $row, "{$col} = ?", $row[$pk]);
+            $affected = $adapter()->update($table_name, $row, "{$col} = ?", $row[$pk]);
 
-            if ($affect) $this->fireEvent('after update');
+            if ($affected) $this->fireEvent('after update');
         }
 
         $this->fireEvent('after save');
 
-        if ($affect) $this->refersh();
+        if ($refresh AND $affected) $this->refresh();
         return $this;
     }
 
@@ -400,14 +414,14 @@ abstract class ActiveRecord {
 
         $adpater = $this->getAdapter();
         $pk = $adapter->qcol(static::$primary_key);
-        if ($affect = $adapter->delete(static::$table_name, "{$pk} = ?", $id)) {
+        if ($affected = $adapter->delete(static::$table_name, "{$pk} = ?", $id)) {
             $this->row = $this->dirty_row = $this->referer_result = array();
             $this->adapter = null;
         }
 
         $this->fireEvent('after destroy');
 
-        return $affect;
+        return $affected;
     }
 
     /**
@@ -416,7 +430,7 @@ abstract class ActiveRecord {
      * @access public
      * @return self
      */
-    public function refersh() {
+    public function refresh() {
         if (!$id = $this->id()) return $this;
 
         $adapter = $this->getAdapter();
@@ -504,12 +518,9 @@ abstract class ActiveRecord {
      */
     static public function find($id, IAdapter $adapter = null) {
         $select = static::select($adapter);
-        $adapter = $select->getAdapter();
-        $pk = $adapter->qcol(static::$primary_key);
 
         if (is_array($id)) {
-            $where = sprintf('%s in (%s)', $pk, implode(',', $adapter->qstr($id)));
-            return $select->where($where)->get();
+            return $select->whereIn($pk, $id)->get();
         } else {
             return $select->where("{$pk} = ?", $id)->get(1);
         }
