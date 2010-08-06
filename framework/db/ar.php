@@ -290,8 +290,7 @@ abstract class ActiveRecord {
             if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
                 throw new \UnexpectedValueException('Referer class must be subclass of Lysine\Db\ActiveRecord');
 
-            $adapter = $this->getRefererAdapter($config);
-            $select = forward_static_call(array($class, 'select'), $adapter);
+            $select = forward_static_call(array($class, 'select'), $this->getRefererAdapter($config));
             $adapter = $select->getAdapter();
 
             if (isset($config['source_key'], $config['target_key'])) {
