@@ -4,7 +4,7 @@ return array(
     'Lysine\Cache\Memcached' => './cache/memcached.php',
     'Lysine\Config' => './core.php',
     'Lysine\Db' => './db/db.php',
-    'Lysine\Db\ActiveRecord' => './db/ar.php',
+    'Lysine\Db\ActiveRecord' => './db/activerecord.php',
     'Lysine\Db\Adapter' => './db/adapter/adapter.php',
     'Lysine\Db\Adapter\Mysql' => './db/adapter/mysql.php',
     'Lysine\Db\Adapter\Pgsql' => './db/adapter/pgsql.php',
