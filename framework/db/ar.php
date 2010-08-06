@@ -24,6 +24,16 @@ abstract class ActiveRecord {
     static protected $primary_key;
 
     /**
+     * 连接池中的数据库连接名
+     *
+     * @var string
+     * @static
+     * @access protected
+     * @see Lysine\Db\Pool
+     */
+    static protected $adapter_name;
+
+    /**
      * 字段行为定义
      *
      * @var array
@@ -230,9 +240,9 @@ abstract class ActiveRecord {
      * @return IAdapter
      */
     protected function getRefererAdapter(array $referer_config) {
-        if (!isset($referer_config['dispatcher'])) return $this->getAdapter();
-        $dconfig = $referer_config['dispatcher'];
+        if (!isset($referer_config['dispatcher'])) return null;
 
+        $dconfig = $referer_config['dispatcher'];
         if (!isset($dconfig['group']))
             throw new \UnexpectedValueException('Please specify referer dispatcher group name');
         $args = array($dconfig['group']);
@@ -281,8 +291,9 @@ abstract class ActiveRecord {
                 throw new \UnexpectedValueException('Referer class must be subclass of Lysine\Db\ActiveRecord');
 
             $adapter = $this->getRefererAdapter($config);
-
             $select = forward_static_call(array($class, 'select'), $adapter);
+            $adapter = $select->getAdapter();
+
             if (isset($config['source_key'], $config['target_key'])) {
                 $target_key = $adapter->qcol($config['target_key']);
                 $where = "{$target_key} = ?";
@@ -326,7 +337,7 @@ abstract class ActiveRecord {
      * @return IAdapter
      */
     public function getAdapter() {
-        if (!$this->adapter) $this->adapter = Pool::instance()->getAdapter();
+        if (!$this->adapter) $this->adapter = Pool::instance()->getAdapter(static::$adapter_name);
         return $this->adapter;
     }
 
@@ -468,7 +479,7 @@ abstract class ActiveRecord {
      * @return Select
      */
     static public function select(IAdapter $adapter = null) {
-        if (!$adapter)$adapter = Pool::instance()->getAdapter();
+        if (!$adapter) $adapter = Pool::instance()->getAdapter(static::$adapter_name);
 
         $class = get_called_class();
         $processor = function($row) use ($class, $adapter) {
