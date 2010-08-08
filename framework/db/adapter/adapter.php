@@ -269,15 +269,11 @@ abstract class Adapter implements IAdapter {
      * @access public
      * @return integer
      */
-    public function update($table_name, array $row, $where = null, $bind = null) {
+    public function update($table_name, array $row, $where, $bind = null) {
         $this->connect();
 
         // 先解析where
-        $where_bind = array();
-        if (is_null($where)) {
-            $where = null;
-            $where_bind = array();
-        } elseif (is_array($where)) {
+        if (is_array($where)) {
             list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         } else {
             $args = func_get_args();
@@ -322,15 +318,13 @@ abstract class Adapter implements IAdapter {
      * @access public
      * @return integer
      */
-    public function delete($table_name, $where = null, $bind = null) {
+    public function delete($table_name, $where, $bind = null) {
         $this->connect();
 
         $bind = array();
 
         $sql = 'DELETE FROM '. $this->qtab($table_name);
-        if (is_null($where)) {
-            $where = $bind = null;
-        } elseif (is_array($where)) {
+        if (is_array($where)) {
             list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         } else {
             $args = func_get_args();
