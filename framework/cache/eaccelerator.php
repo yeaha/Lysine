@@ -3,7 +3,7 @@ namespace Lysine\Cache;
 
 use Lysine\ICache;
 
-class Xcache implements ICache {
+class Eaccelerator implements ICache {
     public function __construct(array $config = array()) {
     }
 
