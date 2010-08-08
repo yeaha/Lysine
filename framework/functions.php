@@ -5,7 +5,7 @@ function app() {
 
 function cfg($path = null) {
     $path = is_array($path) ? $path : func_get_args();
-    return forward_static_call_array(array('Lysine\Config', 'get'), $path);
+    return \Lysine\Config::get($path);
 }
 
 function req() {
