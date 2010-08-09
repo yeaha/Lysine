@@ -4,15 +4,25 @@ namespace Lysine\Cache;
 use Lysine\ICache;
 
 class Xcache implements ICache {
+    protected $life_time = 60;
+
     public function __construct(array $config = array()) {
+        if (!extension_loaded('xcache'))
+            throw new \RuntimeException('Require XCACHE extension');
+
+        foreach ($config as $option => $value) $this->$option = $value;
     }
 
     public function set($key, $val, $life_time = null) {
+        if ($life_time === null) $life_time = $this->life_time;
+        return xcache_set($key, $val, $life_time);
     }
 
     public function get($key) {
+        return xcache_isset($key) ? xcache_get($key) : false;
     }
 
     public function delete($key) {
+        return xcache_unset($key);
     }
 }
