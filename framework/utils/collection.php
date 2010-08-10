@@ -352,7 +352,8 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
         $args = func_get_args();
         if (count($args) > 2) {
             $replace = $args[2];
-            return new self(array_splice($this->coll, $offset, $length, $replace));
+            array_splice($this->coll, $offset, $length, $replace);
+            return $this;
         }
         return new self(array_splice($this->coll, $offset, $length));
     }

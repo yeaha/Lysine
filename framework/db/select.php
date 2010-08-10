@@ -489,7 +489,7 @@ class Select {
 
             if ($relation instanceof Select) {
                 list($relation, $relation_bind) = $relation->compile();
-                $bind = array_splice($bind, count($bind), 0, $relation_bind);
+                array_splice($bind, count($bind), 0, $relation_bind);
             }
             $sql .= $relation;
         }
