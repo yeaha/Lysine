@@ -251,14 +251,6 @@ abstract class ActiveRecord {
                 : static::$primary_key;
         array_splice($args, count($args), 0, $column);
 
-        if (isset($dconfig['other'])) {
-            if (is_array($dconfig['other'])) {
-                $args = array_merge($args, $dconfig['other']);
-            } else {
-                $args[] = $dconfig['other'];
-            }
-        }
-
         return call_user_func_array(array(Pool::instance(), 'dispatch'), $args);
     }
 
