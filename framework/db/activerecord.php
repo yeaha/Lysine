@@ -66,8 +66,7 @@ abstract class ActiveRecord {
             'order' => 'create_time DESC',
             'dispatcher' => array(
                 'group' => 'book',
-                'by_column => 'pk',
-                'other' => array(),
+                'by_column' => 'pk', // string or array
             ),
         ),
         'orders' => array(
@@ -250,7 +249,7 @@ abstract class ActiveRecord {
         $column = isset($dconfig['by_column'])
                 ? $dconfig['by_column']
                 : static::$primary_key;
-        $args[] = $this->get($column);
+        array_splice($args, count($args), 0, $column);
 
         if (isset($dconfig['other'])) {
             if (is_array($dconfig['other'])) {
