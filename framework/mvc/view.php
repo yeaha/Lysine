@@ -285,11 +285,12 @@ class View {
      */
     protected function stripTags($str, $tags, $stripContent = false) {
         $content = '';
-        if(!is_array($tags)) {
+        if (!is_array($tags)) {
             $tags = (strpos($str, '>') !== false ? explode('>', str_replace('<', '', $tags)) : array($tags));
-            if(end($tags) == '') array_pop($tags);
+            if (end($tags) == '') array_pop($tags);
         }
-        foreach($tags as $tag) {
+
+        foreach ($tags as $tag) {
             if ($stripContent)
                  $content = '(.+</'.$tag.'[^>]*>|)';
              $str = preg_replace('#</?'.$tag.'[^>]*>'.$content.'#is', '', $str);
