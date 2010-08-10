@@ -271,30 +271,4 @@ class View {
             echo $output;
         }
     }
-
-    /**
-     * 过滤掉指定的tag
-     * 和strip_tags()相反，strip_tags()可以声明保留哪些tag
-     * 这个只过滤指定的tag
-     *
-     * @param string $str
-     * @param mixed $tags
-     * @param boolean $stripContent
-     * @access protected
-     * @return string
-     */
-    protected function stripTags($str, $tags, $stripContent = false) {
-        $content = '';
-        if (!is_array($tags)) {
-            $tags = (strpos($str, '>') !== false ? explode('>', str_replace('<', '', $tags)) : array($tags));
-            if (end($tags) == '') array_pop($tags);
-        }
-
-        foreach ($tags as $tag) {
-            if ($stripContent)
-                 $content = '(.+</'.$tag.'[^>]*>|)';
-             $str = preg_replace('#</?'.$tag.'[^>]*>'.$content.'#is', '', $str);
-        }
-        return $str;
-    }
 }
