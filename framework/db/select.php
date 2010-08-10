@@ -164,9 +164,8 @@ class Select {
      * @return mixed
      */
     public function __call($fn, $args) {
-        if (substr($fn, 0, 3) == 'get')
-            $sth = $this->execute();
-            return call_user_func_array(array($sth, $fn), $args);
+        $sth = $this->execute();
+        return call_user_func_array(array($sth, $fn), $args);
     }
 
     /**
