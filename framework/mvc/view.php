@@ -96,6 +96,18 @@ class View {
     }
 
     /**
+     * 魔法方法
+     *
+     * @param string $key
+     * @param mixed $val
+     * @access public
+     * @return void
+     */
+    public function __set($key, $val) {
+        $this->set($key, $val);
+    }
+
+    /**
      * 设定视图数据
      *
      * @param string $key
@@ -165,7 +177,7 @@ class View {
 
         ob_start();
 
-        extract($this->vars);
+        if ($this->vars) extract($this->vars);
         include $file;
         // 安全措施，关闭掉忘记关闭的block
         if ($this->current_block) $this->endblock();
@@ -192,8 +204,9 @@ class View {
     protected function includes($file, array $vars = null) {
         $file = $this->findFile($file);
 
-        extract($this->vars);
-        if ($vars) extract($vars);
+        $v = $this->vars;
+        if ($vars) $v = array_merge($v, $vars);
+        if ($v) extract($v);
         include $file;
     }
 
