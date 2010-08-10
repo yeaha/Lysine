@@ -162,7 +162,7 @@ namespace Lysine\Db {
          * @access public
          * @return integer
          */
-        public function update($table_name, array $row, $where = null, $bind = null);
+        public function update($table_name, array $row, $where, $bind = null);
 
         /**
          * 根据条件删除指定的数据
@@ -174,7 +174,7 @@ namespace Lysine\Db {
          * @access public
          * @return integer
          */
-        public function delete($table_name, $where = null, $bind = null);
+        public function delete($table_name, $where, $bind = null);
 
         /**
          * 获得表名字的完全限定名
