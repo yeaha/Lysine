@@ -41,11 +41,24 @@ class Memcached implements ICache {
         return $this->memcached->set($key, $val, $life_time);
     }
 
+    public function mset(array $data, $life_time = null) {
+        $life_time = $life_time ? (time() + $life_time) : 0;
+        return $this->memcached->setMulti($data, $life_time);
+    }
+
     public function get($key) {
         return $this->memcached->get($key);
     }
 
+    public function mget(array $keys) {
+        return $this->memcached->getMulti($keys);
+    }
+
     public function delete($key) {
         return $this->memcached->delete($key);
+    }
+
+    public function mdelete(array $keys) {
+        foreach ($keys as $key) $this->delete($key);
     }
 }

@@ -19,6 +19,16 @@ namespace Lysine {
         public function set($key, $val, $life_time = null);
 
         /**
+         * 批量保存
+         *
+         * @param array $data
+         * @param mixed $life_time
+         * @access public
+         * @return boolean
+         */
+        public function mset(array $data, $life_time = null);
+
+        /**
          * 读取缓存
          *
          * @param string $key
@@ -28,6 +38,15 @@ namespace Lysine {
         public function get($key);
 
         /**
+         * 批量读取
+         *
+         * @param array $keys
+         * @access public
+         * @return array
+         */
+        public function mget(array $keys);
+
+        /**
          * 删除缓存
          *
          * @param string $key
@@ -35,6 +54,15 @@ namespace Lysine {
          * @return boolean
          */
         public function delete($key);
+
+        /**
+         * 批量删除
+         *
+         * @param array $key
+         * @access public
+         * @return boolean
+         */
+        public function mdelete(array $key);
     }
 }
 
