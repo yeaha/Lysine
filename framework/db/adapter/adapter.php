@@ -2,6 +2,7 @@
 namespace Lysine\Db;
 
 use Lysine\Db\IAdapter;
+use Lysine\Db\Expr;
 use Lysine\Db\Select;
 
 /**
@@ -349,6 +350,7 @@ abstract class Adapter implements IAdapter {
             return $val;
         }
 
+        if ($val instanceof Expr) return $val->__toString();
         if (is_numeric($val)) return $val;
         if (is_null($val)) return 'NULL';
 
