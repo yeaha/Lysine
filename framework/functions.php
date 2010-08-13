@@ -47,8 +47,14 @@ function cookie() {
     return call_user_func_array(array(req(), 'cookie'), $args);
 }
 
-function db($node_name = null) {
-    return \Lysine\Db\Pool::instance()->getAdapter($node_name);
+function db($node_name = null, $token = null) {
+    $pool = \Lysine\Db\Pool::instance();
+    if ($token === null) {
+        return $pool->getAdapter($node_name);
+    } else {
+        $args = func_get_args();
+        return call_user_func_array(array($pool, 'dispatch'), $args);
+    }
 }
 
 function dbexpr($expr) {
