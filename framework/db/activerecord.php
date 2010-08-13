@@ -131,6 +131,9 @@ abstract class ActiveRecord {
         $events->addEvent($this, 'before destroy', array($this, '__before_destroy'));
         $events->addEvent($this, 'after destroy', array($this, '__after_destroy'));
 
+        $events->addEvent($this, 'before refresh', array($this, '__before_refresh'));
+        $events->addEvent($this, 'after refresh', array($this, '__after_refresh'));
+
         $this->fireEvent('before init');
 
         $this->row = $row;
@@ -424,6 +427,8 @@ abstract class ActiveRecord {
     public function refresh() {
         if (!$id = $this->id()) return $this;
 
+        $this->fireEvent('before refresh');
+
         $adapter = $this->getAdapter();
 
         $sql = sprintf(
@@ -437,6 +442,8 @@ abstract class ActiveRecord {
         if ($row) {
             $this->row = $row;
             $this->dirty_row = array();
+
+            $this->fireEvent('after refresh');
         }
         return $this;
     }
@@ -527,4 +534,6 @@ abstract class ActiveRecord {
     public function __after_update() {}
     public function __before_destroy() {}
     public function __after_destroy() {}
+    public function __before_refresh() {}
+    public function __after_refresh() {}
 }
