@@ -208,8 +208,13 @@ class Pool implements ArrayAccess {
      * @access public
      * @return self
      */
-    public function __invoke($node_name = null) {
-        return $this->getAdapter($node_name);
+    public function __invoke($node_name = null, $token = null) {
+        if ($token === null) {
+            return $this->getAdapter($node_name);
+        } else {
+            $args = func_get_args();
+            return call_user_func_array(array($this, 'dispatch'), $args);
+        }
     }
 
     /**

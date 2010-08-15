@@ -49,12 +49,8 @@ function cookie() {
 
 function db($node_name = null, $token = null) {
     $pool = \Lysine\Db\Pool::instance();
-    if ($token === null) {
-        return $pool->getAdapter($node_name);
-    } else {
-        $args = func_get_args();
-        return call_user_func_array(array($pool, 'dispatch'), $args);
-    }
+    $args = func_get_args();
+    return call_user_func_array($pool, $args);
 }
 
 function dbexpr($expr) {
