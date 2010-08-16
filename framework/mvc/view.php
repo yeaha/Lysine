@@ -147,12 +147,7 @@ class View {
     protected function findFile($file) {
         if (!$file) throw new \InvalidArgumentException('Invalid view file');
 
-        // 没有以/开头的是相对路径，转换为view dir下的文件
-        if (substr($file, 0, 1) != '/')
-            $file = sprintf('%s/%s', $this->view_dir, $file);
-
-        // 没有指定文件扩展名
-        if (!pathinfo($file, PATHINFO_EXTENSION)) $file .= '.'. $this->file_ext;
+        $file = sprintf('%s/%s.%s', $this->view_dir, $file, $this->file_ext);
 
         if (!is_readable($file))
             throw new \RuntimeException('View file('. $file .') is not exist or readable!');
