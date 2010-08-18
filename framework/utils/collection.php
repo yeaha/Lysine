@@ -377,8 +377,8 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @access public
      * @return Lysine\Utils\Coll
      */
-    public function usort($cmp_function) {
-        usort($this->coll, $cmp_function);
+    public function orderBy($cmp_function) {
+        uasort($this->coll, $cmp_function);
         return $this;
     }
 
