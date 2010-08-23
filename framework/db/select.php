@@ -279,7 +279,7 @@ class Select {
      */
     protected function whereSub($col, $relation, $in) {
         $adapter = $this->getAdapter();
-        $col = $adapter->qcol($adapter);
+        $col = $adapter->qcol($col);
 
         if ($relation instanceof Select) {
             list($where, $bind) = $relation->compile();
