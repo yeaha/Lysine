@@ -24,14 +24,32 @@ abstract class ActiveRecord {
     static protected $primary_key;
 
     /**
-     * 连接池中的数据库连接名
+     * 数据库连接配置
+     * 可以是字符串或数组
+     * 如果是字符串，则相当于调用db pool getAdapter()
+     * 如果是数组，则相当于调用db pool dispatch()
      *
-     * @var string
+     * [code]
+     * // 如果不指定
+     * // 相当于$this->adapter = $pool->getAdapter();
+     *
+     * // 相当于$this->adapter = $pool->getAdapter('user');
+     * $adapter_config = 'user';
+     *
+     * // 当前实例的id值为3
+     * // 相当于$this->adapter = $pool->dispatch('users', 3);
+     * $adapter_config = array(
+     *     'users',
+     *     'id',
+     * );
+     * [/code]
+     *
+     * @var mixed
      * @static
      * @access protected
      * @see Lysine\Db\Pool
      */
-    static protected $adapter_name;
+    static protected $adapter_config;
 
     /**
      * 字段行为定义
@@ -66,7 +84,7 @@ abstract class ActiveRecord {
             'order' => 'create_time DESC',
             'dispatcher' => array(
                 'group' => 'book',
-                'by_column' => 'pk', // string or array
+                'by_column' => 'id', // string or array，这里的字段指当前实例的字段
             ),
         ),
         'orders' => array(
@@ -193,6 +211,37 @@ abstract class ActiveRecord {
     }
 
     /**
+     * 魔法方法
+     *
+     * @param string $fn
+     * @param array $args
+     * @access public
+     * @return mixed
+     */
+    public function __call($fn, $args) {
+        if ($fn == 'getAdapter') {  // 获得当前实例的adapter
+            if (!$this->adapter)
+                $this->adapter = forward_static_call(array(get_class(), 'getAdapter'), $this);
+            return $this->adapter;
+        }
+    }
+
+    /**
+     * 魔法方法
+     *
+     * @param string $fn
+     * @param array $args
+     * @static
+     * @access public
+     * @return mixed
+     */
+    static public function __callStatic($fn, $args) {
+        if ($fn == 'getAdapter') {
+            return forward_static_call_array(array(get_called_class(), 'getAdapter'), $args);
+        }
+    }
+
+    /**
      * 设置字段的值
      *
      * @param mixed $col
@@ -210,8 +259,8 @@ abstract class ActiveRecord {
 
         $pk = static::$primary_key;
         while (list($key, $val) = each($col)) {
-            if ($key == $pk && $this->row[$pk]) {
-                trigger_error(__CLASS__ .': primary key refuse update', E_USER_WARNING);
+            if ($key == $pk && isset($this->row[$pk]) && $this->row[$pk]) {
+                throw new \LogicException(__CLASS__ .': primary key refuse update');
             } else {
                 $this->row[$key] = $val;
                 if (!$direct) $this->dirty_row[] = $key;
@@ -237,22 +286,29 @@ abstract class ActiveRecord {
     /**
      * 得到引用数据的adapter
      *
-     * @param array $referer_config
+     * @param string $name
      * @access protected
      * @return IAdapter
      */
-    protected function getRefererAdapter(array $referer_config) {
-        if (!isset($referer_config['dispatcher'])) return null;
+    protected function getRefererAdapter($name) {
+        if (!isset(static::$referer[$name]['dispatcher'])) return null;
+        $config = static::$referer[$name]['dispatcher'];
 
-        $dconfig = $referer_config['dispatcher'];
-        if (!isset($dconfig['group']))
+        if (!isset($config['group']))
             throw new \UnexpectedValueException('Please specify referer dispatcher group name');
-        $args = array($dconfig['group']);
+        $args = array($config['group']);
 
-        $column = isset($dconfig['by_column'])
-                ? $dconfig['by_column']
-                : static::$primary_key;
-        array_splice($args, count($args), 0, $column);
+        $columns = isset($config['by_column'])
+                 ? $config['by_column']
+                 : static::$primary_key;
+        if (!is_array($columns)) $columns = array($columns);
+
+        foreach ($columns as $column) {
+            $value = $this->get($column);
+            if ($value === false)
+                throw new \UnexpectedValueException(__CLASS__ .': Can not get referer ['.$name.'] adapter without ['.$column.'] value');
+            $args[] = $value;
+        }
 
         return call_user_func_array(array(Pool::instance(), 'dispatch'), $args);
     }
@@ -288,7 +344,7 @@ abstract class ActiveRecord {
             if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
                 throw new \UnexpectedValueException('Activerecord referer class must be subclass of Lysine\Db\ActiveRecord');
 
-            $select = forward_static_call(array($class, 'select'), $this->getRefererAdapter($config));
+            $select = forward_static_call(array($class, 'select'), $this->getRefererAdapter($name));
             $adapter = $select->getAdapter();
 
             if (isset($config['source_key'], $config['target_key'])) {
@@ -327,17 +383,6 @@ abstract class ActiveRecord {
     public function setAdapter(IAdapter $adapter) {
         $this->adapter = $adapter;
         return $this;
-    }
-
-    /**
-     * 得到数据库连接
-     *
-     * @access public
-     * @return IAdapter
-     */
-    public function getAdapter() {
-        if (!$this->adapter) $this->adapter = Pool::instance()->getAdapter(static::$adapter_name);
-        return $this->adapter;
     }
 
     /**
@@ -482,6 +527,42 @@ abstract class ActiveRecord {
     }
 
     /**
+     * 获得activerecord的adapter
+     *
+     * @param mixed $ar
+     * @static
+     * @access protected
+     * @return Lysine\Db\IAdapter
+     */
+    static protected function getAdapter($ar = null) {
+        $config = static::$adapter_config;
+        $pool = Pool::instance();
+
+        if (!is_array($config)) return $pool->getAdapter($config);
+
+        // 如果adapter config是dispatch方式
+        // 把字段名替换为值，再调用pool dispatch()
+        if ($ar instanceof ActiveRecord) {
+            foreach (array_slice($config, 1, null, true) as $key => $column) {
+                $value = $ar->get($column);
+                if ($value === false)
+                    throw new \UnexpectedValueException(get_called_class() .': Can not get adapter without ['.$column.'] value');
+                $config[$key] = $value;
+            }
+        } else {
+            $args = func_get_args();
+            foreach (array_slice($config, 1, null, true) as $key => $column) {
+                $value = array_shift($args);
+                if ($value === null)
+                    throw new \InvalidArgumentException(get_called_class() .': Can not get adapter without ['.$column.'] value');
+                $config[$key] = $value;
+            }
+        }
+
+        return call_user_func_array($pool, $config);
+    }
+
+    /**
      * 从数据库内查询
      *
      * @param IAdapter $adapter
@@ -490,7 +571,8 @@ abstract class ActiveRecord {
      * @return Select
      */
     static public function select(IAdapter $adapter = null) {
-        if (!$adapter) $adapter = Pool::instance()->getAdapter(static::$adapter_name);
+        // 如果设置adapter_config是dispatch方式，这里肯定会抛出一个异常
+        if (!$adapter) $adapter = static::getAdapter();
 
         $class = get_called_class();
         $processor = function($row) use ($class, $adapter) {
@@ -515,6 +597,19 @@ abstract class ActiveRecord {
      * @return ActiveRecord
      */
     static public function find($id, IAdapter $adapter = null) {
+        // 如果是多个主键，并且adapter_config是dispatch方式(垂直切分)
+        // 可能每个主键对应的adapter是不一样的
+        // 如果没有指定adapter实例，就需要每个主键依次获取adapter
+        // 然后分组查询，最后再合并
+        // 逻辑复杂，不做处理，这里会抛出异常
+        // 所以同时查询多个主键，并且垂直切分时，需要在查询前传递adapter实例
+        // 要不然就每个主键分别调用find()
+        if (!$adapter) {
+            if (is_array($id) && is_array(static::$adapter_config))
+                throw new \LogicException('Can not find multiple ID while adapter config is dispatcher');
+
+            $adapter = static::getAdapter($id);
+        }
         $select = static::select($adapter);
 
         if (is_array($id)) {
@@ -526,14 +621,19 @@ abstract class ActiveRecord {
 
     public function __before_init() {}
     public function __after_init() {}
+
     public function __before_save() {}
     public function __after_save() {}
+
     public function __before_insert() {}
     public function __after_insert() {}
+
     public function __before_update() {}
     public function __after_update() {}
+
     public function __before_destroy() {}
     public function __after_destroy() {}
+
     public function __before_refresh() {}
     public function __after_refresh() {}
 }
