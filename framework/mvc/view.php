@@ -180,9 +180,7 @@ class View {
         $output = ob_get_clean();
 
         // 如果没有继承其它视图，就直接输出结果
-        if (!$this->extend_file) return $output;
-
-        $extend_file = $this->findFile($this->extend_file);
+        if (!$extend_file = $this->extend_file) return $output;
 
         $this->extend_file = null;
         return $this->fetch($extend_file);
