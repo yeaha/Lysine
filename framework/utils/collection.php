@@ -100,6 +100,26 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
+     * 获得所有元素的key
+     *
+     * @access public
+     * @return array
+     */
+    public function getKeys() {
+        return array_keys($this->coll);
+    }
+
+    /**
+     * 获得所有元素的value
+     *
+     * @access public
+     * @return array
+     */
+    public function getValues() {
+        return array_values($this->coll);
+    }
+
+    /**
      * 获得第一个元素
      *
      * @access public
