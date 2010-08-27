@@ -406,7 +406,6 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      * 自定义分组
      * 使用自定义callback方法依次调用每个元素
      * 根据返回的key把所有元素重新分组
-     * 返回新的collection
      *
      * @param callable $key_function
      * @param boolean $replace 是否覆盖相同key的元素
@@ -424,6 +423,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
             }
         }
 
-        return new self($group);
+        $this->coll = $group;
+        return $this;
     }
 }
