@@ -597,4 +597,42 @@ EOF;
     public static function encodeArray(array $array) {
         return sprintf('{"%s"}', implode('","', $array));
     }
+
+    /**
+     * 把postgresql hstore返回结果转换为php数组
+     *
+     * @param string $hstore
+     * @static
+     * @access public
+     * @return array
+     */
+    public static function decodeHstore($hstore) {
+        $result = array();
+        if (!$hstore) return $result;
+
+        foreach (preg_split('/"\s*,\s*"/', $hstore) as $pair) {
+            list($k, $v) = explode('=>', $pair);
+            $k = trim($k, '\'" ');
+            $v = trim($v, '\'" ');
+            $result[$k] = $v;
+        }
+        return $result;
+    }
+
+    /**
+     * 把php数组转换为postgresql hstore字符串
+     *
+     * @param array $array
+     * @static
+     * @access public
+     * @return string
+     */
+    public static function encodeHstore(array $array) {
+        $result = array();
+        foreach ($array as $k => $v) {
+            $v = str_replace('"', '\"', $v);
+            $result[] = sprintf('"%s"=>"%s"', $k, $v);
+        }
+        return implode(',', $result);
+    }
 }
