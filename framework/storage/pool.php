@@ -89,6 +89,7 @@ class Pool extends Singleton {
             throw new \RuntimeException('Storage ['. $name .'] config not found');
 
         $class = $config['class'];
+        unset($config['class']);
         $this->storages[$name] = new $class($config);
 
         return $this->storages[$name];
