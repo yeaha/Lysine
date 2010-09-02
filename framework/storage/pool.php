@@ -2,6 +2,7 @@
 namespace Lysine\Storage;
 
 use Lysine\Config;
+use Lysine\Utils\Singleton;
 
 /**
  * 存储服务连接池
@@ -9,12 +10,7 @@ use Lysine\Config;
  * @package Storage
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Pool {
-    /**
-     * 唯一实例
-     */
-    static private $instance;
-
+class Pool extends Singleton {
     /**
      * 存储服务配置路径
      */
@@ -40,27 +36,6 @@ class Pool {
      * @access private
      */
     private $dispatcher = array();
-
-    /**
-     * 构造函数，无法直接通过new方式调用
-     *
-     * @access private
-     * @return void
-     */
-    private function __construct() {
-    }
-
-    /**
-     * 获得唯一实例
-     *
-     * @static
-     * @access public
-     * @return Lysine\Storage\Pool
-     */
-    static public function instance() {
-        if (!self::$instance) self::$instance = new self;
-        return self::$instance;
-    }
 
     /**
      * 自定义路由方法

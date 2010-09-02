@@ -37,14 +37,6 @@ class Application extends Injection {
     protected $include_path = array();
 
     /**
-     * 数据注册表
-     *
-     * @var array
-     * @access protected
-     */
-    protected $registry = array();
-
-    /**
      * 获得app单例
      *
      * @static
@@ -152,31 +144,6 @@ class Application extends Injection {
         }
 
         return false;
-    }
-
-    /**
-     * 注册表，保存一条数据
-     *
-     * @param string $key
-     * @param mixed $val
-     * @access public
-     * @return Lysine\Application
-     */
-    public function set($key, $val) {
-        $this->registry[$key] = $val;
-        return $this;
-    }
-
-    /**
-     * 从注册表获得数据
-     *
-     * @param string $key
-     * @param mixed $default
-     * @access public
-     * @return mixed
-     */
-    public function get($key, $default = false) {
-        return array_key_exists($key, $this->registry) ? $this->registry[$key] : $default;
     }
 
     /**

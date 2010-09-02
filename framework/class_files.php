@@ -38,7 +38,7 @@ return array(
     'Lysine\Utils\Coll' => './utils/collection.php',
     'Lysine\Utils\Events' => './utils/events.php',
     'Lysine\Utils\Injection' => './utils/injection.php',
-    'Lysine\Utils\Pool' => './utils/pool.php',
     'Lysine\Utils\Registry' => './utils/registry.php',
+    'Lysine\Utils\Singleton' => './utils/singleton.php',
     'Lysine\View' => './mvc/view.php',
 );

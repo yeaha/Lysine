@@ -1,15 +1,15 @@
 <?php
-namespace Lysine\Utils;
-
 /**
  * 事件触发
  *
  * @package Utils
  * @author yangyi <yangyi@surveypie.com>
  */
-class Events {
-    static protected $instance;
+namespace Lysine\Utils;
 
+use Lysine\Utils\Singleton;
+
+class Events extends Singleton {
     /**
      * 事件列表
      *
@@ -17,24 +17,6 @@ class Events {
      * @access protected
      */
     private $events = array();
-
-    /**
-     * 获得单一实例
-     *
-     * @static
-     * @access public
-     * @return Events
-     */
-    static public function instance() {
-        if (!self::$instance) self::$instance = new self();
-        return self::$instance;
-    }
-
-    private function __construct() {
-    }
-
-    private function __clone() {
-    }
 
     /**
      * 生成对象的唯一标示
