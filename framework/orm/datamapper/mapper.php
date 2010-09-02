@@ -61,7 +61,7 @@ class DBMapper extends Mapper {
             return $data;
         };
 
-        $select = $this->getStorage(Data $class = null)
+        $select = $this->getStorage($class)
                        ->select($this->getMeta()->getCollection())
                        ->setKeyColumn($primary_key)
                        ->setProcessor($processor);
