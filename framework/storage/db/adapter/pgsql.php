@@ -204,7 +204,7 @@ class Pgsql extends Adapter {
      * array(
      *     array(
      *         'name' => 'id',              // column name
-     *         'ctype' => Db::TYPE_INTEGER,   // common type
+     *         'ctype' => DB::TYPE_INTEGER,   // common type
      *         'ntype' => 'integer',        // native type
      *         'length' => null,
      *         'allow_null' => false,
@@ -221,22 +221,22 @@ class Pgsql extends Adapter {
      */
     public function listColumns($table) {
         static $typeMap = array(
-            'image' => Db::TYPE_BINARY,
-            'blob' => Db::TYPE_BINARY,
-            'bit' => Db::TYPE_BINARY,
-            'varbit' => Db::TYPE_BINARY,
-            'bytea' => Db::TYPE_BINARY,
-            'bool' => Db::TYPE_BOOL,
-            'boolean' => Db::TYPE_BOOL,
-            'smallint' => Db::TYPE_INTEGER,
-            'integer' => Db::TYPE_INTEGER,
-            'bigint' => Db::TYPE_INTEGER,
-            'int2' => Db::TYPE_INTEGER,
-            'int4' => Db::TYPE_INTEGER,
-            'int8' => Db::TYPE_INTEGER,
-            'oid' => Db::TYPE_INTEGER,
-            'serial' => Db::TYPE_INTEGER,
-            'bigserial' => Db::TYPE_INTEGER,
+            'image' => DB::TYPE_BINARY,
+            'blob' => DB::TYPE_BINARY,
+            'bit' => DB::TYPE_BINARY,
+            'varbit' => DB::TYPE_BINARY,
+            'bytea' => DB::TYPE_BINARY,
+            'bool' => DB::TYPE_BOOL,
+            'boolean' => DB::TYPE_BOOL,
+            'smallint' => DB::TYPE_INTEGER,
+            'integer' => DB::TYPE_INTEGER,
+            'bigint' => DB::TYPE_INTEGER,
+            'int2' => DB::TYPE_INTEGER,
+            'int4' => DB::TYPE_INTEGER,
+            'int8' => DB::TYPE_INTEGER,
+            'oid' => DB::TYPE_INTEGER,
+            'serial' => DB::TYPE_INTEGER,
+            'bigserial' => DB::TYPE_INTEGER,
         );
 
         list($schema, $table) = $this->_parseTableName($table);
@@ -285,7 +285,7 @@ EOF;
                     $default_value = $match[1];
             }
 
-            $ctype = isset($typeMap[$row['type']]) ? $typeMap[$row['type']] : Db::TYPE_STRING;
+            $ctype = isset($typeMap[$row['type']]) ? $typeMap[$row['type']] : DB::TYPE_STRING;
             $col = array(
                 'schema' => $schema,
                 'table' => $table,

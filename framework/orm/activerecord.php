@@ -1,7 +1,7 @@
 <?php
-namespace Lysine\Db;
+namespace Lysine\Orm;
 
-use Lysine\Db\Pool;
+use Lysine\Storage\Pool;
 use Lysine\Utils\Events;
 
 abstract class ActiveRecord {
