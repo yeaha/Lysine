@@ -15,6 +15,7 @@ return array(
     'Lysine\Orm\DataMapper\Meta' => './orm/datamapper/meta.php',
     'Lysine\Orm\DataMapper\MongoData' => './orm/datamapper/data.php',
     'Lysine\Orm\DataMapper\MongoMapper' => './orm/datamapper/mapper.php',
+    'Lysine\Orm\IActiveRecord' => './orm/activerecord/abstract.php',
     'Lysine\Request' => './mvc/request.php',
     'Lysine\Request_Exception' => './mvc/request.php',
     'Lysine\Response' => './mvc/response.php',
