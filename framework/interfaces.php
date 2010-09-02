@@ -1,12 +1,33 @@
 <?php
 namespace Lysine {
     /**
+     * 存储服务
+     *
+     * @package Storage
+     * @author yangyi <yangyi.cn.gz@gmail.com>
+     */
+    interface IStorage {
+        /**
+         * 构造函数
+         * 参数都必须以数组方式传递
+         * 这样才可以让Lysine\Storage\Pool使用统一的初始化方法
+         *
+         * @param array $config
+         * @access public
+         * @return void
+         */
+        public function __construct(array $config);
+    }
+}
+
+namespace Lysine\Storage {
+    /**
      * 缓存类接口
      *
      * @package base
      * @author yangyi <yangyi@surveypie.com>
      */
-    interface ICache {
+    interface ICache extends \Lysine\IStorage {
         /**
          * 保存缓存
          *
@@ -63,24 +84,6 @@ namespace Lysine {
          * @return boolean
          */
         public function mdelete(array $key);
-    }
-
-    /**
-     * 存储服务
-     *
-     * @package Storage
-     * @author yangyi <yangyi.cn.gz@gmail.com>
-     */
-    interface IStorage {
-        /**
-         * 构造函数
-         * 参数都必须以数组方式传递
-         *
-         * @param array $config
-         * @access public
-         * @return void
-         */
-        public function __construct(array $config);
     }
 }
 

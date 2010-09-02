@@ -1,21 +1,21 @@
 <?php
-namespace Lysine\Cache;
+namespace Lysine\Storage\Cache;
 
-use Lysine\ICache;
+use Lysine\Storage\ICache;
 
-class Xcache implements ICache {
+class Apc implements ICache {
     protected $life_time = 60;
 
-    public function __construct(array $config = array()) {
-        if (!extension_loaded('xcache'))
-            throw new \RuntimeException('Require XCACHE extension');
+    public function __construct(array $config) {
+        if (!extension_loaded('apc'))
+            throw new \RuntimeException('Require APC extension');
 
-        foreach ($config as $option => $value) $this->$option = $value;
+        if (isset($config['life_time'])) $this->life_time = $config['life_time'];
     }
 
     public function set($key, $val, $life_time = null) {
         if ($life_time === null) $life_time = $this->life_time;
-        return xcache_set($key, $val, $life_time);
+        return apc_store($key, $val, $life_time);
     }
 
     public function mset(array $data, $life_time = null) {
@@ -23,7 +23,7 @@ class Xcache implements ICache {
     }
 
     public function get($key) {
-        return xcache_isset($key) ? xcache_get($key) : false;
+        return apc_fetch($key);
     }
 
     public function mget(array $keys) {
@@ -33,7 +33,7 @@ class Xcache implements ICache {
     }
 
     public function delete($key) {
-        return xcache_unset($key);
+        return apc_delete($key);
     }
 
     public function mdelete(array $keys) {

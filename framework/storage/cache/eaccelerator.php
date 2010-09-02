@@ -1,21 +1,21 @@
 <?php
-namespace Lysine\Cache;
+namespace Lysine\Storage\Cache;
 
-use Lysine\ICache;
+use Lysine\Storage\ICache;
 
-class Apc implements ICache {
+class Eaccelerator implements ICache {
     protected $life_time = 60;
 
-    public function __construct(array $config = array()) {
-        if (!extension_loaded('apc'))
-            throw new \RuntimeException('Require APC extension');
+    public function __construct(array $config) {
+        if (!extension_loaded('eaccelerator'))
+            throw new \RuntimeException('Require EACCELERATOR extension');
 
-        foreach ($config as $option => $value) $this->$option = $value;
+        if (isset($config['life_time'])) $this->life_time = $config['life_time'];
     }
 
     public function set($key, $val, $life_time = null) {
         if ($life_time === null) $life_time = $this->life_time;
-        return apc_store($key, $val, $life_time);
+        return eaccelerator_put($key, $val, $life_time);
     }
 
     public function mset(array $data, $life_time = null) {
@@ -23,7 +23,7 @@ class Apc implements ICache {
     }
 
     public function get($key) {
-        return apc_fetch($key);
+        return eaccelerator_get($key);
     }
 
     public function mget(array $keys) {
@@ -33,7 +33,7 @@ class Apc implements ICache {
     }
 
     public function delete($key) {
-        return apc_delete($key);
+        return eaccelerator_rm($key);
     }
 
     public function mdelete(array $keys) {

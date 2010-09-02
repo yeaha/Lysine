@@ -47,7 +47,7 @@ function cookie() {
     return call_user_func_array(array(req(), 'cookie'), $args);
 }
 
-function storage() {
+function storage($name = null) {
     $pool = \Lysine\Storage\Pool::instance();
     $args = func_get_args();
     return call_user_func_array($pool, $args);

@@ -1,7 +1,7 @@
 <?php
-namespace Lysine\Cache;
+namespace Lysine\Storage\Cache;
 
-use Lysine\ICache;
+use Lysine\Storage\ICache;
 
 class Memcached implements ICache {
     protected $memcached;
@@ -10,11 +10,11 @@ class Memcached implements ICache {
 
     protected $life_time = 0;
 
-    public function __construct(array $config = array()) {
+    public function __construct(array $config) {
         if (!extension_loaded('memcached'))
             throw new \RuntimeException('Require memcached extension');
 
-        $memcached = new Memcached();
+        $memcached = new \Memcached();
 
         if ($server = array_get($config, 'server')) {
             call_user_func_array(array($memcached, 'addServer'), $server);
@@ -23,6 +23,8 @@ class Memcached implements ICache {
         } else {
             call_user_func_array(array($memcached, 'addServer'), $this->default_server);
         }
+
+        if (isset($config['life_time'])) $this->life_time = $config['life_time'];
 
         if ($options = array_get($config, 'options')) {
             foreach ($options as $key => $val)
