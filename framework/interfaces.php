@@ -64,9 +64,27 @@ namespace Lysine {
          */
         public function mdelete(array $key);
     }
+
+    /**
+     * 存储服务
+     *
+     * @package Storage
+     * @author yangyi <yangyi.cn.gz@gmail.com>
+     */
+    interface IStorage {
+        /**
+         * 构造函数
+         * 参数都必须以数组方式传递
+         *
+         * @param array $config
+         * @access public
+         * @return void
+         */
+        public function __construct(array $config);
+    }
 }
 
-namespace Lysine\Db {
+namespace Lysine\Storage\DB {
     /**
      * 数据库连接类接口
      * 实现了此接口就可以在Lysine内涉及数据库操作的类里通用
@@ -74,19 +92,7 @@ namespace Lysine\Db {
      * @package DB
      * @author yangyi <yangyi.cn.gz@gmail.com>
      */
-    interface IAdapter {
-        /**
-         * 构造函数
-         *
-         * @param string $dsn
-         * @param string $user
-         * @param string $pass
-         * @param array $options
-         * @access public
-         * @return void
-         */
-        public function __construct($dsn, $user, $pass, array $options = array());
-
+    interface IAdapter extends \Lysine\IStorage {
         /**
          * 返回实际的数据库连接句柄
          *
