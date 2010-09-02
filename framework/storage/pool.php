@@ -41,6 +41,12 @@ class Pool {
      */
     private $dispatcher = array();
 
+    /**
+     * 构造函数，无法直接通过new方式调用
+     *
+     * @access private
+     * @return void
+     */
     private function __construct() {
     }
 
@@ -58,6 +64,7 @@ class Pool {
 
     /**
      * 自定义路由方法
+     * 路由方法调用后必须返回storage名称
      *
      * @param string $name
      * @param callable $fn
@@ -65,6 +72,15 @@ class Pool {
      * @return void
      */
     public function setDispatcher($name, $fn) {
+        if (!is_callable($fn))
+            throw new \UnexpectedValueException('Storage dispatcher is not callable');
+
+        // 检查是否已经有这个名字的storage
+        $path = self::$config_path;
+        $path[] = $name;
+        if ($config = Config::get($path))
+            throw new \LogicException('Storage ['. $name .'] is exist, can not replace with dispatcher');
+
         $this->dispatcher[$name] = $fn;
     }
 
@@ -79,20 +95,39 @@ class Pool {
         if ($name === null) $name = self::$default_storage;
 
         if (isset($this->dispatcher[$name])) {
+            $dispatcher_name = $name;
             $dispatcher = $this->dispatcher[$name];
             $args = array_slice(func_get_args(), 1);
             $name = call_user_func_array($dispatcher, $args);
+
+            if ($name === null)
+                throw new \LogicException('Storage dispatcher ['. $dispatcher_name .'] not return a storage name');
         }
 
-        if (!isset($this->storages[$name])) {
-            $path = self::$config_path;
-            $path[] = $name;
-            $config = Config::get($path);
+        if (isset($this->storages[$name])) return $this->storages[$name];
 
-            $class = $config['class'];
-            $this->storages[$name] = new $class($config);
-        }
+        $path = self::$config_path;
+        $path[] = $name;
+        $config = Config::get($path);
+
+        if (!$config)
+            throw new \RuntimeException('Storage ['. $name .'] config not found');
+
+        $class = $config['class'];
+        $this->storages[$name] = new $class($config);
 
         return $this->storages[$name];
+    }
+
+    /**
+     * 魔法方法
+     * 等于调用get()方法
+     *
+     * @param string $name
+     * @access public
+     * @return Lsyine\IStorage
+     */
+    public function __invoke() {
+        return call_user_func_array(array($this, 'get'), func_get_args());
     }
 }
