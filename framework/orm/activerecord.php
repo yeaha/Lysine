@@ -26,8 +26,6 @@ abstract class ActiveRecord {
     /**
      * 数据库连接配置
      * 可以是字符串或数组
-     * 如果是字符串，则相当于调用db pool getAdapter()
-     * 如果是数组，则相当于调用db pool dispatch()
      *
      * [code]
      * // 如果不指定
@@ -47,7 +45,7 @@ abstract class ActiveRecord {
      * @var mixed
      * @static
      * @access protected
-     * @see Lysine\Db\Pool
+     * @see Lysine\Storage\Pool
      */
     static protected $adapter_config;
 
@@ -341,8 +339,8 @@ abstract class ActiveRecord {
 
         if (isset($config['class'])) {
             $class = $config['class'];
-            if (!is_subclass_of($class, 'Lysine\Db\ActiveRecord'))
-                throw new \UnexpectedValueException('Activerecord referer class must be subclass of Lysine\Db\ActiveRecord');
+            if (!is_subclass_of($class, 'Lysine\Orm\ActiveRecord'))
+                throw new \UnexpectedValueException('Activerecord referer class must be subclass of Lysine\Orm\ActiveRecord');
 
             $select = forward_static_call(array($class, 'select'), $this->getRefererAdapter($name));
             $adapter = $select->getAdapter();
@@ -532,7 +530,7 @@ abstract class ActiveRecord {
      * @param mixed $ar
      * @static
      * @access protected
-     * @return Lysine\Db\IAdapter
+     * @return Lysine\Storage\DB\IAdapter
      */
     static protected function getAdapter($ar = null) {
         $config = static::$adapter_config;

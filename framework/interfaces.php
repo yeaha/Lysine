@@ -127,13 +127,12 @@ namespace Lysine\Storage\DB {
 
         /**
          * 执行sql语句并返回IResult实例
-         * 如果此adapter要使用Lysine db select和active record
          * 就必须返回IResult才行
          *
          * @param string $sql
          * @param mixed $bind
          * @access public
-         * @return Lysine\Db\IResult
+         * @return Lysine\Storage\DB\IResult
          */
         public function execute($sql, $bind = null);
 
@@ -142,7 +141,7 @@ namespace Lysine\Storage\DB {
          *
          * @param string $table_name
          * @access public
-         * @return Lysine\Db\Select
+         * @return Lysine\Storage\DB\Select
          */
         public function select($table_name);
 

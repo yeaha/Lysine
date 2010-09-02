@@ -11,14 +11,14 @@ use Lysine\Storage\DB\Select;
  *
  * @uses IAdapter
  * @abstract
- * @package DB
+ * @package Storage
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 abstract class Adapter implements IAdapter {
     /**
      * 数据库连接配置
      *
-     * @var mixed
+     * @var array
      * @access private
      */
     private $config;
@@ -72,7 +72,6 @@ abstract class Adapter implements IAdapter {
     /**
      * 魔法方法，函数式调用
      *
-     * $db = \Lysine\Db::factory($dsn, $user, $pass);
      * $rowset = $db('select * from users')->getAll();
      *
      * @access public
@@ -187,7 +186,7 @@ abstract class Adapter implements IAdapter {
      * @param string $sql
      * @param mixed $bind
      * @access public
-     * @return Lysine\Db\IResult
+     * @return Lysine\Storage\DB\IResult
      */
     public function execute($sql, $bind = null) {
         $this->connect();
@@ -214,11 +213,11 @@ abstract class Adapter implements IAdapter {
     }
 
     /**
-     * 生成Lysine\Db\Select实例
+     * 生成Lysine\Storage\DB\Select实例
      *
      * @param string $table_name
      * @access public
-     * @return Lysine\Db\Select
+     * @return Lysine\Storage\DB\Select
      */
     public function select($table_name) {
         $select = new Select($this);

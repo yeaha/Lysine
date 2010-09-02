@@ -47,14 +47,14 @@ function cookie() {
     return call_user_func_array(array(req(), 'cookie'), $args);
 }
 
-function db($node_name = null, $token = null) {
-    $pool = \Lysine\Db\Pool::instance();
+function storage() {
+    $pool = \Lysine\Storage\Pool::instance();
     $args = func_get_args();
     return call_user_func_array($pool, $args);
 }
 
 function dbexpr($expr) {
-    return new \Lysine\Db\Expr($expr);
+    return new \Lysine\Storage\DB\Expr($expr);
 }
 
 function url() {
