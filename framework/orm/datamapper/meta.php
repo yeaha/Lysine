@@ -89,7 +89,7 @@ class Meta {
      * @var array
      * @access private
      */
-    private $props_to_fields;
+    private $prop_to_field;
 
     /**
      * 字段名对应的属性名
@@ -97,7 +97,7 @@ class Meta {
      * @var array
      * @access private
      */
-    private $fields_to_props;
+    private $field_to_prop;
 
     /**
      * 构造函数
@@ -130,8 +130,8 @@ class Meta {
             $field = $config['field'];
             if ($config['primary_key']) $this->primary_key = $field;
 
-            $this->props_to_fields[$name] = $field;
-            $this->fields_to_props[$field] = $name;
+            $this->prop_to_field[$name] = $field;
+            $this->field_to_prop[$field] = $name;
         }
     }
 
@@ -176,10 +176,51 @@ class Meta {
      * @access public
      * @return array
      */
-    public function getPropMeta($prop) {
+    public function getPropMeta($prop = null) {
+        if ($prop === null) return $this->props;
+
         if (!isset($this->props[$prop]))
             throw new \InvalidArgumentException("Undefined {$this->class} property [{$prop}] meta");
         return $this->props[$prop];
+    }
+
+    /**
+     * 获得属性对应的字段
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getPropToField($prop = null) {
+        if ($prop === null) return $this->prop_to_field;
+
+        if (!isset($this->prop_to_field[$prop]))
+            throw new \InvalidArgumentException();
+        return $this->prop_to_field[$prop];
+    }
+
+    /**
+     * 获得字段对应的属性
+     *
+     * @access public
+     * @return mixed
+     */
+    public function getFieldToProp($field = null) {
+        if ($field === null) return $this->field_to_prop;
+
+        if (!isset($this->field_to_prop[$field]))
+            throw new \InvalidArgumentException();
+        return $this->field_to_prop[$field];
+    }
+
+    /**
+     * 是否具有属性
+     *
+     * @param string $prop
+     * @access public
+     * @return boolean
+     */
+    public function haveProperty($prop) {
+        return isset($this->props[$prop]);
     }
 
     /**
