@@ -6,6 +6,14 @@ use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\Pool;
 use Lysine\Orm\ActiveRecord;
 
+/**
+ * 数据库数据和业务模型映射封装
+ *
+ * @uses ActiveRecord
+ * @abstract
+ * @package ORM
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 abstract class DB extends ActiveRecord {
     /*
     static protected $referer_config = array(
@@ -26,6 +34,13 @@ abstract class DB extends ActiveRecord {
     );
     */
 
+    /**
+     * 保存到数据库
+     *
+     * @param boolean $refresh
+     * @access public
+     * @return Lysine\Orm\ActiveRecord\DB
+     */
     public function save($refresh = true) {
         $pk = static::$primary_key;
         $table_name = static::$collection;
@@ -74,6 +89,12 @@ abstract class DB extends ActiveRecord {
         return $this;
     }
 
+    /**
+     * 从数据库中删除数据
+     *
+     * @access public
+     * @return boolean
+     */
     public function destroy() {
         if (!$id = $this->id()) return false;
 
@@ -91,6 +112,12 @@ abstract class DB extends ActiveRecord {
         return $affected;
     }
 
+    /**
+     * 从数据库重新获取数据
+     *
+     * @access public
+     * @return Lysine\Orm\ActiveRecord\DB
+     */
     public function refresh() {
         if (!$id = $this->id()) return $this;
 
@@ -116,6 +143,14 @@ abstract class DB extends ActiveRecord {
         return $this;
     }
 
+    /**
+     * 获得关联数据
+     * 只能在Lysine\Orm\ActiveRecord\DB类之间关联
+     *
+     * @param string $name
+     * @access protected
+     * @return mixed
+     */
     protected function getReferer($name) {
         if (array_key_exists($name, $this->referer))
             return $this->referer[$name];
@@ -153,6 +188,25 @@ abstract class DB extends ActiveRecord {
         return $result;
     }
 
+    /**
+     * 设置当前数据库连接实例
+     *
+     * @param IAdapter $adapter
+     * @access public
+     * @return Lysine\Orm\ActiveRecord\DB
+     */
+    public function setStorage(IAdapter $adapter) {
+        return parent::setStorage($adapter);
+    }
+
+    /**
+     * 生成数据库查询
+     *
+     * @param IAdapter $adapter
+     * @static
+     * @access public
+     * @return Lysine\Storage\DB\Select
+     */
     static public function select(IAdapter $adapter = null) {
         if (!$adapter) $adapter = static::getStorage();
 
@@ -169,6 +223,15 @@ abstract class DB extends ActiveRecord {
         return $select;
     }
 
+    /**
+     * 根据主键得到实例
+     *
+     * @param mixed $key
+     * @param IStorage $storage
+     * @static
+     * @access public
+     * @return mixed
+     */
     static public function find($key, IStorage $storage = null) {
         $select = static::select($storage);
 
