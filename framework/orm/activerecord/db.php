@@ -7,8 +7,8 @@ use Lysine\Storage\Pool;
 use Lysine\Orm\ActiveRecord;
 
 abstract class DB extends ActiveRecord {
+    /*
     static protected $referer_config = array(
-        /*
         'author' => array(
             'class' => 'Author',
             'source_key' => 'author_id',
@@ -23,20 +23,8 @@ abstract class DB extends ActiveRecord {
             'where' => array('is_deleted = ?', 0),
             'order' => 'create_time DESC',
         ),
-        */
     );
-
-    protected $referer = array();
-
-    public function __get($key) {
-        $val = parent::__get($key);
-        if ($val !== false) return $val;
-
-        if (array_key_exists($key, static::$referer))
-            return $this->getReferer($key);
-
-        return false;
-    }
+    */
 
     public function save($refresh = true) {
         $pk = static::$primary_key;

@@ -25,11 +25,15 @@ abstract class ActiveRecord implements IActiveRecord {
         */
     );
 
+    static protected $referer_config = array();
+
     protected $storage;
     protected $row = array();
     protected $dirty_row = array();
     protected $props = array();
+    protected $referer = array();
 
+    abstract public function getReferer($name);
     abstract public function save($refersh = true);
     abstract public function destroy();
     abstract public function refresh();
@@ -103,6 +107,9 @@ abstract class ActiveRecord implements IActiveRecord {
 
             return $prop;
         }
+
+        if (isset(static::$referer_config[$key]))
+            return $this->getReferer($key);
 
         return $this->get($key);
     }
