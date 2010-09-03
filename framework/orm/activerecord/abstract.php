@@ -6,9 +6,6 @@ use Lysine\Utils\Events;
 use Lysine\Storage\Pool;
 
 interface IActiveRecord {
-    public function save();
-    public function destroy();
-    public function refresh();
     static public function find($key, IStorage $storage = null);
 }
 
@@ -32,6 +29,10 @@ abstract class ActiveRecord implements IActiveRecord {
     protected $row = array();
     protected $dirty_row = array();
     protected $props = array();
+
+    abstract public function save($refersh = true);
+    abstract public function destroy();
+    abstract public function refresh();
 
     public function __construct(array $row = array(), $from_storage = false) {
         $events = Events::instance();
@@ -65,6 +66,13 @@ abstract class ActiveRecord implements IActiveRecord {
         Events::instance()->clearEvent($this);
     }
 
+    public function __call($fn, $args) {
+        if ($fn == 'getStorage') {  // 获得当前实例的storage
+            if (!$this->storage) $this->storage = static::getStorage();
+            return $this->storage;
+        }
+    }
+
     public function __set($key, $val) {
         if (isset(static::$props_config[$key]['setter'])) {
             $fn = static::$props_config[$key]['setter'];
@@ -77,29 +85,26 @@ abstract class ActiveRecord implements IActiveRecord {
     }
 
     public function __get($key) {
-        $val = $this->get($key);
-        if ($val !== false) return $val;
+        if (isset(static::$props_config[$key]['getter'])) {
+            if (isset($this->props[$key])) return $this->props[$key];
 
-        if (!isset(static::$props_config[$key])) return false;
+            $config = static::$props_config[$key]['getter'];
 
-        if (isset($this->props[$key])) return $this->props[$key];
+            if (is_array($config)) {
+                $fn = array_shift($config);
+                $cache = array_shift($config);
+            } else {
+                $fn = $config;
+                $cache = false;
+            }
 
-        $config = static::$props_config[$key];
+            $prop = $this->$fn();
+            if ($cache) $this->props[$key] = $prop;
 
-        if (!isset($config['getter'])) return false;
-
-        if (is_array($config['getter'])) {
-            $fn = array_shift($config['getter']);
-            $cache = array_shift($config['getter']);
-        } else {
-            $fn = $config['getter'];
-            $cache = false;
+            return $prop;
         }
 
-        $prop = $this->$fn();
-        if ($cache) $this->props[$key] = $prop;
-
-        return $prop;
+        return $this->get($key);
     }
 
     public function id() {
@@ -114,13 +119,12 @@ abstract class ActiveRecord implements IActiveRecord {
         }
 
         $pk = static::$primary_key;
-        while (list($key, $val) = each($col)) {
-            if ($key == $pk && isset($this->row[$pk]) && $this->row[$pk]) {
+        foreach ($col as $key => $val) {
+            if ($key == $pk && isset($this->row[$pk]) && $this->row[$pk])
                 throw new \LogicException(__CLASS__ .': primary key refuse update');
-            } else {
-                $this->row[$key] = $val;
-                if (!$direct) $this->dirty_row[] = $key;
-            }
+
+            $this->row[$key] = $val;
+            if (!$direct) $this->dirty_row[] = $key;
         }
         if (!$direct) $this->dirty_row = array_unique($this->dirty_row);
 
@@ -149,10 +153,8 @@ abstract class ActiveRecord implements IActiveRecord {
         return $this;
     }
 
-    static public function getStorage($ar = null) {
-        $config = static::$storage_config;
-        if (!is_array($config)) return Pool::instance()->get($config);
-        return false;
+    static public function getStorage() {
+        return Pool::instance()->get(static::$storage_config);
     }
 
     public function __before_init() {}
