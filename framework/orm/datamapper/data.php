@@ -1,8 +1,8 @@
 <?php
-namespace Lysine\Orm\DataMapper;
+namespace Lysine\ORM\DataMapper;
 
-use Lysine\Orm\DataMapper\DBMapper;
-use Lysine\Orm\DataMapper\MongoMapper;
+use Lysine\ORM\DataMapper\DBMapper;
+use Lysine\ORM\DataMapper\MongoMapper;
 
 interface IData {
     static public function getMapper();

@@ -1,8 +1,8 @@
 <?php
-namespace Lysine\Orm\DataMapper;
+namespace Lysine\ORM\DataMapper;
 
-use Lysine\Orm\DataMapper\Data;
-use Lysine\Orm\DataMapper\Meta;
+use Lysine\ORM\DataMapper\Data;
+use Lysine\ORM\DataMapper\Meta;
 
 abstract class Mapper {
     static private $instance = array();

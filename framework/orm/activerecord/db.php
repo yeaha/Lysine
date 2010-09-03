@@ -1,10 +1,10 @@
 <?php
-namespace Lysine\Orm\ActiveRecord;
+namespace Lysine\ORM\ActiveRecord;
 
 use Lysine\IStorage;
 use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\Pool;
-use Lysine\Orm\ActiveRecord;
+use Lysine\ORM\ActiveRecord;
 
 /**
  * 数据库数据和业务模型映射封装
@@ -39,7 +39,7 @@ abstract class DB extends ActiveRecord {
      *
      * @param boolean $refresh
      * @access public
-     * @return Lysine\Orm\ActiveRecord\DB
+     * @return Lysine\ORM\ActiveRecord\DB
      */
     public function save($refresh = true) {
         $pk = static::$primary_key;
@@ -116,7 +116,7 @@ abstract class DB extends ActiveRecord {
      * 从数据库重新获取数据
      *
      * @access public
-     * @return Lysine\Orm\ActiveRecord\DB
+     * @return Lysine\ORM\ActiveRecord\DB
      */
     public function refresh() {
         if (!$id = $this->id()) return $this;
@@ -145,7 +145,7 @@ abstract class DB extends ActiveRecord {
 
     /**
      * 获得关联数据
-     * 只能在Lysine\Orm\ActiveRecord\DB类之间关联
+     * 只能在Lysine\ORM\ActiveRecord\DB类之间关联
      *
      * @param string $name
      * @access protected
@@ -160,8 +160,8 @@ abstract class DB extends ActiveRecord {
             throw new \UnexpectedValueException(__CLASS__ .': ActiveRecord referer must set class');
 
         $class = $config['class'];
-        if (!is_subclass_of($class, 'Lysine\Orm\ActiveRecord\DB'))
-            throw new \UnexpectedValueException(__CLASS__ .': Activerecord referer class must be subclass of Lysine\Orm\ActiveRecord\DB');
+        if (!is_subclass_of($class, 'Lysine\ORM\ActiveRecord\DB'))
+            throw new \UnexpectedValueException(__CLASS__ .': Activerecord referer class must be subclass of Lysine\ORM\ActiveRecord\DB');
 
         $select = forward_static_call(array($class, 'select'));
         $adapter = $select->getAdapter();
@@ -193,7 +193,7 @@ abstract class DB extends ActiveRecord {
      *
      * @param IAdapter $adapter
      * @access public
-     * @return Lysine\Orm\ActiveRecord\DB
+     * @return Lysine\ORM\ActiveRecord\DB
      */
     public function setStorage(IAdapter $adapter) {
         return parent::setStorage($adapter);

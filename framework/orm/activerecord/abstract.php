@@ -1,5 +1,5 @@
 <?php
-namespace Lysine\Orm;
+namespace Lysine\ORM;
 
 use Lysine\IStorage;
 use Lysine\Utils\Events;
@@ -19,7 +19,7 @@ interface IActiveRecord {
      * @param IStorage $storage
      * @static
      * @access public
-     * @return Lysine\Orm\ActiveRecord
+     * @return Lysine\ORM\ActiveRecord
      */
     static public function find($key, IStorage $storage = null);
 }
@@ -126,7 +126,7 @@ abstract class ActiveRecord implements IActiveRecord {
      * @param boolean $refersh 保存成功后从存储服务重新获取数据
      * @abstract
      * @access public
-     * @return Lysine\Orm\ActiveRecord
+     * @return Lysine\ORM\ActiveRecord
      */
     abstract public function save($refersh = true);
 
@@ -144,7 +144,7 @@ abstract class ActiveRecord implements IActiveRecord {
      *
      * @abstract
      * @access public
-     * @return Lysine\Orm\ActiveRecord
+     * @return Lysine\ORM\ActiveRecord
      */
     abstract public function refresh();
 
@@ -278,7 +278,7 @@ abstract class ActiveRecord implements IActiveRecord {
      * @param mixed $val
      * @param boolean $direct
      * @access public
-     * @return Lysine\Orm\ActiveRecrod
+     * @return Lysine\ORM\ActiveRecrod
      */
     public function set($col, $val = null, $direct = false) {
         if (is_array($col)) {
@@ -350,7 +350,7 @@ abstract class ActiveRecord implements IActiveRecord {
      *
      * @param IStorage $storage
      * @access public
-     * @return Lysine\Orm\ActiveRecord
+     * @return Lysine\ORM\ActiveRecord
      */
     public function setStorage(IStorage $storage) {
         $this->storage = $storage;
