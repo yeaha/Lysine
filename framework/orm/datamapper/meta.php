@@ -190,7 +190,7 @@ class Meta {
      * @access public
      * @return mixed
      */
-    public function getPropToField($prop = null) {
+    public function getFieldOfProp($prop = null) {
         if ($prop === null) return $this->prop_to_field;
 
         if (!isset($this->prop_to_field[$prop]))
@@ -204,7 +204,7 @@ class Meta {
      * @access public
      * @return mixed
      */
-    public function getFieldToProp($field = null) {
+    public function getPropOfField($field = null) {
         if ($field === null) return $this->field_to_prop;
 
         if (!isset($this->field_to_prop[$field]))

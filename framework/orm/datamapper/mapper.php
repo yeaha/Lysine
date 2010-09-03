@@ -109,7 +109,7 @@ abstract class Mapper {
      */
     public function recordToProps(array $record) {
         $props = array();
-        foreach ($this->getMeta()->getFieldToProp() as $field => $prop)
+        foreach ($this->getMeta()->getPropOfField() as $field => $prop)
             $props[$prop] = $record[$field];
 
         return $props;
@@ -124,10 +124,10 @@ abstract class Mapper {
      */
     public function propsToRecord(array $props) {
         $record = array();
-        $ptf = $this->getMeta()->getPropToField();
+        $fop = $this->getMeta()->getFieldOfProp();
 
         foreach ($props as $prop => $val)
-            $record[$ptf[$prop]] = $val;
+            $record[$fop[$prop]] = $val;
 
         return $record;
     }
