@@ -338,20 +338,21 @@ class MetaInspector {
      * 从指定的类中解析出类和属性的注释信息
      * 解析的结果需要通过Meta::sanitize()处理后才能使用
      *
-     * @param string $class
+     * @param string $class_name
      * @static
      * @access public
      * @return array
      */
-    static public function parse($class) {
-        $class = new \ReflectionClass($class);
+    static public function parse($class_name) {
+        $class = new \ReflectionClass($class_name);
 
         $meta = self::parseComment($class->getDocComment());
 
         $prop_meta = array();
         foreach ($class->getProperties() as $prop) {
             // DataMapper映射的属性不应该是静态或者公共属性
-            if ($prop->isStatic() || $prop->isPublic()) continue;
+            // 或者不是当前类所声明的
+            if ($prop->isStatic() || $prop->isPublic() || $prop->getDeclaringClass() != $class) continue;
 
             $result = array_merge(
                 self::parseComment($prop->getDocComment()),
@@ -361,6 +362,12 @@ class MetaInspector {
             $prop_meta[] = $result;
         }
         $meta['props'] = $prop_meta;
+
+        if ($parent_class = get_parent_class($class_name)) {
+            $parent_meta = Meta::factory($parent_class);
+            $meta['props'] = array_merge($parent_meta->getPropMeta(), $meta['props']);
+        }
+
         return $meta;
     }
 
