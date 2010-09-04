@@ -51,6 +51,16 @@ abstract class Data implements IData {
     protected $dirty_props = array();
 
     /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct() {
+        Events::instance()->clearEvent($this);
+    }
+
+    /**
      * 魔法方法
      * 读取属性
      *

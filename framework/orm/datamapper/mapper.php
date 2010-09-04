@@ -4,6 +4,7 @@ namespace Lysine\ORM\DataMapper;
 use Lysine\ORM\DataMapper\Data;
 use Lysine\ORM\DataMapper\Meta;
 use Lysine\Storage\Pool;
+use Lysine\Utils\Events;
 
 /**
  * 封装领域模型存储服务数据映射关系
@@ -146,6 +147,35 @@ abstract class Mapper {
         $data = new $data_class;
         $data->__fill($this->recordToProps($record));
         return $data;
+    }
+
+    /**
+     * 监听事件
+     *
+     * @param string $event
+     * @param callable $callback
+     * @access public
+     * @return void
+     */
+    public function addEvent($event, $callback) {
+        Events::instance()->addEvent($this, $event, $callback);
+    }
+
+    /**
+     * 触发事件
+     *
+     * @param string $event
+     * @param mixed $args
+     * @access public
+     * @return void
+     */
+    public function fireEvent($event, $args = null) {
+        if ($args === null) {
+            Events::instance()->fireEvent($this, $event);
+        } else {
+            $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
+            Events::instance()->fireEvent($this, $event, $args);
+        }
     }
 
     /**
