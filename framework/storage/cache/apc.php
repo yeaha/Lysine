@@ -1,20 +1,21 @@
 <?php
 namespace Lysine\Storage\Cache;
 
-use Lysine\Storage\ICache;
+use Lysine\Storage\Cache;
 
-class Apc implements ICache {
+class Apc extends Cache {
     protected $life_time = 60;
 
     public function __construct(array $config) {
         if (!extension_loaded('apc'))
             throw new \RuntimeException('Require APC extension');
 
-        if (isset($config['life_time'])) $this->life_time = $config['life_time'];
+        parent::__construct($config);
     }
 
     public function set($key, $val, $life_time = null) {
         if ($life_time === null) $life_time = $this->life_time;
+        $key = $this->makeKey($key);
         return apc_store($key, $val, $life_time);
     }
 
@@ -23,6 +24,7 @@ class Apc implements ICache {
     }
 
     public function get($key) {
+        $key = $this->makeKey($key);
         return apc_fetch($key);
     }
 
@@ -33,6 +35,7 @@ class Apc implements ICache {
     }
 
     public function delete($key) {
+        $key = $this->makeKey($key);
         return apc_delete($key);
     }
 

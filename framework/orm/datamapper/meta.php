@@ -3,7 +3,7 @@ namespace Lysine\ORM\DataMapper;
 
 use Lysine\Config;
 use Lysine\Storage\Pool;
-use Lysine\Storage\ICache;
+use Lysine\Storage\Cache;
 
 /**
  * 领域模型元数据
@@ -271,12 +271,12 @@ class Meta {
     /**
      * 设置缓存服务实例
      *
-     * @param ICache $cache
+     * @param Cache $cache
      * @static
      * @access public
      * @return void
      */
-    static public function setCache(ICache $cache) {
+    static public function setCache(Cache $cache) {
         self::$cache = $cache;
     }
 
@@ -285,7 +285,7 @@ class Meta {
      *
      * @static
      * @access public
-     * @return ICache
+     * @return Cache
      */
     static public function getCache() {
         if (self::$cache === null) {

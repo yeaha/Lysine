@@ -1,9 +1,9 @@
 <?php
 namespace Lysine\Storage\Cache;
 
-use Lysine\Storage\ICache;
+use Lysine\Storage\Cache;
 
-class Memcached implements ICache {
+class Memcached extends Cache {
     protected $memcached;
 
     protected $default_server = array('127.0.0.1', 11211);
@@ -26,6 +26,8 @@ class Memcached implements ICache {
 
         if (isset($config['life_time'])) $this->life_time = $config['life_time'];
 
+        if (isset($config['prefix'])) $this->setPrefix($config['prefix']);
+
         if ($options = array_get($config, 'options')) {
             foreach ($options as $key => $val)
                 $memcache->setOption($key, $val);
@@ -40,23 +42,36 @@ class Memcached implements ICache {
 
     public function set($key, $val, $life_time = null) {
         $life_time = $life_time ? (time() + $life_time) : 0;
+        $key = $this->makeKey($key);
         return $this->memcached->set($key, $val, $life_time);
     }
 
     public function mset(array $data, $life_time = null) {
         $life_time = $life_time ? (time() + $life_time) : 0;
-        return $this->memcached->setMulti($data, $life_time);
+
+        $d = array();
+        foreach ($data as $key => $val) {
+            $key = $this->makeKey($key);
+            $d[$key] = $val;
+        }
+
+        return $this->memcached->setMulti($d, $life_time);
     }
 
     public function get($key) {
+        $key = $this->makeKey($key);
+        var_dump($key);
         return $this->memcached->get($key);
     }
 
     public function mget(array $keys) {
+        foreach ($keys as $idx => $key)
+            $keys[$idx] = $this->makeKey($key);
         return $this->memcached->getMulti($keys);
     }
 
     public function delete($key) {
+        $key = $this->makeKey($key);
         return $this->memcached->delete($key);
     }
 
