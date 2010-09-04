@@ -75,9 +75,8 @@ class Mysql extends Adapter {
         if ($col_name instanceof Expr) return $col_name->__toString();
 
         $col_name = explode('.', $col_name);
-        while (list($key, $col) = each($col_name)) {
+        foreach ($col_name as $key => $col)
             $col_name[$key] = '`'. trim('`', $col) .'`';
-        }
         return implode('.', $col_name);
     }
 

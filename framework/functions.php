@@ -87,7 +87,7 @@ function array_get($target, $path) {
 
     $path = is_array($path) ? $path : array_slice(func_get_args(), 1);
 
-    while (list(, $key) = each($path)) {
+    foreach ($path as $key) {
         if (!is_array($target)) return false;
         if (!array_key_exists($key, $target)) return false;
 
@@ -124,7 +124,7 @@ function array_set(&$target, $path, $val) {
         list($key, $val) = array_splice($path, -2, 2);
     }
 
-    while (list(, $p) = each($path)) {
+    foreach ($path as $p) {
         if (!is_array($target)) return false;
         if (!array_key_exists($p, $target)) $target[$p] = array();
         $target =& $target[$p];

@@ -285,7 +285,7 @@ abstract class Adapter implements IAdapter {
         if ($where_bind AND is_int(key($where_bind))) $holder = '?';
 
         $set = $bind = array();
-        while (list($col, $val) = each($row)) {
+        foreach ($row as $col => $val) {
             $holder_here = $holder ? $holder : ':'. $col;
             $set[] = $this->qcol($col) .' = '. $holder_here;
 

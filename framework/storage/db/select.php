@@ -224,7 +224,7 @@ class Select {
         $cols = $this->cols;
         if (!is_array($col)) $col = func_get_args();
 
-        while (list(, $c) = each($col)) $cols[] = $c;
+        foreach ($col as $c) $cols[] = $c;
         $this->cols = array_unique($cols);
         return $this;
     }

@@ -27,7 +27,7 @@ class Injection {
      */
     final public function inject($fn, $callable = null) {
         if (is_array($fn)) {
-            while (list($k, $v) = each($fn)) $this->inject($k, $v);
+            foreach ($fn as $k => $v) $this->inject($k, $v);
         } else {
             if (!is_callable($callable))
                 throw new \InvalidArgumentException('Injection::inject() parameter 2 is not callable');

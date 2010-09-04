@@ -61,7 +61,7 @@ class View {
     protected $block_config = array();
 
     public function __construct(array $config) {
-        while (list($key, $val) = each($config))
+        foreach ($config as $key => $val)
             $this->$key = $val;
     }
 
@@ -166,7 +166,7 @@ class View {
         $file = $this->findFile($file);
 
         if ($vars) {
-            while (list($key, $val) = each($vars))
+            foreach ($vars as $key => $val)
                 $this->set($key, $val);
         }
 
