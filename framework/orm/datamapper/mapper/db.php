@@ -19,15 +19,14 @@ class DBMapper extends Mapper {
      * @return Lysine\ORM\DataMapper\Data
      */
     public function find($key) {
-        $meta = $this->getMeta();
-        $adapter = $this->getStorage();
-        $table_name = $adapter->qtab($meta->getCollection());
-        $primary_key = $adapter->qcol($meta->getPrimaryKey());
+        $select = $this->select();
+        $pk = $this->getMeta()->getPrimaryKey();
 
-        $sql = "select * from {$table_name} where {$primary_key} = ?";
-        if ($record = $adapter->execute($sql, $key)->getRow())
-            return $this->package($record);
-        return false;
+        if (is_array($key)) {
+            return $select->whereIn($pk, $key)->get();
+        } else {
+            return $select->where($pk, $key)->get(1);
+        }
     }
 
     /**
