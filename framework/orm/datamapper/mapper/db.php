@@ -19,31 +19,15 @@ class DBMapper extends Mapper {
      * @return Lysine\ORM\DataMapper\Data
      */
     public function find($key) {
-        $select = $this->select();
-        $primary_key = $this->getMeta()->getPrimaryKey();
-
-        if (is_array($key)) {
-            return $select->whereIn($primary_key, $key)->get();
-        } else {
-            return $select->where($primary_key, $key)->get(1);
-        }
-    }
-
-    /**
-     * 发起数据库查询
-     *
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function select() {
-        $processor = array($this, 'package');
-
         $meta = $this->getMeta();
-        $select = $this->getStorage()
-                       ->select($meta->getCollection())
-                       ->setKeyColumn($meta->getPrimaryKey())
-                       ->setProcessor($processor);
-        return $select;
+        $adapter = $this->getStorage();
+        $table_name = $adapter->qtab($meta->getCollection());
+        $primary_key = $adapter->qcol($meta->getPrimaryKey());
+
+        $sql = "select * from {$table_name} where {$primary_key} = ?";
+        if ($record = $adapter->execute($sql, $key)->getRow())
+            return $this->package($record);
+        return false;
     }
 
     /**
@@ -103,5 +87,22 @@ class DBMapper extends Mapper {
         $primary_key = $meta->getPrimaryKey();
 
         return $this->getStorage()->delete($table_name, "{$primary_key} = ?", $data->id());
+    }
+
+    /**
+     * 发起数据库查询
+     *
+     * @access public
+     * @return Lysine\Storage\DB\Select
+     */
+    public function select() {
+        $processor = array($this, 'package');
+
+        $meta = $this->getMeta();
+        $select = $this->getStorage()
+                       ->select($meta->getCollection())
+                       ->setKeyColumn($meta->getPrimaryKey())
+                       ->setProcessor($processor);
+        return $select;
     }
 }
