@@ -42,7 +42,7 @@ abstract class Data implements IData {
     protected $is_fresh = true;
 
     /**
-     * 被修改过的属性
+     * 被修改过的属性名
      *
      * @var array
      * @access protected
@@ -51,6 +51,7 @@ abstract class Data implements IData {
     protected $dirty_props = array();
 
     /**
+     * 魔法方法
      * 读取属性
      *
      * @param string $prop
@@ -58,9 +59,13 @@ abstract class Data implements IData {
      * @return mixed
      */
     public function __get($prop) {
-        // 修改过的属性值会覆盖原来的属性值
-        if (array_key_exists($prop, $this->dirty_props))
-            return $this->dirty_props[$prop];
+        $meta = static::getMeta();
+
+        if ($meta->haveProperty($prop)) {
+            $prop_meta = $meta->getPropMeta($prop);
+            if ($getter = $prop_meta['getter'])
+                return $this->$getter();
+        }
 
         return $this->$prop;
     }
@@ -86,7 +91,37 @@ abstract class Data implements IData {
         if (!$this->is_fresh && $prop_meta['primary_key'] && $this->$prop)
             throw new \LogicException(get_class($this) .': Property ['. $prop .'] refuse update');
 
-        $this->dirty_props[$prop] = $val;
+        if ($setter = $prop_meta['setter']) {
+            return $this->$setter($val);
+        } else {
+            $this->set($prop, $val);
+        }
+    }
+
+    /**
+     * 设置属性
+     *
+     * @param mixed $prop
+     * @param mixed $val
+     * @param boolean $direct
+     * @access public
+     * @return Lysine\ORM\DataMapper\Data
+     */
+    public function set($prop, $val, $direct = false) {
+        if (is_array($prop)) {
+            $props = $prop;
+            $direct = (bool)$val;
+        } else {
+            $props = array($prop => $val);
+        }
+
+        foreach ($props as $prop => $val) {
+            $this->$prop = $val;
+            if (!$direct) $this->dirty_props[] = $prop;
+        }
+        if (!$direct) $this->dirty_props = array_unique($this->dirty_props);
+
+        return $this;
     }
 
     /**
@@ -136,13 +171,18 @@ abstract class Data implements IData {
      * @return array
      */
     public function toArray($only_dirty = false) {
-        if ($only_dirty) return $this->dirty_props;
-
         $props = array();
+
+        if ($only_dirty) {
+            foreach ($this->dirty_props as $prop)
+                $props[$prop] = $this->$prop;
+            return $props;
+        }
+
         foreach (array_keys(static::getMeta()->getPropMeta()) as $prop)
             $props[$prop] = $this->$prop;
 
-        return array_merge($props, $this->dirty_props);
+        return $props;
     }
 
     /**

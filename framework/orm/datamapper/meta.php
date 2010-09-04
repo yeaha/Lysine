@@ -31,6 +31,8 @@ class Meta {
         'type' => NULL,
         'primary_key' => FALSE,
         'readonly' => FALSE,
+        'getter' => NULL,
+        'setter' => NULL,
     );
 
     /**
@@ -119,7 +121,7 @@ class Meta {
         }
 
         if (!$meta) {
-            $meta = self::sanitize(MetaInspector::parse($class));
+            $meta = MetaInspector::parse($class);
             if ($meta) self::$meta_set[$class] = $meta;
             if ($meta && $cache) $cache->set('orm.datamapper.meta.'. $class, $meta);
         }
@@ -362,6 +364,8 @@ class MetaInspector {
             $prop_meta[] = $result;
         }
         $meta['props'] = $prop_meta;
+
+        $meta = Meta::sanitize($meta);
 
         if ($parent_class = get_parent_class($class_name)) {
             $parent_meta = Meta::factory($parent_class);
