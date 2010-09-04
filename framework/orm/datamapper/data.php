@@ -89,7 +89,7 @@ abstract class Data implements IData {
             throw new \LogicException(get_class($this) .': Property ['. $prop .'] is readonly');
 
         if (!$this->is_fresh && $prop_meta['primary_key'] && $this->$prop)
-            throw new \LogicException(get_class($this) .': Property ['. $prop .'] refuse update');
+            throw new \LogicException(get_class($this) .': Property ['. $prop .'] refuse replace');
 
         if ($setter = $prop_meta['setter']) {
             return $this->$setter($val);
@@ -193,7 +193,7 @@ abstract class Data implements IData {
      */
     public function save() {
         $mapper = static::getMapper();
-        return $this->is_fresh ? $mapper->create($this) : $mapper->update($this);
+        return $this->is_fresh ? $mapper->put($this) : $mapper->replace($this);
     }
 
     /**

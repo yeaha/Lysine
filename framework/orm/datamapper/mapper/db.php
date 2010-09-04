@@ -53,7 +53,7 @@ class DBMapper extends Mapper {
      * @access public
      * @return Lysine\ORM\DataMapper\Data
      */
-    public function create(Data $data) {
+    public function put(Data $data) {
         $record = $this->propsToRecord($data->toArray());
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
@@ -75,7 +75,7 @@ class DBMapper extends Mapper {
      * @access public
      * @return Lysine\ORM\DataMapper\Data
      */
-    public function update(Data $data) {
+    public function replace(Data $data) {
         $props = $data->toArray(/* only_dirty */true);
         if (!$props) return $data;
 

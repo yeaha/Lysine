@@ -35,7 +35,7 @@ abstract class Mapper {
      * @access public
      * @return Lysine\ORM\DataMapper\Data
      */
-    abstract public function create(Data $data);
+    abstract public function put(Data $data);
 
     /**
      * 更新领域模型数据到存储服务
@@ -45,7 +45,7 @@ abstract class Mapper {
      * @access public
      * @return Lysine\ORM\DataMapper\Data
      */
-    abstract public function update(Data $data);
+    abstract public function replace(Data $data);
 
     /**
      * 在存储服务中删除领域模型数据
