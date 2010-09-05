@@ -79,8 +79,6 @@ class DBMapper extends Mapper {
      * @return boolean
      */
     public function delete(Data $data) {
-        if ($data->isFresh()) return true;
-
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();

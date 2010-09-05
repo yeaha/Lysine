@@ -203,7 +203,13 @@ abstract class Data implements IData {
      */
     public function save() {
         $mapper = static::getMapper();
-        return $this->is_fresh ? $mapper->put($this) : $mapper->replace($this);
+        if ($this->is_fresh) {
+            return $mapper->put($this);
+        } elseif ($this->dirty_props) {
+            return $mapper->replace($this);
+        } else {
+            return $this;
+        }
     }
 
     /**
@@ -213,6 +219,8 @@ abstract class Data implements IData {
      * @return boolean
      */
     public function delete() {
+        if ($this->is_fresh) return true;
+
         return static::getMapper()->delete($this);
     }
 
