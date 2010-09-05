@@ -125,12 +125,8 @@ abstract class Mapper {
      */
     public function propsToRecord(array $props) {
         $record = array();
-        $fop = $this->getMeta()->getFieldOfProp();
-
-        foreach ($props as $prop => $val) {
-            if (!isset($fop[$prop])) continue;
-            $record[$fop[$prop]] = $val;
-        }
+        foreach ($this->getMeta()->getFieldOfProp() as $prop => $field)
+            $record[$field] = $props[$prop];
 
         return $record;
     }
