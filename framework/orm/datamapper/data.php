@@ -102,7 +102,7 @@ abstract class Data implements IData {
             throw new \LogicException(get_class($this) .': Property ['. $prop .'] refuse replace');
 
         if ($setter = $prop_meta['setter']) {
-            return $this->$setter($val);
+            $this->$setter($val);
         } else {
             $this->set($prop, $val);
         }

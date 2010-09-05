@@ -20,19 +20,23 @@ class Meta {
     /**
      * 类定义元数据有效的key
      */
-    static private $class_meta_keys = array('storage', 'collection');
+    static private $class_meta_keys = array(
+        'storage',          // 存储服务配置，一般是设置为存储服务名
+        'collection'        // 存储集合名字
+    );
 
     /**
      * 默认属性元数据定义数组
      */
     static private $default_prop_meta = array(
-        'name' => NULL,
-        'field' => NULL,
-        'type' => NULL,
-        'primary_key' => FALSE,
-        'readonly' => FALSE,
-        'getter' => NULL,
-        'setter' => NULL,
+        'name' => NULL,             // 属性名
+        'field' => NULL,            // 存储字段名
+        'type' => NULL,             // 数据类型
+        'primary_key' => FALSE,     // 是否主键
+        'readonly' => FALSE,        // 是否只读属性
+        'internal' => FALSE,        // 是否model自己的属性 和存储数据无直接映射关系
+        'getter' => NULL,           // 自定义getter
+        'setter' => NULL,           // 自定义setter
     );
 
     /**
@@ -129,6 +133,8 @@ class Meta {
         foreach ($meta as $key => $val) $this->$key = $val;
 
         foreach ($this->props as $name => $config) {
+            if ($config['internal']) continue;
+
             $field = $config['field'];
             if ($config['primary_key']) $this->primary_key = $field;
 
@@ -195,9 +201,9 @@ class Meta {
     public function getFieldOfProp($prop = null) {
         if ($prop === null) return $this->prop_to_field;
 
-        if (!isset($this->prop_to_field[$prop]))
-            throw new \InvalidArgumentException();
-        return $this->prop_to_field[$prop];
+        return isset($this->prop_to_field[$prop])
+             ? $this->prop_to_field[$prop]
+             : false;
     }
 
     /**
@@ -209,9 +215,9 @@ class Meta {
     public function getPropOfField($field = null) {
         if ($field === null) return $this->field_to_prop;
 
-        if (!isset($this->field_to_prop[$field]))
-            throw new \InvalidArgumentException();
-        return $this->field_to_prop[$field];
+        return isset($this->field_to_prop[$field])
+             ? $this->field_to_prop[$field]
+             : false;
     }
 
     /**
@@ -246,19 +252,13 @@ class Meta {
         $default = self::$default_prop_meta;
         $prop_keys = array_keys($default);
         foreach ($meta['props'] as $config) {
-            // 声明为internal的属性属于模型自己的属性，不纳入DataMapper映射关系
-            if (array_key_exists('internal', $config)) continue;
+            if (!isset($config['field']) && !isset($config['internal']))
+                $config['field'] = $config['name'];
 
             if (isset($config['var'])) {
                 if (!isset($config['type'])) $config['type'] = $config['var'];
                 unset($config['var']);
             }
-
-            if (!isset($config['field'])) $config['field'] = $config['name'];
-
-            if (array_key_exists('primary_key', $config)) $config['primary_key'] = true;
-
-            if (array_key_exists('readonly', $config)) $config['readonly'] = true;
 
             foreach ($config as $key => $val)
                 if (!in_array($key, $prop_keys)) unset($config[$key]);
@@ -393,7 +393,7 @@ class MetaInspector {
 
             if (preg_match('/^@(\w+)\s*(\S+)?/', $line, $match)) {
                 $key = strtolower($match[1]);
-                $result[$key] = isset($match[2]) ? $match[2] : null;
+                $result[$key] = isset($match[2]) ? $match[2] : true;
             }
         }
 
