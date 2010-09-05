@@ -13,7 +13,7 @@ abstract class Singleton {
     /**
      * 唯一实例
      */
-    static protected $instance;
+    static protected $instance = array();
 
     /**
      * 获得唯一实例
@@ -23,11 +23,11 @@ abstract class Singleton {
      * @return mixed
      */
     static public function instance() {
-        if (!static::$instance) {
-            $class = get_called_class();
-            static::$instance = new $class;
-        }
-        return static::$instance;
+        $class = get_called_class();
+        if (!isset(self::$instance[$class]))
+            self::$instance[$class] = new $class;
+
+        return static::$instance[$class];
     }
 
     /**
