@@ -60,7 +60,6 @@ class Memcached extends Cache {
 
     public function get($key) {
         $key = $this->makeKey($key);
-        var_dump($key);
         return $this->memcached->get($key);
     }
 

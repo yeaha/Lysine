@@ -158,7 +158,7 @@ abstract class Data implements IData {
      */
     public function id() {
         $meta = static::getMeta();
-        $prop = $meta->getFieldToProp($meta->getPrimaryKey());
+        $prop = $meta->getPropOfField($meta->getPrimaryKey());
         return $this->$prop;
     }
 
