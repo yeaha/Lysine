@@ -348,7 +348,11 @@ class MetaInspector {
     static public function parse($class_name) {
         $class = new \ReflectionClass($class_name);
 
-        $meta = self::parseComment($class->getDocComment());
+        $class_comment = $class->getDocComment();
+        if ($class_comment === false)
+            throw new \UnexpectedValueException('Undefined class ['. $class->getName() .'] meta comment');
+
+        $meta = self::parseComment($class_comment);
 
         $prop_meta = array();
         foreach ($class->getProperties() as $prop) {
@@ -356,8 +360,12 @@ class MetaInspector {
             // 或者不是当前类所声明的
             if ($prop->isStatic() || $prop->isPublic() || $prop->getDeclaringClass() != $class) continue;
 
+            $prop_comment = $prop->getDocComment();
+            if ($prop_comment === false)
+                throw new \UnexpectedValueException('Undefined class ['. $class->getName() .'] property ['. $prop->getName() .'] meta comment');
+
             $result = array_merge(
-                self::parseComment($prop->getDocComment()),
+                self::parseComment($prop_comment),
                 array('name' => $prop->getName())
             );
 
