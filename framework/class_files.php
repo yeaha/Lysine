@@ -34,6 +34,7 @@ return array(
     'Lysine\Storage\DB\IResult' => './interfaces.php',
     'Lysine\Storage\DB\Result' => './storage/db/result.php',
     'Lysine\Storage\DB\Select' => './storage/db/select.php',
+    'Lysine\Storage\Mongo' => './storage/mongo/mongo.php',
     'Lysine\Storage\Pool' => './storage/pool.php',
     'Lysine\Utils\Coll' => './utils/collection.php',
     'Lysine\Utils\Events' => './utils/events.php',
