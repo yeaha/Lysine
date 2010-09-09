@@ -3,23 +3,10 @@ namespace Lysine\Storage;
 
 use Lysine\IStorage;
 
-class Mongo extends IStorage {
-    private $handle;
-
+class Mongo extends \Mongo implements IStorage {
     public function __construct(array $config) {
-        if (!extension_loaded('mongo'))
-            throw new \RuntimeException('Need mongo extension!');
-
         list($dsn, $options) = self::parseConfig($config);
-        $this->handle = new \Mongo($dsn, $options);
-    }
-
-    public function __get($prop) {
-        return $this->handle->$prop;
-    }
-
-    public function __call($fn, $args) {
-        return call_user_func_array(array($this->handle, $fn), $args);
+        parent::__construct($dsn, $options);
     }
 
     static public function parseConfig(array $config) {
