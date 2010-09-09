@@ -29,44 +29,45 @@ abstract class Mapper {
     protected $class;
 
     /**
-     * 保存新的领域模型数据到存储服务
+     * 根据主键查找数据
      *
-     * @param Data $data
+     * @param mixed $id
      * @abstract
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
+     * @access protected
+     * @return array
      */
-    abstract public function put(Data $data);
+    abstract protected function doFind($id);
 
     /**
-     * 更新领域模型数据到存储服务
+     * 保存数据到存储服务
      *
-     * @param Data $data
+     * @param array $record
      * @abstract
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
+     * @access protected
+     * @return mixed 新数据的主键值
      */
-    abstract public function replace(Data $data);
+    abstract protected function doPut(array $record);
 
     /**
-     * 在存储服务中删除领域模型数据
+     * 保存更新数据到存储服务
      *
-     * @param Data $data
+     * @param string $id 主键值
+     * @param array $record
      * @abstract
-     * @access public
+     * @access protected
      * @return boolean
      */
-    abstract public function delete(Data $data);
+    abstract protected function doReplace($id, array $record);
 
     /**
-     * 根据主键生成领域模型实例
+     * 删除指定主键的数据
      *
-     * @param mixed $key
+     * @param mixed $id
      * @abstract
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
+     * @access protected
+     * @return boolean
      */
-    abstract public function find($key);
+    abstract protected function doDelete($id);
 
     /**
      * 构造函数
@@ -132,6 +133,94 @@ abstract class Mapper {
     }
 
     /**
+     * 根据主键返回模型
+     *
+     * @param mixed $id
+     * @access public
+     * @return Lysine\ORM\DataMapper\Data
+     */
+    public function find($id) {
+        if ($record = $this->doFind($id))
+            return $this->package($record);
+        return false;
+    }
+
+    /**
+     * 保存模型数据到存储服务
+     *
+     * @param Data $data
+     * @access public
+     * @return Lysine\ORM\DataMapper\Data
+     */
+    public function save(Data $data) {
+        if ($this->getMeta()->getReadonly())
+            throw new \LogicException($this->class .' is readonly');
+
+        $data->fireEvent(Data::BEFORE_SAVE_EVENT);
+
+        if ($data->isFresh()) {
+            $data->fireEvent(Data::BEFORE_PUT_EVENT);
+            if ($this->put($data)) $data->fireEvent(Data::AFTER_PUT_EVENT);
+        } elseif ($data->isDirty()) {
+            $data->fireEvent(Data::BEFORE_REPLACE_EVENT);
+            if ($this->replace($data)) $data->fireEvent(Data::AFTER_REPLACE_EVENT);
+        }
+
+        $data->fireEvent(Data::AFTER_SAVE_EVENT);
+
+        return $data;
+    }
+
+    /**
+     * 保存新的模型数据到存储服务
+     *
+     * @param Data $data
+     * @access protected
+     * @return boolean
+     */
+    protected function put(Data $data) {
+        $record = $this->propsToRecord($data->toArray());
+        if (!$id = $this->doPut($record)) return false;
+
+        $new_record = $this->doFind($id);
+        $data->__fill($this->recordToProps($new_record));
+
+        return true;
+    }
+
+    /**
+     * 更新领域模型数据到存储服务
+     *
+     * @param Data $data
+     * @access protected
+     * @return boolean
+     */
+    protected function replace(Data $data) {
+        $record = $this->propsToRecord($data->toArray(/* only dirty */true));
+        if (!$this->doReplace($data->id(), $record)) return false;
+
+        return true;
+    }
+
+    /**
+     * 从存储服务删除模型数据
+     *
+     * @param Data $data
+     * @access public
+     * @return boolean
+     */
+    public function delete(Data $data) {
+        if ($this->getMeta()->getReadonly())
+            throw new \LogicException($this->class .' is readonly');
+
+        $data->fireEvent(Data::BEFORE_DELETE_EVENT);
+        if (!$this->doDelete($data->id())) return false;
+
+        $data->fireEvent(Data::AFTER_DELETE_EVENT);
+        return true;
+    }
+
+    /**
      * 把存储服务中获得的数据实例化为领域模型
      *
      * @param array $record
@@ -143,35 +232,6 @@ abstract class Mapper {
         $data = new $data_class;
         $data->__fill($this->recordToProps($record));
         return $data;
-    }
-
-    /**
-     * 监听事件
-     *
-     * @param string $event
-     * @param callable $callback
-     * @access public
-     * @return void
-     */
-    public function addEvent($event, $callback) {
-        Events::instance()->addEvent($this, $event, $callback);
-    }
-
-    /**
-     * 触发事件
-     *
-     * @param string $event
-     * @param mixed $args
-     * @access public
-     * @return void
-     */
-    public function fireEvent($event, $args = null) {
-        if ($args === null) {
-            Events::instance()->fireEvent($this, $event);
-        } else {
-            $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-            Events::instance()->fireEvent($this, $event, $args);
-        }
     }
 
     /**

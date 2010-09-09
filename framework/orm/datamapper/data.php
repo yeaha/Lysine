@@ -32,6 +32,18 @@ interface IData {
  * @collection
  */
 abstract class Data implements IData {
+    const BEFORE_SAVE_EVENT = 'before save';
+    const AFTER_SAVE_EVENT = 'after save';
+
+    const BEFORE_PUT_EVENT = 'before put';
+    const AFTER_PUT_EVENT = 'after put';
+
+    const BEFORE_REPLACE_EVENT = 'before replace';
+    const AFTER_REPLACE_EVENT = 'after replace';
+
+    const BEFORE_DELETE_EVENT = 'before delete';
+    const AFTER_DELETE_EVENT = 'after delete';
+
     /**
      * 是否新建数据
      *
@@ -181,6 +193,16 @@ abstract class Data implements IData {
     }
 
     /**
+     * 是否被修改过
+     *
+     * @access public
+     * @return boolean
+     */
+    public function isDirty() {
+        return (bool)$this->dirty_props;
+    }
+
+    /**
      * 以数组方式返回模型属性数据
      * 只包含字段对应的属性
      *
@@ -210,17 +232,7 @@ abstract class Data implements IData {
      * @return Lysine\ORM\DataMapper\Data;
      */
     public function save() {
-        if (static::getMeta()->getReadonly())
-            throw new \LogicException(get_class($this) .' is readonly');
-
-        $mapper = static::getMapper();
-        if ($this->is_fresh) {
-            return $mapper->put($this);
-        } elseif ($this->dirty_props) {
-            return $mapper->replace($this);
-        } else {
-            return $this;
-        }
+        return static::getMapper()->save($this);
     }
 
     /**

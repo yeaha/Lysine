@@ -1,8 +1,6 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
-use Lysine\ORM\DataMapper\Data;
-
 /**
  * 数据库映射关系封装
  *
@@ -12,78 +10,69 @@ use Lysine\ORM\DataMapper\Data;
  */
 class DBMapper extends Mapper {
     /**
-     * 根据主键从数据库实例化领域模型
+     * 根据主键从数据库查询数据
      *
      * @param mixed $key
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
+     * @access protected
+     * @return array
      */
-    public function find($key) {
-        $select = $this->select();
-        $pk = $this->getMeta()->getPrimaryKey();
+    protected function doFind($key) {
+        $meta = $this->getMeta();
+        $table_name = $meta->getCollection();
+        $primary_key = $meta->getPrimaryKey();
 
-        if (is_array($key)) {
-            return $select->whereIn($pk, $key)->get();
-        } else {
-            return $select->where($pk, $key)->get(1);
-        }
+        return $this->getStorage()->execute("SELECT * FROM {$table_name} WHERE {$primary_key} = ?", $key)->getRow();
     }
 
     /**
-     * 保存新的领域模型数据到数据库
+     * 插入新数据到数据库
      *
-     * @param Data $data
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
+     * @param array $record
+     * @access protected
+     * @return mixed
      */
-    public function put(Data $data) {
-        $record = $this->propsToRecord($data->toArray());
+    protected function doPut(array $record) {
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
         $adapter = $this->getStorage();
 
-        if ($adapter->insert($table_name, $record)) {
-            if (!$id = $data->id()) $id = $adapter->lastId($table_name, $primary_id);
-            $record = $adapter->select($table_name)->where("{$primary_key} = ?", $id)->getRow();
-            $data->__fill($this->recordToProps($record));
-        }
-        return $data;
+        if (!$adapter->insert($table_name, $record)) return false;
+
+        if (isset($record[$primary_key])) return $record[$primary_key];
+
+        return $adapter->lastId($table_name, $primary_id);
     }
 
     /**
-     * 更新领域模型数据到数据库
+     * 更新数据到数据库
      *
-     * @param Data $data
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
+     * @param mixed $id
+     * @param array $record
+     * @access protected
+     * @return boolean
      */
-    public function replace(Data $data) {
-        $props = $data->toArray(/* only_dirty */true);
-        if (!$props) return $data;
-
-        $record = $this->propsToRecord($props);
+    protected function doReplace($id, array $record) {
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
 
-        $this->getStorage()->update($table_name, $record, "{$primary_key} = ?", $data->id());
-        return $data;
+        return $this->getStorage()->update($table_name, $record, "{$primary_key} = ?", $id);
     }
 
     /**
      * 从数据库里删除领域模型数据
      *
-     * @param Data $data
+     * @param mixed $id
      * @access public
      * @return boolean
      */
-    public function delete(Data $data) {
+    protected function doDelete($id) {
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
 
-        return $this->getStorage()->delete($table_name, "{$primary_key} = ?", $data->id());
+        return $this->getStorage()->delete($table_name, "{$primary_key} = ?", $id);
     }
 
     /**
