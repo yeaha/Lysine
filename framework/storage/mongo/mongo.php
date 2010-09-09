@@ -13,7 +13,13 @@ class Mongo extends \Mongo implements IStorage {
         if (isset($config['dsn'])) {
             $dsn = $config['dsn'];
         } elseif (isset($config['servers']) && is_array($config['servers'])) {
-            $dsn = 'mongodb://'. implode(',', $config['servers']);
+            $servers = array();
+            foreach ($config['servers'] as $server) {
+                if (is_array($server))
+                    $server = implode(':', $server);
+                $servers[] = $server;
+            }
+            $dsn = 'mongodb://'. implode(',', $servers);
         } else {
             $server = isset($config['server']) ? $config['server'] : ini_get('mongo.default_host');
             $port = isset($config['port']) ? $config['port'] : ini_get('mongo.default_port');
