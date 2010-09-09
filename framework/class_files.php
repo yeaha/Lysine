@@ -28,6 +28,7 @@ return array(
     'Lysine\Storage\DB\Adapter' => './storage/db/adapter.php',
     'Lysine\Storage\DB\Adapter\Mysql' => './storage/db/adapter/mysql.php',
     'Lysine\Storage\DB\Adapter\Pgsql' => './storage/db/adapter/pgsql.php',
+    'Lysine\Storage\DB\Adapter\Sqlite' => './storage/db/adapter/sqlite.php',
     'Lysine\Storage\DB\Exception' => './storage/db/db.php',
     'Lysine\Storage\DB\Expr' => './storage/db/expr.php',
     'Lysine\Storage\DB\IAdapter' => './interfaces.php',
