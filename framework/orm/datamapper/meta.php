@@ -22,7 +22,8 @@ class Meta {
      */
     static private $class_meta_keys = array(
         'storage',          // 存储服务配置，一般是设置为存储服务名
-        'collection'        // 存储集合名字
+        'collection',       // 存储集合名字
+        'readonly',         // 只读模型
     );
 
     /**
@@ -56,6 +57,14 @@ class Meta {
      * @access private
      */
     private $class;
+
+    /**
+     * 是否只读模型
+     *
+     * @var boolean
+     * @access private
+     */
+    private $readonly = false;
 
     /**
      * 存储服务配置
@@ -141,6 +150,16 @@ class Meta {
             $this->prop_to_field[$name] = $field;
             $this->field_to_prop[$field] = $name;
         }
+    }
+
+    /**
+     * 获得只读状态
+     *
+     * @access public
+     * @return boolean
+     */
+    public function getReadonly() {
+        return $this->readonly;
     }
 
     /**

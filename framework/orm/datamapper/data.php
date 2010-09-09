@@ -89,8 +89,13 @@ abstract class Data implements IData {
      * @return void
      */
     public function __set($prop, $val) {
+        $meta = static::getMeta();
+
+        if ($meta->getReadonly())
+            throw new \LogicException(get_class($this) .' is readonly');
+
         try {
-            $prop_meta = static::getMeta()->getPropMeta($prop);
+            $prop_meta = $meta->getPropMeta($prop);
         } catch (\InvalidArgumentException $ex) {
             throw new \InvalidArgumentException(get_class($this) .': Undefined property ['. $prop .']', 0, $ex);
         }
@@ -118,6 +123,9 @@ abstract class Data implements IData {
      * @return Lysine\ORM\DataMapper\Data
      */
     public function set($prop, $val, $direct = false) {
+        if (static::getMeta()->getReadonly())
+            throw new \LogicException(get_class($this) .' is readonly');
+
         if (is_array($prop)) {
             $props = $prop;
             $direct = (bool)$val;
@@ -202,6 +210,9 @@ abstract class Data implements IData {
      * @return Lysine\ORM\DataMapper\Data;
      */
     public function save() {
+        if (static::getMeta()->getReadonly())
+            throw new \LogicException(get_class($this) .' is readonly');
+
         $mapper = static::getMapper();
         if ($this->is_fresh) {
             return $mapper->put($this);
@@ -220,6 +231,9 @@ abstract class Data implements IData {
      */
     public function delete() {
         if ($this->is_fresh) return true;
+
+        if (static::getMeta()->getReadonly())
+            throw new \LogicException(get_class($this) .' is readonly');
 
         return static::getMapper()->delete($this);
     }
