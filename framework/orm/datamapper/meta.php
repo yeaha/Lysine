@@ -418,7 +418,7 @@ class MetaInspector {
             $line = trim($line, "/* \t");
             if (!$line) continue;
 
-            if (preg_match('/^@(\w+)\s*(\S+)?/', $line, $match)) {
+            if (preg_match('/^@(\w+)\s*(.+)?/', $line, $match)) {
                 $key = strtolower($match[1]);
                 $result[$key] = isset($match[2]) ? $match[2] : true;
             }
