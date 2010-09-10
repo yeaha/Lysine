@@ -112,9 +112,7 @@ abstract class Data implements IData {
      * @return mixed
      */
     public function __get($prop) {
-        $meta = static::getMeta();
-
-        if ($prop_meta = $meta->getPropMeta($prop)) {
+        if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
             if ($getter = $prop_meta['getter'])
                 return $this->$getter();
         }
@@ -259,7 +257,7 @@ abstract class Data implements IData {
             return $props;
         }
 
-        foreach (array_keys(static::getMeta()->getPropMeta()) as $prop)
+        foreach (static::getMeta()->getPropMeta() as $prop => $prop_meta)
             $props[$prop] = $this->$prop;
 
         return $props;
