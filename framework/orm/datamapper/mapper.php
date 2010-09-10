@@ -153,7 +153,7 @@ abstract class Mapper {
      * @return Lysine\ORM\DataMapper\Data
      */
     public function save(Data $data) {
-        if ($this->getMeta()->getReadonly())
+        if ($data->isReadonly())
             throw new \LogicException($this->class .' is readonly');
 
         $data->fireEvent(Data::BEFORE_SAVE_EVENT);
@@ -210,8 +210,10 @@ abstract class Mapper {
      * @return boolean
      */
     public function delete(Data $data) {
-        if ($this->getMeta()->getReadonly())
+        if ($data->isReadonly())
             throw new \LogicException($this->class .' is readonly');
+
+        if ($data->isFresh()) return true;
 
         $data->fireEvent(Data::BEFORE_DELETE_EVENT);
         if (!$this->doDelete($data->id())) return false;

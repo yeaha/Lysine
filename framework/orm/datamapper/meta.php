@@ -205,10 +205,7 @@ class Meta {
      */
     public function getPropMeta($prop = null) {
         if ($prop === null) return $this->props;
-
-        if (!isset($this->props[$prop]))
-            throw new \InvalidArgumentException("Undefined {$this->class} property [{$prop}] meta");
-        return $this->props[$prop];
+        return isset($this->props[$prop]) ? $this->props[$prop] : false;
     }
 
     /**
@@ -237,17 +234,6 @@ class Meta {
         return isset($this->field_to_prop[$field])
              ? $this->field_to_prop[$field]
              : false;
-    }
-
-    /**
-     * 是否具有属性
-     *
-     * @param string $prop
-     * @access public
-     * @return boolean
-     */
-    public function haveProperty($prop) {
-        return isset($this->props[$prop]);
     }
 
     /**

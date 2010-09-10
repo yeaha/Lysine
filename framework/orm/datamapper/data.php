@@ -63,6 +63,15 @@ abstract class Data implements IData {
     protected $dirty_props = array();
 
     /**
+     * 是否只读
+     *
+     * @var boolean
+     * @access protected
+     * @internal
+     */
+    protected $is_readonly;
+
+    /**
      * 析构函数
      *
      * @access public
@@ -83,8 +92,7 @@ abstract class Data implements IData {
     public function __get($prop) {
         $meta = static::getMeta();
 
-        if ($meta->haveProperty($prop)) {
-            $prop_meta = $meta->getPropMeta($prop);
+        if ($prop_meta = $meta->getPropMeta($prop)) {
             if ($getter = $prop_meta['getter'])
                 return $this->$getter();
         }
@@ -101,16 +109,13 @@ abstract class Data implements IData {
      * @return void
      */
     public function __set($prop, $val) {
-        $meta = static::getMeta();
-
-        if ($meta->getReadonly())
+        if ($this->isReadonly())
             throw new \LogicException(get_class($this) .' is readonly');
 
-        try {
-            $prop_meta = $meta->getPropMeta($prop);
-        } catch (\InvalidArgumentException $ex) {
-            throw new \InvalidArgumentException(get_class($this) .': Undefined property ['. $prop .']', 0, $ex);
-        }
+        $meta = static::getMeta();
+
+        if (!$prop_meta = $meta->getPropMeta($prop))
+            throw new \InvalidArgumentException(get_class($this) .': Undefined property ['. $prop .']');
 
         if ($prop_meta['readonly'])
             throw new \LogicException(get_class($this) .': Property ['. $prop .'] is readonly');
@@ -135,7 +140,7 @@ abstract class Data implements IData {
      * @return Lysine\ORM\DataMapper\Data
      */
     public function set($prop, $val, $direct = false) {
-        if (static::getMeta()->getReadonly())
+        if ($this->isReadonly())
             throw new \LogicException(get_class($this) .' is readonly');
 
         if (is_array($prop)) {
@@ -203,6 +208,19 @@ abstract class Data implements IData {
     }
 
     /**
+     * 此模型是否只读
+     *
+     * @access public
+     * @return boolean
+     */
+    public function isReadonly() {
+        if ($this->is_readonly === null)
+            $this->is_readonly = static::getMeta()->getReadonly();
+
+        return $this->is_readonly;
+    }
+
+    /**
      * 以数组方式返回模型属性数据
      * 只包含字段对应的属性
      *
@@ -242,11 +260,6 @@ abstract class Data implements IData {
      * @return boolean
      */
     public function delete() {
-        if ($this->is_fresh) return true;
-
-        if (static::getMeta()->getReadonly())
-            throw new \LogicException(get_class($this) .' is readonly');
-
         return static::getMapper()->delete($this);
     }
 
