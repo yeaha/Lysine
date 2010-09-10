@@ -72,6 +72,28 @@ abstract class Data implements IData {
     protected $is_readonly;
 
     /**
+     * 构造函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __construct() {
+        $events = Events::instance();
+
+        $events->addEvent($this, self::BEFORE_SAVE_EVENT, array($this, '__before_save'));
+        $events->addEvent($this, self::AFTER_SAVE_EVENT, array($this, '__after_save'));
+
+        $events->addEvent($this, self::BEFORE_PUT_EVENT, array($this, '__before_put'));
+        $events->addEvent($this, self::AFTER_PUT_EVENT, array($this, '__after_put'));
+
+        $events->addEvent($this, self::BEFORE_REPLACE_EVENT, array($this, '__before_replace'));
+        $events->addEvent($this, self::AFTER_REPLACE_EVENT, array($this, '__after_replace'));
+
+        $events->addEvent($this, self::BEFORE_DELETE_EVENT, array($this, '__before_delete'));
+        $events->addEvent($this, self::AFTER_DELETE_EVENT, array($this, '__after_delete'));
+    }
+
+    /**
      * 析构函数
      *
      * @access public
@@ -291,6 +313,15 @@ abstract class Data implements IData {
             Events::instance()->fireEvent($this, $event, $args);
         }
     }
+
+    public function __before_save() {}
+    public function __after_save() {}
+    public function __before_put() {}
+    public function __after_put() {}
+    public function __before_replace() {}
+    public function __after_replace() {}
+    public function __before_delete() {}
+    public function __after_delete() {}
 
     /**
      * 根据主键生成实例
