@@ -33,7 +33,7 @@ interface IActiveRecord {
  * @package ORM
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-abstract class ActiveRecord implements IActiveRecord {
+abstract class ActiveRecord extends ORM implements IActiveRecord {
     /**
      * 存储服务配置
      * @see Lysine\Storage\Pool
@@ -183,7 +183,7 @@ abstract class ActiveRecord implements IActiveRecord {
         if ($record) $this->record = $record;
         if (!$from_storage) $this->dirty_record = array_keys($record);
 
-        $this->fireEvent(ORM::AFTER_INI_EVENT);
+        $this->fireEvent(ORM::AFTER_INIT_EVENT);
     }
 
     /**
@@ -454,19 +454,4 @@ abstract class ActiveRecord implements IActiveRecord {
     static public function getStorage() {
         return Pool::instance()->get(static::$storage_config);
     }
-
-    public function __before_init() {}
-    public function __after_init() {}
-
-    public function __before_save() {}
-    public function __after_save() {}
-
-    public function __before_put() {}
-    public function __after_put() {}
-
-    public function __before_replace() {}
-    public function __after_replace() {}
-
-    public function __before_delete() {}
-    public function __after_delete() {}
 }

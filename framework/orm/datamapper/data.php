@@ -31,7 +31,7 @@ interface IData {
  * @storage
  * @collection
  */
-abstract class Data implements IData {
+abstract class Data extends ORM implements IData {
     /**
      * 是否新建数据
      *
@@ -296,15 +296,6 @@ abstract class Data implements IData {
             Events::instance()->fireEvent($this, $event, $args);
         }
     }
-
-    public function __before_save() {}
-    public function __after_save() {}
-    public function __before_put() {}
-    public function __after_put() {}
-    public function __before_replace() {}
-    public function __after_replace() {}
-    public function __before_delete() {}
-    public function __after_delete() {}
 
     /**
      * 根据主键生成实例

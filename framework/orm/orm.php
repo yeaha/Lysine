@@ -1,7 +1,15 @@
 <?php
 namespace Lysine;
 
+/**
+ * ORM基类
+ *
+ * @abstract
+ * @package ORM
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 abstract class ORM {
+    // {{{ 内置事件
     const BEFORE_INIT_EVENT = 'before init';
     const AFTER_INIT_EVENT = 'after init';
 
@@ -16,4 +24,22 @@ abstract class ORM {
 
     const BEFORE_DELETE_EVENT = 'before delete';
     const AFTER_DELETE_EVENT = 'after delete';
+    // }}}
+
+    // {{{ 内置事件响应方法
+    public function __before_init() {}
+    public function __after_init() {}
+
+    public function __before_save() {}
+    public function __after_save() {}
+
+    public function __before_put() {}
+    public function __after_put() {}
+
+    public function __before_replace() {}
+    public function __after_replace() {}
+
+    public function __before_delete() {}
+    public function __after_delete() {}
+    // }}}
 }
