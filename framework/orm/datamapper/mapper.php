@@ -182,8 +182,8 @@ abstract class Mapper {
         $record = $this->propsToRecord($data->toArray());
         if (!$id = $this->doPut($record)) return false;
 
-        $new_record = $this->doFind($id);
-        $data->__fill($this->recordToProps($new_record));
+        $record[$this->getMeta()->getPrimaryKey()] = $id;
+        $data->__fill($this->recordToProps($record));
 
         return true;
     }
