@@ -300,7 +300,7 @@ abstract class ActiveRecord implements IActiveRecord {
         $pk = static::$primary_key;
         foreach ($col as $key => $val) {
             if ($key == $pk && isset($this->record[$pk]) && $this->record[$pk])
-                throw new \LogicException(__CLASS__ .': primary key refuse update');
+                throw new \LogicException(get_class($this) .': primary key refuse update');
 
             $this->record[$key] = $val;
             if (!$direct) $this->dirty_record[] = $key;
