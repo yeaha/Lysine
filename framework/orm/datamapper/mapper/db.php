@@ -41,7 +41,7 @@ class DBMapper extends Mapper {
 
         if (isset($record[$primary_key])) return $record[$primary_key];
 
-        return $adapter->lastId($table_name, $primary_id);
+        return $adapter->lastId($table_name, $primary_key);
     }
 
     /**
