@@ -61,7 +61,11 @@ class Events extends Singleton {
         $key = $this->keyOf($target);
 
         if (isset($this->events[$key][$name])) {
-            $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
+            if ($args === null) {
+                $args = array();
+            } else {
+                $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
+            }
             foreach ($this->events[$key][$name] as $callback)
                 call_user_func_array($callback, $args);
         }
