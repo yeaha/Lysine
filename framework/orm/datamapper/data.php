@@ -170,11 +170,8 @@ abstract class Data implements IData {
             $props = array($prop => $val);
         }
 
-        foreach ($props as $prop => $val) {
-            $this->$prop = $val;
-            if (!$direct) $this->dirty_props[] = $prop;
-        }
-        if (!$direct) $this->dirty_props = array_unique($this->dirty_props);
+        foreach ($props as $prop => $val) $this->$prop = $val;
+        if (!$direct) $this->dirty_props = array_unique(array_merge($this->dirty_props, array_keys($props)));
 
         return $this;
     }
