@@ -200,3 +200,101 @@ namespace Lysine\Storage\DB {
         public function getAll($col = null);
     }
 }
+
+namespace Lysine\Utils {
+    /**
+     * 日志记录接口
+     *
+     * @package Utils
+     * @author yangyi <yangyi.cn.gz@gmail.com>
+     */
+    interface ILogger {
+        /**
+         * NONE时不记录日志
+         */
+        const NONE = 99;
+
+        /**
+         * error level
+         */
+        const ERROR = 1;
+
+        /**
+         * warning level
+         */
+        const WARNING = 2;
+
+        /**
+         * notice level
+         */
+        const NOTICE = 3;
+
+        /**
+         * debug level
+         */
+        const DEBUG = 4;
+
+        /**
+         * 构造函数
+         *
+         * @param array $config
+         * @access public
+         * @return void
+         */
+        public function __construct(array $config);
+
+        /**
+         * debug级别日志
+         *
+         * @param string $message
+         * @access public
+         * @return void
+         */
+        public function debug($message);
+
+        /**
+         * notice级别日志
+         *
+         * @param string $message
+         * @access public
+         * @return void
+         */
+        public function notice($message);
+
+        /**
+         * warning级别日志
+         *
+         * @param string $message
+         * @access public
+         * @return void
+         */
+        public function warning($message);
+
+        /**
+         * error级别日志
+         *
+         * @param string $message
+         * @access public
+         * @return void
+         */
+        public function error($message);
+
+        /**
+         * 记录指定级别日志
+         *
+         * @param string $message
+         * @param integer $level
+         * @access public
+         * @return void
+         */
+        public function log($message, $level);
+
+        /**
+         * 把队列里的记录立刻写入存储设备
+         *
+         * @access public
+         * @return boolean
+         */
+        public function flush();
+    }
+}
