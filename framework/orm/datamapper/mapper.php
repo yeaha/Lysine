@@ -29,6 +29,14 @@ abstract class Mapper {
     protected $class;
 
     /**
+     * 领域模型元数据
+     *
+     * @var Lysine\ORM\DataMapper\Meta
+     * @access protected
+     */
+    protected $meta;
+
+    /**
      * 根据主键查找数据
      *
      * @param mixed $id
@@ -87,7 +95,8 @@ abstract class Mapper {
      * @return Lysine\ORM\DataMapper\Meta
      */
     public function getMeta() {
-        return Meta::factory($this->class);
+        if (!$this->meta) $this->meta = Meta::factory($this->class);
+        return $this->meta;
     }
 
     /**
@@ -247,8 +256,10 @@ abstract class Mapper {
     static public function factory($class) {
         if (is_object($class)) $class = get_class($class);
 
-        $mapper_class = get_called_class();
-        if (!isset(self::$instance[$class])) self::$instance[$class] = new $mapper_class($class);
+        if (!isset(self::$instance[$class])) {
+            $mapper_class = get_called_class();
+            self::$instance[$class] = new $mapper_class($class);
+        }
         return self::$instance[$class];
     }
 }

@@ -18,10 +18,11 @@ class DBMapper extends Mapper {
      */
     protected function doFind($key) {
         $meta = $this->getMeta();
-        $table_name = $meta->getCollection();
-        $primary_key = $meta->getPrimaryKey();
+        $adapter = $this->getStorage();
+        $table_name = $adapter->qtab($meta->getCollection());
+        $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
-        return $this->getStorage()->execute("SELECT * FROM {$table_name} WHERE {$primary_key} = ?", $key)->getRow();
+        return $adapter->execute("SELECT * FROM {$table_name} WHERE {$primary_key} = ?", $key)->getRow();
     }
 
     /**
@@ -40,7 +41,6 @@ class DBMapper extends Mapper {
         if (!$adapter->insert($table_name, $record)) return false;
 
         if (isset($record[$primary_key])) return $record[$primary_key];
-
         return $adapter->lastId($table_name, $primary_key);
     }
 
@@ -54,10 +54,11 @@ class DBMapper extends Mapper {
      */
     protected function doReplace($id, array $record) {
         $meta = $this->getMeta();
+        $adapter = $this->getStorage();
         $table_name = $meta->getCollection();
-        $primary_key = $meta->getPrimaryKey();
+        $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
-        return $this->getStorage()->update($table_name, $record, "{$primary_key} = ?", $id);
+        return $adapter->update($table_name, $record, "{$primary_key} = ?", $id);
     }
 
     /**
@@ -69,10 +70,11 @@ class DBMapper extends Mapper {
      */
     protected function doDelete($id) {
         $meta = $this->getMeta();
+        $adapter = $this->getStorage();
         $table_name = $meta->getCollection();
-        $primary_key = $meta->getPrimaryKey();
+        $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
-        return $this->getStorage()->delete($table_name, "{$primary_key} = ?", $id);
+        return $adapter->delete($table_name, "{$primary_key} = ?", $id);
     }
 
     /**

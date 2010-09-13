@@ -1,7 +1,6 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
-use Lysine\ORM\DataMapper\Meta;
 use Lysine\Utils\Events;
 
 /**
@@ -338,6 +337,6 @@ abstract class Data implements IData {
      * @return Lysine\ORM\DataMapper\Meta
      */
     static public function getMeta() {
-        return Meta::factory(get_called_class());
+        return static::getMapper()->getMeta();
     }
 }
