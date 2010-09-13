@@ -144,7 +144,7 @@ abstract class DBActiveRecord extends ActiveRecord {
 
         $class = get_called_class();
         $processor = function($record) use ($class, $adapter) {
-            $ar = $record ? new $class($record, true) : new $class(array(), false);
+            $ar = $record ? new $class($record, false) : new $class;
             $ar->setStorage($adapter);
             return $ar;
         };

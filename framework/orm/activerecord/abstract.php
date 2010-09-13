@@ -77,6 +77,14 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
     static protected $readonly = false;
 
     /**
+     * 是否新建
+     *
+     * @var boolean
+     * @access protected
+     */
+    protected $fresh = true;
+
+    /**
      * 存储服务连接实例
      *
      * @var Lysine\IStorage
@@ -157,11 +165,11 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * 构造函数
      *
      * @param array $record
-     * @param boolean $from_storage
+     * @param boolean $fresh
      * @access public
      * @return void
      */
-    public function __construct(array $record = array(), $from_storage = false) {
+    public function __construct(array $record = array(), $fresh = true) {
         $events = Events::instance();
         $events->addEvent($this, ORM::BEFORE_INIT_EVENT, array($this, '__before_init'));
         $events->addEvent($this, ORM::AFTER_INIT_EVENT, array($this, '__after_init'));
@@ -180,8 +188,12 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
 
         $this->fireEvent(ORM::BEFORE_INIT_EVENT);
 
-        if ($record) $this->record = $record;
-        if (!$from_storage) $this->dirty_record = array_keys($record);
+        if ($record) {
+            $this->record = $record;
+            $this->fresh = $fresh;
+
+            if ($fresh) $this->dirty_record = array_keys($record);
+        }
 
         $this->fireEvent(ORM::AFTER_INIT_EVENT);
     }
@@ -277,33 +289,51 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
     }
 
     /**
+     * 是否新建数据
+     *
+     * @access public
+     * @return boolean
+     */
+    public function isFresh() {
+        return $this->fresh;
+    }
+
+    /**
      * 设置指定字段值
      *
-     * @param string $col
+     * @param string $field
      * @param mixed $val
      * @param boolean $direct
      * @access public
      * @return Lysine\ORM\ActiveRecrod
      */
-    public function set($col, $val = null, $direct = false) {
+    public function set($field, $val = null, $direct = false) {
         if (static::$readonly)
             throw new \LogicException(get_class($this) .' is readonly!');
 
-        if (is_array($col)) {
+        if (is_array($field)) {
+            $values = $field;
             $direct = (boolean)$val;
         } else {
-            $col = array($col => $val);
+            $values = array($field => $val);
         }
 
-        $pk = static::$primary_key;
-        foreach ($col as $key => $val) {
-            if ($key == $pk && isset($this->record[$pk]) && $this->record[$pk])
-                throw new \LogicException(get_class($this) .': primary key refuse update');
+        if (!$this->fresh) {
+            $pk = static::$primary_key;
+            if (isset($values[$pk]))
+                throw new \LogicException(get_class($this) .': Primary key refuse update');
 
+            if ($fields = array_diff(array_keys($values), array_keys($this->record)))
+                throw new \InvalidArgumentException(get_class($this) .': Undefined field ['. implode(',', $fields) .']');
+        }
+
+        foreach ($values as $key => $val)
             $this->record[$key] = $val;
-            if (!$direct) $this->dirty_record[] = $key;
-        }
-        if (!$direct) $this->dirty_record = array_unique($this->dirty_record);
+
+        if (!$direct)
+            $this->dirty_record = array_unique(
+                array_merge($this->dirty_record, array_keys($values))
+            );
 
         return $this;
     }
@@ -311,12 +341,17 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
     /**
      * 获得指定字段值
      *
-     * @param string $col
+     * @param string $field
      * @access public
      * @return mixed
      */
-    public function get($col) {
-        if (array_key_exists($col, $this->record)) return $this->record[$col];
+    public function get($field) {
+        if (array_key_exists($field, $this->record))
+            return $this->record[$field];
+
+        if (!$this->fresh)
+            throw new \InvalidArgumentException(get_class($this) .': Undefined field ['. $field .']');
+
         return false;
     }
 
@@ -340,19 +375,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
 
         $this->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
-        if ($record[$pk]) {
-            $method = 'replace';
-            // 有被改动过的主键值
-            // 说明是新建数据，然后指定的主键，需要insert
-            // 这个类的主键是不允许update的
-            // 所以不可能出现主键值被改了，需要update的情况
-            if (in_array($pk, $this->dirty_record)) $method = 'put';
-        } else {
-            // 没有主键值，肯定是新建数据，需要insert
-            $method = 'put';
-        }
-
-        if ($method == 'put') {
+        if ($this->fresh) {
             $this->fireEvent(ORM::BEFORE_PUT_EVENT);
             if ($result = $this->put()) {
                 $this->set($pk, $result);
@@ -363,8 +386,10 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             if ($result = $this->replace()) $this->fireEvent(ORM::AFTER_REPLACE_EVENT);
         }
 
-        if ($result)
+        if ($result) {
+            $this->fresh = false;
             $this->dirty_record = $this->referer = $this->props = array();
+        }
 
         $this->fireEvent(ORM::AFTER_SAVE_EVENT);
         return $this;
@@ -380,7 +405,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         if (static::$readonly)
             throw new \LogicException(get_class($this) .' is readonly!');
 
-        if (!$id = $this->id()) return false;
+        if ($this->fresh || !$id = $this->id()) return false;
 
         $this->fireEvent(ORM::BEFORE_DELETE_EVENT);
         if (!$this->delete()) return false;
@@ -413,7 +438,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return void
      */
     public function fireEvent($name) {
-        Events::instance()->fireEvent($this, $name);
+        Events::instance()->fireEvent($this, $name, $this);
     }
 
     /**
