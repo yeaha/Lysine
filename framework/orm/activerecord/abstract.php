@@ -325,12 +325,11 @@ abstract class ActiveRecord implements IActiveRecord {
     /**
      * 保存当前实例
      *
-     * @param boolean $refersh 保存成功后从存储服务重新获取数据
      * @abstract
      * @access public
      * @return Lysine\ORM\ActiveRecord
      */
-    public function save($refersh = true) {
+    public function save() {
         if (static::$readonly)
             throw new \LogicException(get_class($this) .' is readonly!');
 
@@ -357,11 +356,17 @@ abstract class ActiveRecord implements IActiveRecord {
 
         if ($method == 'put') {
             $this->fireEvent('before put');
-            if ($new_id = $this->put()) $this->fireEvent('after put');
+            if ($result = $this->put()) {
+                $this->set($pk, $result);
+                $this->fireEvent('after put');
+            }
         } else {
             $this->fireEvent('before replace');
-            if ($this->replace()) $this->fireEvent('after replace');
+            if ($result = $this->replace()) $this->fireEvent('after replace');
         }
+
+        if ($result)
+            $this->dirty_record = $this->referer = $this->props = array();
 
         $this->fireEvent('after save');
         return $this;
