@@ -71,6 +71,11 @@ abstract class ActiveRecord implements IActiveRecord {
     static protected $referer_config = array();
 
     /**
+     * 只读模型
+     */
+    static protected $readonly = false;
+
+    /**
      * 存储服务连接实例
      *
      * @var Lysine\IStorage
@@ -217,6 +222,9 @@ abstract class ActiveRecord implements IActiveRecord {
      * @return void
      */
     public function __set($key, $val) {
+        if (static::$readonly)
+            throw new \LogicException(get_class($this) .' is readonly!');
+
         if (isset(static::$props_config[$key]['setter'])) {
             $fn = static::$props_config[$key]['setter'];
             $this->$fn($val);
@@ -280,6 +288,9 @@ abstract class ActiveRecord implements IActiveRecord {
      * @return Lysine\ORM\ActiveRecrod
      */
     public function set($col, $val = null, $direct = false) {
+        if (static::$readonly)
+            throw new \LogicException(get_class($this) .' is readonly!');
+
         if (is_array($col)) {
             $direct = (boolean)$val;
         } else {
@@ -320,6 +331,9 @@ abstract class ActiveRecord implements IActiveRecord {
      * @return Lysine\ORM\ActiveRecord
      */
     public function save($refersh = true) {
+        if (static::$readonly)
+            throw new \LogicException(get_class($this) .' is readonly!');
+
         $record = $this->record;
         $pk = static::$primary_key;
 
@@ -360,6 +374,9 @@ abstract class ActiveRecord implements IActiveRecord {
      * @return boolean
      */
     public function destroy() {
+        if (static::$readonly)
+            throw new \LogicException(get_class($this) .' is readonly!');
+
         if (!$id = $this->id()) return false;
 
         $this->fireEvent('before destroy');
