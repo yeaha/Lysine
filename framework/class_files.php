@@ -4,7 +4,7 @@ return array(
     'Lysine\Config' => './core.php',
     'Lysine\IStorage' => './interfaces.php',
     'Lysine\ORM\ActiveRecord' => './orm/activerecord/abstract.php',
-    'Lysine\ORM\ActiveRecord\DB' => './orm/activerecord/db.php',
+    'Lysine\ORM\ActiveRecord\DBActiveRecord' => './orm/activerecord/db.php',
     'Lysine\ORM\DataMapper\DBData' => './orm/datamapper/data/db.php',
     'Lysine\ORM\DataMapper\DBMapper' => './orm/datamapper/mapper/db.php',
     'Lysine\ORM\DataMapper\Data' => './orm/datamapper/data.php',

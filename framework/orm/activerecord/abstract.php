@@ -84,7 +84,7 @@ abstract class ActiveRecord implements IActiveRecord {
      * @var array
      * @access protected
      */
-    protected $row = array();
+    protected $record = array();
 
     /**
      * 被修改过的数据的键名
@@ -92,7 +92,7 @@ abstract class ActiveRecord implements IActiveRecord {
      * @var array
      * @access protected
      */
-    protected $dirty_row = array();
+    protected $dirty_record = array();
 
     /**
      * 缓存的虚拟属性值
@@ -121,14 +121,22 @@ abstract class ActiveRecord implements IActiveRecord {
     abstract protected function getReferer($name);
 
     /**
-     * 保存当前实例
+     * 保存新数据
      *
-     * @param boolean $refersh 保存成功后从存储服务重新获取数据
      * @abstract
-     * @access public
-     * @return Lysine\ORM\ActiveRecord
+     * @access protected
+     * @return mixed 新主键值
      */
-    abstract public function save($refersh = true);
+    abstract protected function put();
+
+    /**
+     * 更新数据
+     *
+     * @abstract
+     * @access protected
+     * @return boolean
+     */
+    abstract protected function replace();
 
     /**
      * 删除当前实例
@@ -137,26 +145,17 @@ abstract class ActiveRecord implements IActiveRecord {
      * @access public
      * @return boolean
      */
-    abstract public function destroy();
-
-    /**
-     * 重新获取数据刷新当前实例
-     *
-     * @abstract
-     * @access public
-     * @return Lysine\ORM\ActiveRecord
-     */
-    abstract public function refresh();
+    abstract protected function delete();
 
     /**
      * 构造函数
      *
-     * @param array $row
+     * @param array $record
      * @param boolean $from_storage
      * @access public
      * @return void
      */
-    public function __construct(array $row = array(), $from_storage = false) {
+    public function __construct(array $record = array(), $from_storage = false) {
         $events = Events::instance();
         $events->addEvent($this, 'before init', array($this, '__before_init'));
         $events->addEvent($this, 'after init', array($this, '__after_init'));
@@ -178,8 +177,8 @@ abstract class ActiveRecord implements IActiveRecord {
 
         $this->fireEvent('before init');
 
-        if ($row) $this->row = $row;
-        if (!$from_storage) $this->dirty_row = array_keys($row);
+        if ($record) $this->record = $record;
+        if (!$from_storage) $this->dirty_record = array_keys($record);
 
         $this->fireEvent('after init');
     }
@@ -289,13 +288,13 @@ abstract class ActiveRecord implements IActiveRecord {
 
         $pk = static::$primary_key;
         foreach ($col as $key => $val) {
-            if ($key == $pk && isset($this->row[$pk]) && $this->row[$pk])
+            if ($key == $pk && isset($this->record[$pk]) && $this->record[$pk])
                 throw new \LogicException(__CLASS__ .': primary key refuse update');
 
-            $this->row[$key] = $val;
-            if (!$direct) $this->dirty_row[] = $key;
+            $this->record[$key] = $val;
+            if (!$direct) $this->dirty_record[] = $key;
         }
-        if (!$direct) $this->dirty_row = array_unique($this->dirty_row);
+        if (!$direct) $this->dirty_record = array_unique($this->dirty_record);
 
         return $this;
     }
@@ -308,8 +307,70 @@ abstract class ActiveRecord implements IActiveRecord {
      * @return mixed
      */
     public function get($col) {
-        if (array_key_exists($col, $this->row)) return $this->row[$col];
+        if (array_key_exists($col, $this->record)) return $this->record[$col];
         return false;
+    }
+
+    /**
+     * 保存当前实例
+     *
+     * @param boolean $refersh 保存成功后从存储服务重新获取数据
+     * @abstract
+     * @access public
+     * @return Lysine\ORM\ActiveRecord
+     */
+    public function save($refersh = true) {
+        $record = $this->record;
+        $pk = static::$primary_key;
+
+        // 没有任何字段被改动过，而且主键值不为空
+        // 说明这是从数据库中获得的数据，而且没改过，不需要保存
+        if (!$this->dirty_record && isset($record[$pk]) && !$record[$pk]) return $this;
+
+        $this->fireEvent('before save');
+
+        if ($record[$pk]) {
+            $method = 'replace';
+            // 有被改动过的主键值
+            // 说明是新建数据，然后指定的主键，需要insert
+            // 这个类的主键是不允许update的
+            // 所以不可能出现主键值被改了，需要update的情况
+            if (in_array($pk, $this->dirty_record)) $method = 'put';
+        } else {
+            // 没有主键值，肯定是新建数据，需要insert
+            $method = 'put';
+        }
+
+        if ($method == 'put') {
+            $this->fireEvent('before put');
+            if ($new_id = $this->put()) $this->fireEvent('after put');
+        } else {
+            $this->fireEvent('before replace');
+            if ($this->replace()) $this->fireEvent('after replace');
+        }
+
+        $this->fireEvent('after save');
+        return $this;
+    }
+
+    /**
+     * 销毁当前实例
+     *
+     * @access public
+     * @return boolean
+     */
+    public function destroy() {
+        if (!$id = $this->id()) return false;
+
+        $this->fireEvent('before destroy');
+        if (!$this->delete()) return false;
+
+        $this->fireEvent('after destroy');
+
+        $this->record = $this->dirty_record = $this->referer = $this->props = array();
+        $this->storage = null;
+
+        return true;
     }
 
     /**
@@ -338,11 +399,17 @@ abstract class ActiveRecord implements IActiveRecord {
     /**
      * 以数组方式返回当前实例的数据
      *
+     * @param boolean $only_dirty
      * @access public
      * @return array
      */
-    public function toArray() {
-        return $this->row;
+    public function toArray($only_dirty = false) {
+        if (!$only_dirty) return $this->record;
+
+        $record = array();
+        foreach ($this->dirty_record as $field)
+            $record = $this->record[$field];
+        return $record;
     }
 
     /**
