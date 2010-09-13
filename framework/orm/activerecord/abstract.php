@@ -402,10 +402,10 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return boolean
      */
     public function destroy() {
+        if ($this->fresh) return false;
+
         if (static::$readonly)
             throw new \LogicException(get_class($this) .' is readonly!');
-
-        if ($this->fresh || !$id = $this->id()) return false;
 
         $this->fireEvent(ORM::BEFORE_DELETE_EVENT);
         if (!$this->delete()) return false;
