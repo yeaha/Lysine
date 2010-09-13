@@ -3,6 +3,7 @@ return array(
     'Lysine\Application' => './mvc/application.php',
     'Lysine\Config' => './core.php',
     'Lysine\IStorage' => './interfaces.php',
+    'Lysine\ORM' => './orm/orm.php',
     'Lysine\ORM\ActiveRecord' => './orm/activerecord/abstract.php',
     'Lysine\ORM\ActiveRecord\DBActiveRecord' => './orm/activerecord/db.php',
     'Lysine\ORM\DataMapper\DBData' => './orm/datamapper/data/db.php',

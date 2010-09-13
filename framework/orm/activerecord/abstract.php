@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\ORM;
 
+use Lysine\ORM;
 use Lysine\IStorage;
 use Lysine\Utils\Events;
 use Lysine\Storage\Pool;
@@ -162,30 +163,27 @@ abstract class ActiveRecord implements IActiveRecord {
      */
     public function __construct(array $record = array(), $from_storage = false) {
         $events = Events::instance();
-        $events->addEvent($this, 'before init', array($this, '__before_init'));
-        $events->addEvent($this, 'after init', array($this, '__after_init'));
+        $events->addEvent($this, ORM::BEFORE_INIT_EVENT, array($this, '__before_init'));
+        $events->addEvent($this, ORM::AFTER_INIT_EVENT, array($this, '__after_init'));
 
-        $events->addEvent($this, 'before save', array($this, '__before_save'));
-        $events->addEvent($this, 'after save', array($this, '__after_save'));
+        $events->addEvent($this, ORM::BEFORE_SAVE_EVENT, array($this, '__before_save'));
+        $events->addEvent($this, ORM::AFTER_SAVE_EVENT, array($this, '__after_save'));
 
-        $events->addEvent($this, 'before insert', array($this, '__before_insert'));
-        $events->addEvent($this, 'after insert', array($this, '__after_insert'));
+        $events->addEvent($this, ORM::BEFORE_PUT_EVENT, array($this, '__before_put'));
+        $events->addEvent($this, ORM::AFTER_PUT_EVENT, array($this, '__after_put'));
 
-        $events->addEvent($this, 'before update', array($this, '__before_update'));
-        $events->addEvent($this, 'after update', array($this, '__after_update'));
+        $events->addEvent($this, ORM::BEFORE_REPLACE_EVENT, array($this, '__before_replace'));
+        $events->addEvent($this, ORM::AFTER_REPLACE_EVENT, array($this, '__after_replace'));
 
-        $events->addEvent($this, 'before destroy', array($this, '__before_destroy'));
-        $events->addEvent($this, 'after destroy', array($this, '__after_destroy'));
+        $events->addEvent($this, ORM::BEFORE_DELETE_EVENT, array($this, '__before_delete'));
+        $events->addEvent($this, ORM::AFTER_DELETE_EVENT, array($this, '__after_delete'));
 
-        $events->addEvent($this, 'before refresh', array($this, '__before_refresh'));
-        $events->addEvent($this, 'after refresh', array($this, '__after_refresh'));
-
-        $this->fireEvent('before init');
+        $this->fireEvent(ORM::BEFORE_INIT_EVENT);
 
         if ($record) $this->record = $record;
         if (!$from_storage) $this->dirty_record = array_keys($record);
 
-        $this->fireEvent('after init');
+        $this->fireEvent(ORM::AFTER_INI_EVENT);
     }
 
     /**
@@ -340,7 +338,7 @@ abstract class ActiveRecord implements IActiveRecord {
         // 说明这是从数据库中获得的数据，而且没改过，不需要保存
         if (!$this->dirty_record && isset($record[$pk]) && !$record[$pk]) return $this;
 
-        $this->fireEvent('before save');
+        $this->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         if ($record[$pk]) {
             $method = 'replace';
@@ -355,20 +353,20 @@ abstract class ActiveRecord implements IActiveRecord {
         }
 
         if ($method == 'put') {
-            $this->fireEvent('before put');
+            $this->fireEvent(ORM::BEFORE_PUT_EVENT);
             if ($result = $this->put()) {
                 $this->set($pk, $result);
-                $this->fireEvent('after put');
+                $this->fireEvent(ORM::AFTER_PUT_EVENT);
             }
         } else {
-            $this->fireEvent('before replace');
-            if ($result = $this->replace()) $this->fireEvent('after replace');
+            $this->fireEvent(ORM::BEFORE_REPLACE_EVENT);
+            if ($result = $this->replace()) $this->fireEvent(ORM::AFTER_REPLACE_EVENT);
         }
 
         if ($result)
             $this->dirty_record = $this->referer = $this->props = array();
 
-        $this->fireEvent('after save');
+        $this->fireEvent(ORM::AFTER_SAVE_EVENT);
         return $this;
     }
 
@@ -384,10 +382,10 @@ abstract class ActiveRecord implements IActiveRecord {
 
         if (!$id = $this->id()) return false;
 
-        $this->fireEvent('before destroy');
+        $this->fireEvent(ORM::BEFORE_DELETE_EVENT);
         if (!$this->delete()) return false;
 
-        $this->fireEvent('after destroy');
+        $this->fireEvent(ORM::AFTER_DELETE_EVENT);
 
         $this->record = $this->dirty_record = $this->referer = $this->props = array();
         $this->storage = null;
@@ -463,15 +461,12 @@ abstract class ActiveRecord implements IActiveRecord {
     public function __before_save() {}
     public function __after_save() {}
 
-    public function __before_insert() {}
-    public function __after_insert() {}
+    public function __before_put() {}
+    public function __after_put() {}
 
-    public function __before_update() {}
-    public function __after_update() {}
+    public function __before_replace() {}
+    public function __after_replace() {}
 
-    public function __before_destroy() {}
-    public function __after_destroy() {}
-
-    public function __before_refresh() {}
-    public function __after_refresh() {}
+    public function __before_delete() {}
+    public function __after_delete() {}
 }

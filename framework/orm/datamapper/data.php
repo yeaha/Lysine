@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
+use Lysine\ORM;
 use Lysine\Utils\Events;
 
 /**
@@ -31,18 +32,6 @@ interface IData {
  * @collection
  */
 abstract class Data implements IData {
-    const BEFORE_SAVE_EVENT = 'before save';
-    const AFTER_SAVE_EVENT = 'after save';
-
-    const BEFORE_PUT_EVENT = 'before put';
-    const AFTER_PUT_EVENT = 'after put';
-
-    const BEFORE_REPLACE_EVENT = 'before replace';
-    const AFTER_REPLACE_EVENT = 'after replace';
-
-    const BEFORE_DELETE_EVENT = 'before delete';
-    const AFTER_DELETE_EVENT = 'after delete';
-
     /**
      * 是否新建数据
      *
@@ -79,17 +68,17 @@ abstract class Data implements IData {
     public function __construct() {
         $events = Events::instance();
 
-        $events->addEvent($this, self::BEFORE_SAVE_EVENT, array($this, '__before_save'));
-        $events->addEvent($this, self::AFTER_SAVE_EVENT, array($this, '__after_save'));
+        $events->addEvent($this, ORM::BEFORE_SAVE_EVENT, array($this, '__before_save'));
+        $events->addEvent($this, ORM::AFTER_SAVE_EVENT, array($this, '__after_save'));
 
-        $events->addEvent($this, self::BEFORE_PUT_EVENT, array($this, '__before_put'));
-        $events->addEvent($this, self::AFTER_PUT_EVENT, array($this, '__after_put'));
+        $events->addEvent($this, ORM::BEFORE_PUT_EVENT, array($this, '__before_put'));
+        $events->addEvent($this, ORM::AFTER_PUT_EVENT, array($this, '__after_put'));
 
-        $events->addEvent($this, self::BEFORE_REPLACE_EVENT, array($this, '__before_replace'));
-        $events->addEvent($this, self::AFTER_REPLACE_EVENT, array($this, '__after_replace'));
+        $events->addEvent($this, ORM::BEFORE_REPLACE_EVENT, array($this, '__before_replace'));
+        $events->addEvent($this, ORM::AFTER_REPLACE_EVENT, array($this, '__after_replace'));
 
-        $events->addEvent($this, self::BEFORE_DELETE_EVENT, array($this, '__before_delete'));
-        $events->addEvent($this, self::AFTER_DELETE_EVENT, array($this, '__after_delete'));
+        $events->addEvent($this, ORM::BEFORE_DELETE_EVENT, array($this, '__before_delete'));
+        $events->addEvent($this, ORM::AFTER_DELETE_EVENT, array($this, '__after_delete'));
     }
 
     /**

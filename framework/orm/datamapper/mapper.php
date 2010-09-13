@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
+use Lysine\ORM;
 use Lysine\ORM\DataMapper\Data;
 use Lysine\ORM\DataMapper\Meta;
 use Lysine\Storage\Pool;
@@ -165,17 +166,17 @@ abstract class Mapper {
         if ($data->isReadonly())
             throw new \LogicException($this->class .' is readonly');
 
-        $data->fireEvent(Data::BEFORE_SAVE_EVENT);
+        $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         if ($data->isFresh()) {
-            $data->fireEvent(Data::BEFORE_PUT_EVENT);
-            if ($this->put($data)) $data->fireEvent(Data::AFTER_PUT_EVENT);
+            $data->fireEvent(ORM::BEFORE_PUT_EVENT);
+            if ($this->put($data)) $data->fireEvent(ORM::AFTER_PUT_EVENT);
         } elseif ($data->isDirty()) {
-            $data->fireEvent(Data::BEFORE_REPLACE_EVENT);
-            if ($this->replace($data)) $data->fireEvent(Data::AFTER_REPLACE_EVENT);
+            $data->fireEvent(ORM::BEFORE_REPLACE_EVENT);
+            if ($this->replace($data)) $data->fireEvent(ORM::AFTER_REPLACE_EVENT);
         }
 
-        $data->fireEvent(Data::AFTER_SAVE_EVENT);
+        $data->fireEvent(ORM::AFTER_SAVE_EVENT);
 
         return $data;
     }
@@ -224,10 +225,10 @@ abstract class Mapper {
 
         if ($data->isFresh()) return true;
 
-        $data->fireEvent(Data::BEFORE_DELETE_EVENT);
+        $data->fireEvent(ORM::BEFORE_DELETE_EVENT);
         if (!$this->doDelete($data->id())) return false;
 
-        $data->fireEvent(Data::AFTER_DELETE_EVENT);
+        $data->fireEvent(ORM::AFTER_DELETE_EVENT);
         return true;
     }
 
