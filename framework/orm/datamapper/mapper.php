@@ -170,23 +170,24 @@ abstract class Mapper {
 
         if ($data->isFresh()) {
             $data->fireEvent(ORM::BEFORE_PUT_EVENT);
-            if ($this->put($data)) $data->fireEvent(ORM::AFTER_PUT_EVENT);
+            if ($result = $this->put($data)) $data->fireEvent(ORM::AFTER_PUT_EVENT);
         } elseif ($data->isDirty()) {
             $data->fireEvent(ORM::BEFORE_REPLACE_EVENT);
-            if ($this->replace($data)) $data->fireEvent(ORM::AFTER_REPLACE_EVENT);
+            if ($result = $this->replace($data)) $data->fireEvent(ORM::AFTER_REPLACE_EVENT);
         }
 
         $data->fireEvent(ORM::AFTER_SAVE_EVENT);
 
-        return $data;
+        return $result;
     }
 
     /**
      * 保存新的模型数据到存储服务
+     * 返回新主键
      *
      * @param Data $data
      * @access protected
-     * @return boolean
+     * @return mixed
      */
     protected function put(Data $data) {
         $record = $this->propsToRecord($data->toArray());
@@ -195,7 +196,7 @@ abstract class Mapper {
         $record[$this->getMeta()->getPrimaryKey()] = $id;
         $data->__fill($this->recordToProps($record));
 
-        return true;
+        return $id;
     }
 
     /**
@@ -208,6 +209,8 @@ abstract class Mapper {
     protected function replace(Data $data) {
         $record = $this->propsToRecord($data->toArray(/* only dirty */true));
         if (!$this->doReplace($data->id(), $record)) return false;
+
+        $data->__fill($data->toArray());
 
         return true;
     }
