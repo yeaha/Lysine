@@ -249,22 +249,22 @@ abstract class Data extends ORM implements IData {
     }
 
     /**
-     * 保存到存储服务中
+     * 保存当前实例
      *
      * @access public
-     * @return Lysine\ORM\DataMapper\Data;
+     * @return mixed
      */
     public function save() {
         return static::getMapper()->save($this);
     }
 
     /**
-     * 从存储服务中删除
+     * 销毁当前实例
      *
      * @access public
      * @return boolean
      */
-    public function delete() {
+    public function destroy() {
         return static::getMapper()->delete($this);
     }
 
