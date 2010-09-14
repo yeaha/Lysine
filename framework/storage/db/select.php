@@ -1,7 +1,7 @@
 <?php
 namespace Lysine\Storage\DB;
 
-use Lysine\Utils\Coll;
+use Lysine\Utils\Set;
 
 /**
  * 这个类只管组装sql语句，并对查询结果进行简单处理
@@ -12,14 +12,14 @@ use Lysine\Utils\Coll;
  */
 class Select {
     /**
-     * get()方法返回的多行数据是否使用Lysine\Utils\Coll类包装
+     * get()方法返回的多行数据是否使用Lysine\Utils\Set类包装
      * 影响到所有的实例
      *
      * @var boolean
      * @access public
      * @static
      */
-    static public $enableCollection = true;
+    static public $returnSet = true;
 
     /**
      * 数据库连接
@@ -127,25 +127,25 @@ class Select {
     protected $where_relation = 'AND';
 
     /**
-     * get()方法返回的多行数据是否使用Lysine\Utils\Coll类包装
+     * get()方法返回的多行数据是否使用Lysine\Utils\Set类包装
      * 只影响当前实例
      *
      * @var boolean
      * @access protected
      */
-    protected $return_collection;
+    protected $return_set;
 
     /**
      * 构造函数
      *
      * @param IAdapter $adapter
-     * @param boolean $return_collection
+     * @param boolean $return_set
      * @access public
      * @return void
      */
-    public function __construct(IAdapter $adapter, $return_collection = true) {
+    public function __construct(IAdapter $adapter, $return_set = true) {
         $this->adapter = $adapter;
-        $this->return_collection = $return_collection;
+        $this->return_set = $return_set;
     }
 
     /**
@@ -554,7 +554,7 @@ class Select {
         } else {
             $result = $sth->getAll($this->key_column);
             if ($processor) $result = array_map($processor, $result);
-            if (self::$enableCollection && $this->return_collection) $result = new Coll($result);
+            if (self::$returnSet && $this->return_set) $result = new Set($result);
             return $result;
         }
     }

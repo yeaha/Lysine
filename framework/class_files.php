@@ -38,12 +38,12 @@ return array(
     'Lysine\Storage\DB\Select' => './storage/db/select.php',
     'Lysine\Storage\Mongo' => './storage/mongo/mongo.php',
     'Lysine\Storage\Pool' => './storage/pool.php',
-    'Lysine\Utils\Coll' => './utils/collection.php',
     'Lysine\Utils\Events' => './utils/events.php',
     'Lysine\Utils\ILogger' => './interfaces.php',
     'Lysine\Utils\Injection' => './utils/injection.php',
     'Lysine\Utils\Logger' => './utils/logger.php',
     'Lysine\Utils\Registry' => './utils/registry.php',
+    'Lysine\Utils\Set' => './utils/set.php',
     'Lysine\Utils\Singleton' => './utils/singleton.php',
     'Lysine\View' => './mvc/view.php',
 );

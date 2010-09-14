@@ -1,7 +1,7 @@
 <?php
 namespace Lysine\Utils;
 
-class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
+class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
      * collection元素数组
      *
@@ -154,7 +154,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param mixed $element
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function unshift($element) {
         $args = func_get_args();
@@ -177,7 +177,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param mixed $element
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function push($element) {
         $args = func_get_args();
@@ -191,12 +191,12 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param mixed $others
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function merge($others) {
         $args = func_get_args();
         foreach ($args as $k => $arg)
-            if ($arg instanceof Coll) $args[$k] = $arg->toArray();
+            if ($arg instanceof Set) $args[$k] = $arg->toArray();
 
         array_unshift($args, $this->coll);
         $result = call_user_func_array('array_merge', $args);
@@ -215,13 +215,13 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
 
     /**
      * 把每个元素作为参数传递给callback
-     * 把所有的返回值以Lysine\Utils\Coll方式返回
+     * 把所有的返回值以Lysine\Utils\Set方式返回
      * 返回新的collection
      *
      * @param callback $callback
      * @param mixed $more
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function map($callback, $more = null) {
         $args = func_get_args();
@@ -241,13 +241,13 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
 
     /**
      * 把每个元素作为参数传递给callback
-     * 和map不同，map会创建一个新的Lysine\Utils\Coll
+     * 和map不同，map会创建一个新的Lysine\Utils\Set
      * each会修改自身
      *
      * @param callback $callback
      * @param mixed $more
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function each($callback, $more = null) {
         $more = is_array($more) ? $more : array_slice(func_get_args(), 1);
@@ -268,7 +268,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param callback $callback
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function find($callback) {
         $find = array();
@@ -286,7 +286,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param callback $callback
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function filter($callback) {
         foreach ($this->coll as $key => $el) {
@@ -298,13 +298,13 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
 
     /**
      * 调用每个元素的方法
-     * 把每次调用的结果以Lysine\Utils\Coll类型返回
+     * 把每次调用的结果以Lysine\Utils\Set类型返回
      * 返回新的collection
      *
      * @param string $fn
      * @param mixed $args
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function call($fn, $args = null) {
         if (!is_array($args)) {
@@ -326,7 +326,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @param string $fn
      * @param array $args
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function __call($fn, $args) {
         return $this->call($fn, $args);
@@ -338,7 +338,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param string $k
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function __get($k) {
         $result = array();
@@ -353,7 +353,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @param integer $length
      * @param boolean $preserve_keys
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function slice($offset, $length = null, $preserve_keys = false) {
         return new self(array_slice($this->coll, $offset, $length, $preserve_keys));
@@ -366,7 +366,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @param integer $length
      * @param mixed $replace
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function splice($offset, $length = 0, $replace = null) {
         $args = func_get_args();
@@ -395,7 +395,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      *
      * @param callable $cmp_function
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function orderBy($cmp_function) {
         uasort($this->coll, $cmp_function);
@@ -410,7 +410,7 @@ class Coll implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @param callable $key_function
      * @param boolean $replace 是否覆盖相同key的元素
      * @access public
-     * @return Lysine\Utils\Coll
+     * @return Lysine\Utils\Set
      */
     public function groupBy($key_function, $replace = false) {
         $group = array();
