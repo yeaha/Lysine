@@ -19,15 +19,15 @@ abstract class DBActiveRecord extends ActiveRecord {
     static protected $referer_config = array(
         'author' => array(
             'class' => 'Author',
-            'source_key' => 'author_id',
-            'target_key' => 'id',
+            'source_field' => 'author_id',
+            'target_field' => 'id',
             'where' => 'is_deleted = 0',
             'limit' => 1
         ),
         'books' => array(
             'class' => 'Book',
-            'source_key' => 'id',
-            'target_key' => 'author_id',
+            'source_field' => 'id',
+            'target_field' => 'author_id',
             'where' => array('is_deleted = ?', 0),
             'order' => 'create_time DESC',
         ),
@@ -85,7 +85,7 @@ abstract class DBActiveRecord extends ActiveRecord {
 
     /**
      * 获得关联数据
-     * 只能在Lysine\ORM\ActiveRecord\DB类之间关联
+     * 只能在Lysine\ORM\ActiveRecord\DBActiveRecord类之间关联
      *
      * @param string $name
      * @access protected
@@ -109,11 +109,11 @@ abstract class DBActiveRecord extends ActiveRecord {
         $select = forward_static_call(array($class, 'select'));
         $adapter = $select->getAdapter();
 
-        if (!isset($config['source_key'], $config['target_key']))
-            throw new \UnexpectedValueException(get_class($this) .': MUST specify activerecord referer source_key AND target_key');
+        if (!isset($config['source_field'], $config['target_field']))
+            throw new \UnexpectedValueException(get_class($this) .': MUST specify activerecord referer source_field AND target_field');
 
-        $target_key = $adapter->qcol($config['target_key']);
-        $select->where("{$target_key} = ?", $this->get($config['source_key']));
+        $target_field = $adapter->qcol($config['target_field']);
+        $select->where("{$target_field} = ?", $this->get($config['source_field']));
 
         if (isset($config['where'])) {
             if (is_array($config['where'])) {
