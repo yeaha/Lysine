@@ -5,7 +5,6 @@ use Lysine\ORM;
 use Lysine\ORM\DataMapper\Data;
 use Lysine\ORM\DataMapper\Meta;
 use Lysine\Storage\Pool;
-use Lysine\Utils\Events;
 
 /**
  * 封装领域模型存储服务数据映射关系
