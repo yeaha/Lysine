@@ -170,23 +170,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return void
      */
     public function __construct(array $record = array(), $fresh = true) {
-        $events = Events::instance();
-        $events->addEvent($this, ORM::BEFORE_INIT_EVENT, array($this, '__before_init'));
-        $events->addEvent($this, ORM::AFTER_INIT_EVENT, array($this, '__after_init'));
-
-        $events->addEvent($this, ORM::BEFORE_SAVE_EVENT, array($this, '__before_save'));
-        $events->addEvent($this, ORM::AFTER_SAVE_EVENT, array($this, '__after_save'));
-
-        $events->addEvent($this, ORM::BEFORE_PUT_EVENT, array($this, '__before_put'));
-        $events->addEvent($this, ORM::AFTER_PUT_EVENT, array($this, '__after_put'));
-
-        $events->addEvent($this, ORM::BEFORE_REPLACE_EVENT, array($this, '__before_replace'));
-        $events->addEvent($this, ORM::AFTER_REPLACE_EVENT, array($this, '__after_replace'));
-
-        $events->addEvent($this, ORM::BEFORE_DELETE_EVENT, array($this, '__before_delete'));
-        $events->addEvent($this, ORM::AFTER_DELETE_EVENT, array($this, '__after_delete'));
-
-        $this->fireEvent(ORM::BEFORE_INIT_EVENT);
+        $this->fireEvent(ORM::BEFORE_INIT_EVENT, $this);
 
         if ($record) {
             $this->record = $record;
@@ -195,7 +179,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             if ($fresh) $this->dirty_record = array_keys($record);
         }
 
-        $this->fireEvent(ORM::AFTER_INIT_EVENT);
+        $this->fireEvent(ORM::AFTER_INIT_EVENT, $this);
     }
 
     /**
@@ -373,17 +357,17 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         // 说明这是从数据库中获得的数据，而且没改过，不需要保存
         if (!$this->dirty_record && isset($record[$pk]) && !$record[$pk]) return $this;
 
-        $this->fireEvent(ORM::BEFORE_SAVE_EVENT);
+        $this->fireEvent(ORM::BEFORE_SAVE_EVENT, $this);
 
         if ($this->fresh) {
-            $this->fireEvent(ORM::BEFORE_PUT_EVENT);
+            $this->fireEvent(ORM::BEFORE_PUT_EVENT, $this);
             if ($result = $this->put()) {
                 $this->set($pk, $result);
-                $this->fireEvent(ORM::AFTER_PUT_EVENT);
+                $this->fireEvent(ORM::AFTER_PUT_EVENT, $this);
             }
         } else {
-            $this->fireEvent(ORM::BEFORE_REPLACE_EVENT);
-            if ($result = $this->replace()) $this->fireEvent(ORM::AFTER_REPLACE_EVENT);
+            $this->fireEvent(ORM::BEFORE_REPLACE_EVENT, $this);
+            if ($result = $this->replace()) $this->fireEvent(ORM::AFTER_REPLACE_EVENT, $this);
         }
 
         if ($result) {
@@ -391,7 +375,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             $this->dirty_record = $this->referer = $this->props = array();
         }
 
-        $this->fireEvent(ORM::AFTER_SAVE_EVENT);
+        $this->fireEvent(ORM::AFTER_SAVE_EVENT, $this);
         return $this;
     }
 
@@ -407,10 +391,10 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         if (static::$readonly)
             throw new \LogicException(get_class($this) .' is readonly!');
 
-        $this->fireEvent(ORM::BEFORE_DELETE_EVENT);
+        $this->fireEvent(ORM::BEFORE_DELETE_EVENT, $this);
         if (!$this->delete()) return false;
 
-        $this->fireEvent(ORM::AFTER_DELETE_EVENT);
+        $this->fireEvent(ORM::AFTER_DELETE_EVENT, $this);
 
         $this->record = $this->dirty_record = $this->referer = $this->props = array();
         $this->storage = null;
@@ -421,24 +405,53 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
     /**
      * 监听事件
      *
-     * @param string $name
+     * @param string $event
      * @param callback $callback
      * @access public
      * @return void
      */
-    public function addEvent($name, $callback) {
-        Events::instance()->addEvent($this, $name, $callback);
+    public function addEvent($event, $callback) {
+        Events::instance()->addEvent($this, $event, $callback);
     }
 
     /**
      * 触发事件
      *
-     * @param string $name
+     * @param string $event
+     * @param mixed $args
      * @access public
      * @return void
      */
-    public function fireEvent($name) {
-        Events::instance()->fireEvent($this, $name, $this);
+    public function fireEvent($event, $args = null) {
+        switch ($event) {
+            case ORM::BEFORE_INIT_EVENT:    $this->__before_init();
+                                            break;
+            case ORM::AFTER_INIT_EVENT:     $this->__after_init();
+                                            break;
+            case ORM::BEFORE_SAVE_EVENT:    $this->__before_save();
+                                            break;
+            case ORM::AFTER_SAVE_EVENT:     $this->__after_save();
+                                            break;
+            case ORM::BEFORE_PUT_EVENT:     $this->__before_put();
+                                            break;
+            case ORM::AFTER_PUT_EVENT:      $this->__after_put();
+                                            break;
+            case ORM::BEFORE_REPLACE_EVENT: $this->__before_replace();
+                                            break;
+            case ORM::AFTER_REPLACE_EVENT:  $this->__after_replace();
+                                            break;
+            case ORM::BEFORE_DELETE_EVENT:  $this->__before_delete();
+                                            break;
+            case ORM::AFTER_DELETE_EVENT:   $this->__after_delete();
+                                            break;
+        }
+
+        if ($args === null) {
+            Events::instance()->fireEvent($this, $event);
+        } else {
+            $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
+            Events::instance()->fireEvent($this, $event, $args);
+        }
     }
 
     /**

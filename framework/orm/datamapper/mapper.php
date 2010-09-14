@@ -165,17 +165,17 @@ abstract class Mapper {
         if ($data->isReadonly())
             throw new \LogicException($this->class .' is readonly');
 
-        $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
+        $data->fireEvent(ORM::BEFORE_SAVE_EVENT, $data);
 
         if ($data->isFresh()) {
-            $data->fireEvent(ORM::BEFORE_PUT_EVENT);
-            if ($result = $this->put($data)) $data->fireEvent(ORM::AFTER_PUT_EVENT);
+            $data->fireEvent(ORM::BEFORE_PUT_EVENT, $data);
+            if ($result = $this->put($data)) $data->fireEvent(ORM::AFTER_PUT_EVENT, $data);
         } elseif ($data->isDirty()) {
-            $data->fireEvent(ORM::BEFORE_REPLACE_EVENT);
-            if ($result = $this->replace($data)) $data->fireEvent(ORM::AFTER_REPLACE_EVENT);
+            $data->fireEvent(ORM::BEFORE_REPLACE_EVENT, $data);
+            if ($result = $this->replace($data)) $data->fireEvent(ORM::AFTER_REPLACE_EVENT, $data);
         }
 
-        $data->fireEvent(ORM::AFTER_SAVE_EVENT);
+        $data->fireEvent(ORM::AFTER_SAVE_EVENT, $data);
 
         return $result;
     }
@@ -227,10 +227,10 @@ abstract class Mapper {
 
         if ($data->isFresh()) return true;
 
-        $data->fireEvent(ORM::BEFORE_DELETE_EVENT);
+        $data->fireEvent(ORM::BEFORE_DELETE_EVENT, $data);
         if (!$this->doDelete($data->id())) return false;
 
-        $data->fireEvent(ORM::AFTER_DELETE_EVENT);
+        $data->fireEvent(ORM::AFTER_DELETE_EVENT, $data);
         return true;
     }
 

@@ -60,28 +60,6 @@ abstract class Data extends ORM implements IData {
     protected $is_readonly;
 
     /**
-     * 构造函数
-     *
-     * @access public
-     * @return void
-     */
-    public function __construct() {
-        $events = Events::instance();
-
-        $events->addEvent($this, ORM::BEFORE_SAVE_EVENT, array($this, '__before_save'));
-        $events->addEvent($this, ORM::AFTER_SAVE_EVENT, array($this, '__after_save'));
-
-        $events->addEvent($this, ORM::BEFORE_PUT_EVENT, array($this, '__before_put'));
-        $events->addEvent($this, ORM::AFTER_PUT_EVENT, array($this, '__after_put'));
-
-        $events->addEvent($this, ORM::BEFORE_REPLACE_EVENT, array($this, '__before_replace'));
-        $events->addEvent($this, ORM::AFTER_REPLACE_EVENT, array($this, '__after_replace'));
-
-        $events->addEvent($this, ORM::BEFORE_DELETE_EVENT, array($this, '__before_delete'));
-        $events->addEvent($this, ORM::AFTER_DELETE_EVENT, array($this, '__after_delete'));
-    }
-
-    /**
      * 析构函数
      *
      * @access public
@@ -289,6 +267,25 @@ abstract class Data extends ORM implements IData {
      * @return void
      */
     public function fireEvent($event, $args = null) {
+        switch ($event) {
+            case ORM::BEFORE_SAVE_EVENT:    $this->__before_save();
+                                            break;
+            case ORM::AFTER_SAVE_EVENT:     $this->__after_save();
+                                            break;
+            case ORM::BEFORE_PUT_EVENT:     $this->__before_put();
+                                            break;
+            case ORM::AFTER_PUT_EVENT:      $this->__after_put();
+                                            break;
+            case ORM::BEFORE_REPLACE_EVENT: $this->__before_replace();
+                                            break;
+            case ORM::AFTER_REPLACE_EVENT:  $this->__after_replace();
+                                            break;
+            case ORM::BEFORE_DELETE_EVENT:  $this->__before_delete();
+                                            break;
+            case ORM::AFTER_DELETE_EVENT:   $this->__after_delete();
+                                            break;
+        }
+
         if ($args === null) {
             Events::instance()->fireEvent($this, $event);
         } else {
