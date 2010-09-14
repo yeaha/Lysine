@@ -1,6 +1,13 @@
 <?php
 namespace Lysine\Utils;
 
+/**
+ * 集合对象
+ * 对象包装起来的数组
+ *
+ * @package Utils
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
      * 集合数据
@@ -214,136 +221,72 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
-     * 把每个元素作为参数传递给callback
+     * 把每个元素作为参数传递给function
      * 把所有的返回值以Lysine\Utils\Set方式返回
      * 返回新的Set
      *
-     * @param callback $callback
-     * @param mixed $more
+     * @param callback $fn
      * @access public
      * @return Lysine\Utils\Set
      */
-    public function map($callback, $more = null) {
-        $args = func_get_args();
-
-        if (count($args) > 1) {
-            if (is_array($args[1])) {
-                $more = $args[1];
-            } else {
-                $more = array_slice($args, 1);
-            }
-
-            return new self(array_map($callback, $this->set, $more));
-        } else {
-            return new self(array_map($callback, $this->set));
-        }
+    public function map($fn) {
+        return new self(array_map($fn, $this->set));
     }
 
     /**
-     * 把每个元素作为参数传递给callback
-     * 和map不同，map会创建一个新的Lysine\Utils\Set
-     * each会修改自身
+     * 把每个元素作为参数传递给function
      *
-     * @param callback $callback
-     * @param mixed $more
+     * @param callback $fn
      * @access public
-     * @return Lysine\Utils\Set
+     * @return void
      */
-    public function each($callback, $more = null) {
-        $more = is_array($more) ? $more : array_slice(func_get_args(), 1);
-
-        foreach ($this->set as $key => $val) {
-            $args = array($val, $key);
-            if ($more) $args = array_merge($args, $more);
-
-            $this->set[$key] = call_user_func_array($callback, $args);
-        }
-        return $this;
+    public function each($fn) {
+        return array_walk($this->set, $fn);
     }
 
     /**
-     * 把数组中的每个元素作为参数传递给callback
+     * 把数组中的每个元素作为参数传递给function
      * 找出符合条件的值
      * 返回新的Set
      *
-     * @param callback $callback
+     * @param callback $fn
      * @access public
      * @return Lysine\Utils\Set
      */
-    public function find($callback) {
+    public function find($fn) {
         $find = array();
 
-        foreach ($this->set as $key => $el) {
-            if (call_user_func($callback, $el)) $find[$key] = $el;
-        }
+        foreach ($this->set as $key => $el)
+            if (call_user_func($fn, $el)) $find[$key] = $el;
         return new self($find);
     }
 
     /**
-     * 把数组中的每个元素作为参数传递给callback
-     * 过滤掉不符合条件的值
-     * 修改当前Set
+     * 把每个元素用function调用
+     * 检查是否每个调用都返回真
      *
-     * @param callback $callback
+     * @param callback $fn
      * @access public
-     * @return Lysine\Utils\Set
+     * @return boolean
      */
-    public function filter($callback) {
-        foreach ($this->set as $key => $el) {
-            if (!call_user_func($callback, $el))
-                unset($this->set[$key]);
-        }
-        return $this;
+    public function every($fn) {
+        foreach ($this->set as $el)
+            if (!call_user_func($fn, $el)) return false;
+        return true;
     }
 
     /**
-     * 调用每个元素的方法
-     * 把每次调用的结果以Lysine\Utils\Set类型返回
-     * 返回新的Set
+     * 把每个元素用function调用
+     * 检查是否至少有一次调用结果为真
      *
-     * @param string $fn
-     * @param mixed $args
+     * @param callback $fn
      * @access public
-     * @return Lysine\Utils\Set
+     * @return boolean
      */
-    public function call($fn, $args = null) {
-        if (!is_array($args)) {
-            $args = func_get_args();
-            $args = array_slice($args, 1);
-        }
-
-        $result = array();
-        foreach ($this->set as $key => $el) {
-            $result[$key] = call_user_func_array(array($el, $fn), $args);
-        }
-        return new self($result);
-    }
-
-    /**
-     * 魔法方法
-     * 依次调用每个元素的方法
-     *
-     * @param string $fn
-     * @param array $args
-     * @access public
-     * @return Lysine\Utils\Set
-     */
-    public function __call($fn, $args) {
-        return $this->call($fn, $args);
-    }
-
-    /**
-     * 魔法方法
-     * 依次获取每个元素的属性
-     *
-     * @param string $k
-     * @access public
-     * @return Lysine\Utils\Set
-     */
-    public function __get($k) {
-        $result = array();
-        foreach ($this->set as $key => $el) $result[$key] = $el->$k;
-        return new self($result);
+    public function some($fn) {
+        foreach ($this->set as $el)
+            if (call_user_func($fn, $el)) return true;
+        return false;
     }
 
     /**
@@ -404,18 +347,18 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
 
     /**
      * 自定义分组
-     * 使用自定义callback方法依次调用每个元素
+     * 使用自定义function依次调用每个元素
      * 根据返回的key把所有元素重新分组
      *
-     * @param callable $key_function
+     * @param callable $fn
      * @param boolean $replace 是否覆盖相同key的元素
      * @access public
      * @return Lysine\Utils\Set
      */
-    public function groupBy($key_function, $replace = false) {
+    public function groupBy($fn, $replace = false) {
         $group = array();
         foreach ($this->set as $idx => $el) {
-            $key = call_user_func($key_function, $el);
+            $key = call_user_func($fn, $el);
             if ($replace) {
                 $group[$key] = $el;
             } else {
