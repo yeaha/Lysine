@@ -3,12 +3,12 @@ namespace Lysine\Utils;
 
 class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
-     * collection元素数组
+     * 集合数据
      *
-     * @var mixed
-     * @access array
+     * @var array
+     * @access protected
      */
-    protected $coll;
+    protected $set;
 
     /**
      * 构造函数
@@ -18,7 +18,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return void
      */
     public function __construct(array $elements = array()) {
-        $this->coll = $elements;
+        $this->set = $elements;
     }
 
     /**
@@ -28,7 +28,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return void
      */
     public function __destruct() {
-        $this->coll = null;
+        $this->set = null;
     }
 
     /**
@@ -39,7 +39,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return ArrayIterator
      */
     public function getIterator() {
-        return new \ArrayIterator($this->coll);
+        return new \ArrayIterator($this->set);
     }
 
     /**
@@ -49,7 +49,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return integer
      */
     public function count() {
-        return count($this->coll);
+        return count($this->set);
     }
 
     /**
@@ -60,7 +60,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return boolean
      */
     public function offsetExists($offset) {
-        return array_key_exists($offset, $this->coll);
+        return array_key_exists($offset, $this->set);
     }
 
     /**
@@ -71,8 +71,8 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return mixed
      */
     public function offsetGet($offset) {
-        return array_key_exists($offset, $this->coll)
-             ? $this->coll[$offset]
+        return array_key_exists($offset, $this->set)
+             ? $this->set[$offset]
              : false;
     }
 
@@ -85,7 +85,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return void
      */
     public function offsetSet($offset, $val) {
-        $this->coll[$offset] = $val;
+        $this->set[$offset] = $val;
     }
 
     /**
@@ -96,7 +96,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return void
      */
     public function offsetUnset($offset) {
-        unset($this->coll[$offset]);
+        unset($this->set[$offset]);
     }
 
     /**
@@ -106,7 +106,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return array
      */
     public function getKeys() {
-        return array_keys($this->coll);
+        return array_keys($this->set);
     }
 
     /**
@@ -116,7 +116,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return array
      */
     public function getValues() {
-        return array_values($this->coll);
+        return array_values($this->set);
     }
 
     /**
@@ -126,7 +126,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return mixed
      */
     public function first() {
-        return reset($this->coll);
+        return reset($this->set);
     }
 
     /**
@@ -136,7 +136,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return mixed
      */
     public function last() {
-        return end($this->coll);
+        return end($this->set);
     }
 
     /**
@@ -146,7 +146,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return mixed
      */
     public function shift() {
-        return array_shift($this->coll);
+        return array_shift($this->set);
     }
 
     /**
@@ -158,7 +158,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function unshift($element) {
         $args = func_get_args();
-        array_splice($this->coll, 0, 0, $args);
+        array_splice($this->set, 0, 0, $args);
         return $this;
     }
 
@@ -169,7 +169,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return mixed
      */
     public function pop() {
-        return array_pop($this->coll);
+        return array_pop($this->set);
     }
 
     /**
@@ -181,13 +181,13 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function push($element) {
         $args = func_get_args();
-        array_splice($this->coll, count($this->coll), 0, $args);
+        array_splice($this->set, count($this->set), 0, $args);
         return $this;
     }
 
     /**
      * array_merge
-     * 返回新的collection
+     * 返回新的Set
      *
      * @param mixed $others
      * @access public
@@ -198,7 +198,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
         foreach ($args as $k => $arg)
             if ($arg instanceof Set) $args[$k] = $arg->toArray();
 
-        array_unshift($args, $this->coll);
+        array_unshift($args, $this->set);
         $result = call_user_func_array('array_merge', $args);
         return new self($result);
     }
@@ -210,13 +210,13 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return array
      */
     public function toArray() {
-        return $this->coll;
+        return $this->set;
     }
 
     /**
      * 把每个元素作为参数传递给callback
      * 把所有的返回值以Lysine\Utils\Set方式返回
-     * 返回新的collection
+     * 返回新的Set
      *
      * @param callback $callback
      * @param mixed $more
@@ -233,9 +233,9 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
                 $more = array_slice($args, 1);
             }
 
-            return new self(array_map($callback, $this->coll, $more));
+            return new self(array_map($callback, $this->set, $more));
         } else {
-            return new self(array_map($callback, $this->coll));
+            return new self(array_map($callback, $this->set));
         }
     }
 
@@ -252,11 +252,11 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     public function each($callback, $more = null) {
         $more = is_array($more) ? $more : array_slice(func_get_args(), 1);
 
-        foreach ($this->coll as $key => $val) {
+        foreach ($this->set as $key => $val) {
             $args = array($val, $key);
             if ($more) $args = array_merge($args, $more);
 
-            $this->coll[$key] = call_user_func_array($callback, $args);
+            $this->set[$key] = call_user_func_array($callback, $args);
         }
         return $this;
     }
@@ -264,7 +264,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
      * 把数组中的每个元素作为参数传递给callback
      * 找出符合条件的值
-     * 返回新的collection
+     * 返回新的Set
      *
      * @param callback $callback
      * @access public
@@ -273,7 +273,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     public function find($callback) {
         $find = array();
 
-        foreach ($this->coll as $key => $el) {
+        foreach ($this->set as $key => $el) {
             if (call_user_func($callback, $el)) $find[$key] = $el;
         }
         return new self($find);
@@ -282,16 +282,16 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
      * 把数组中的每个元素作为参数传递给callback
      * 过滤掉不符合条件的值
-     * 修改当前collection
+     * 修改当前Set
      *
      * @param callback $callback
      * @access public
      * @return Lysine\Utils\Set
      */
     public function filter($callback) {
-        foreach ($this->coll as $key => $el) {
+        foreach ($this->set as $key => $el) {
             if (!call_user_func($callback, $el))
-                unset($this->coll[$key]);
+                unset($this->set[$key]);
         }
         return $this;
     }
@@ -299,7 +299,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
      * 调用每个元素的方法
      * 把每次调用的结果以Lysine\Utils\Set类型返回
-     * 返回新的collection
+     * 返回新的Set
      *
      * @param string $fn
      * @param mixed $args
@@ -313,7 +313,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
         }
 
         $result = array();
-        foreach ($this->coll as $key => $el) {
+        foreach ($this->set as $key => $el) {
             $result[$key] = call_user_func_array(array($el, $fn), $args);
         }
         return new self($result);
@@ -342,7 +342,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function __get($k) {
         $result = array();
-        foreach ($this->coll as $key => $el) $result[$key] = $el->$k;
+        foreach ($this->set as $key => $el) $result[$key] = $el->$k;
         return new self($result);
     }
 
@@ -356,7 +356,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return Lysine\Utils\Set
      */
     public function slice($offset, $length = null, $preserve_keys = false) {
-        return new self(array_slice($this->coll, $offset, $length, $preserve_keys));
+        return new self(array_slice($this->set, $offset, $length, $preserve_keys));
     }
 
     /**
@@ -372,10 +372,10 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
         $args = func_get_args();
         if (count($args) > 2) {
             $replace = $args[2];
-            array_splice($this->coll, $offset, $length, $replace);
+            array_splice($this->set, $offset, $length, $replace);
             return $this;
         }
-        return new self(array_splice($this->coll, $offset, $length));
+        return new self(array_splice($this->set, $offset, $length));
     }
 
     /**
@@ -387,7 +387,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return mixed
      */
     public function reduce($function, $initial = null) {
-        return array_reduce($this->coll, $function, $initial);
+        return array_reduce($this->set, $function, $initial);
     }
 
     /**
@@ -398,7 +398,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return Lysine\Utils\Set
      */
     public function orderBy($cmp_function) {
-        uasort($this->coll, $cmp_function);
+        uasort($this->set, $cmp_function);
         return $this;
     }
 
@@ -414,7 +414,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function groupBy($key_function, $replace = false) {
         $group = array();
-        foreach ($this->coll as $idx => $el) {
+        foreach ($this->set as $idx => $el) {
             $key = call_user_func($key_function, $el);
             if ($replace) {
                 $group[$key] = $el;
@@ -423,7 +423,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
             }
         }
 
-        $this->coll = $group;
+        $this->set = $group;
         return $this;
     }
 }
