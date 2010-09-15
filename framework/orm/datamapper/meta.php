@@ -24,7 +24,6 @@ class Meta {
         'storage',          // 存储服务配置，一般是设置为存储服务名
         'collection',       // 存储集合名字
         'readonly',         // 只读模型
-        'strict',           // 定义的属性和字段是否严格对应
     );
 
     /**
@@ -66,17 +65,6 @@ class Meta {
      * @access private
      */
     private $readonly = false;
-
-    /**
-     * 属性和字段是否严格对应
-     * 有些schema free的存储方式不一定保证每个字段都一定存在
-     * 这种情况下可以设置strict为false
-     * 关系式数据库可以设置为true
-     *
-     * @var boolean
-     * @access private
-     */
-    private $strict = false;
 
     /**
      * 存储服务配置
@@ -172,10 +160,6 @@ class Meta {
      */
     public function getReadonly() {
         return $this->readonly;
-    }
-
-    public function getStrict() {
-        return $this->strict;
     }
 
     /**
