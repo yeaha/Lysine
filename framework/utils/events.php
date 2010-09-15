@@ -26,7 +26,9 @@ class Events extends Singleton {
      * @return string
      */
     final protected function keyOf($target) {
-        return get_class($target) .'#'. spl_object_hash($target);
+        if (!is_object($target))
+            throw new \UnexpectedValueException('Event target must be an object');
+        return spl_object_hash($target);
     }
 
     /**
@@ -40,7 +42,7 @@ class Events extends Singleton {
      */
     final public function addEvent($target, $name, $callback) {
         if (!is_callable($callback))
-            throw new BadFunctionCallException('Bad event callback');
+            throw new \UnexpectedValueException('Bad event callback');
 
         $key = $this->keyOf($target);
         if (!isset($this->events[$key][$name])) $this->events[$key][$name] = array();
@@ -60,15 +62,14 @@ class Events extends Singleton {
     final public function fireEvent($target, $name, $args = null) {
         $key = $this->keyOf($target);
 
-        if (isset($this->events[$key][$name])) {
-            if ($args === null) {
-                $args = array();
-            } else {
-                $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
-            }
-            foreach ($this->events[$key][$name] as $callback)
-                call_user_func_array($callback, $args);
-        }
+        if (!isset($this->events[$key][$name])) return;
+
+        $args = ($args === null)
+              ? array()
+              : is_array($args) ? $args : array_slice(func_get_args(), 2);
+
+        foreach ($this->events[$key][$name] as $callback)
+            call_user_func_array($callback, $args);
     }
 
     /**
@@ -87,20 +88,5 @@ class Events extends Singleton {
         } else {
             unset($this->events[$key]);
         }
-    }
-
-    /**
-     * 魔法方法，函数风格调用
-     * 等效于fireEvent
-     *
-     * $event = Events::instance();
-     * $event($target, 'event name');
-     *
-     * @access public
-     * @return void
-     */
-    public function __invoke() {
-        $args = func_get_args();
-        call_user_func_array(array($this, 'fireEvent'), $args);
     }
 }
