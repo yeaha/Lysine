@@ -119,9 +119,16 @@ abstract class Mapper {
      * @return array
      */
     public function recordToProps(array $record) {
+        $strict = $this->getMeta()->getStrict();
         $props = array();
-        foreach ($this->getMeta()->getPropOfField() as $field => $prop)
+        foreach ($this->getMeta()->getPropOfField() as $field => $prop) {
+            if (!array_key_exists($field, $record)) {
+                if (!$strict) continue;
+                throw new \RuntimeException($this->class .': Undefined record filed ['. $field .']');
+            }
+
             $props[$prop] = $record[$field];
+        }
 
         return $props;
     }
