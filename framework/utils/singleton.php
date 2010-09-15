@@ -13,30 +13,32 @@ abstract class Singleton {
     /**
      * 唯一实例
      */
-    static protected $instance = array();
+    static private $instance = array();
 
     /**
      * 获得唯一实例
      *
      * @static
+     * @final
      * @access public
      * @return mixed
      */
-    static public function instance() {
+    final static public function instance() {
         $class = get_called_class();
         if (!isset(self::$instance[$class]))
             self::$instance[$class] = new $class;
 
-        return static::$instance[$class];
+        return self::$instance[$class];
     }
 
     /**
      * 构造函数
      * 无法通过new直接调用
      *
+     * @final
      * @access private
      * @return void
      */
-    private function __construct() {
+    final private function __construct() {
     }
 }
