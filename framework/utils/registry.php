@@ -57,7 +57,7 @@ class Registry {
      * @access public
      * @return void
      */
-    static public function del($key) {
+    static public function unset($key) {
         unset(self::$instance[$key]);
     }
 }
