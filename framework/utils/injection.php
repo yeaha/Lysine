@@ -14,7 +14,7 @@ namespace Lysine\Utils;
  * @author Yang Yi <yangyi.cn.gz@gmail.com>
  */
 class Injection {
-    protected $method = array();
+    private $method = array();
 
     /**
      * 注入方法
@@ -41,12 +41,13 @@ class Injection {
      *
      * @param string $fn
      * @param array $args
+     * @final
      * @access public
      * @return mixed
      */
-    final public function call($fn, $args) {
+    final public function call($fn, array $args) {
         if (!array_key_exists($fn, $this->method))
-            throw new \BadMethodCallException('Call bad injection method '. $fn);
+            throw new \BadMethodCallException(get_class($this) .': Undefined method ['. $fn .']');
 
         array_unshift($args, $this);
         return call_user_func_array($this->method[$fn], $args);
