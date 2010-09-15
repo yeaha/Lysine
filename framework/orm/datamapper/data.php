@@ -79,8 +79,11 @@ abstract class Data extends ORM implements IData {
      */
     public function __get($prop) {
         if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
-            if ($getter = $prop_meta['getter'])
+            if ($getter = $prop_meta['getter']) {
+                if (!method_exists($this, $getter))
+                    throw new \BadMethodCallException(get_class($this) .': Undefined getter method ['. $getter .']');
                 return $this->$getter();
+            }
         }
 
         return $this->$prop;
@@ -110,6 +113,8 @@ abstract class Data extends ORM implements IData {
             throw new \LogicException(get_class($this) .': Property ['. $prop .'] refuse replace');
 
         if ($setter = $prop_meta['setter']) {
+            if (!method_exists($this, $setter))
+                throw new \BadMethodCallException(get_class($this) .': Undefined setter method ['. $setter .']');
             $this->$setter($val);
         } else {
             $this->set($prop, $val);
