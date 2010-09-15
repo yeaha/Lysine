@@ -252,12 +252,12 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @access public
      * @return Lysine\Utils\Set
      */
-    public function find($fn) {
-        $find = array();
+    public function filter($fn) {
+        $set = array();
 
         foreach ($this->set as $key => $el)
-            if (call_user_func($fn, $el)) $find[$key] = $el;
-        return new self($find);
+            if (call_user_func($fn, $el)) $set[$key] = $el;
+        return new self($set);
     }
 
     /**
