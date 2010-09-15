@@ -39,6 +39,16 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
+     * 还原为数组
+     *
+     * @access public
+     * @return array
+     */
+    public function toArray() {
+        return $this->set;
+    }
+
+    /**
      * IteratorAggregate接口
      * 返回迭代子
      *
@@ -211,18 +221,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
-     * 还原为数组
-     *
-     * @access public
-     * @return array
-     */
-    public function toArray() {
-        return $this->set;
-    }
-
-    /**
      * 把每个元素作为参数传递给function
-     * 把所有的返回值以Lysine\Utils\Set方式返回
      * 返回新的Set
      *
      * @param callback $fn
@@ -291,6 +290,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
 
     /**
      * array_slice方法
+     * 返回新的set
      *
      * @param integer $offset
      * @param integer $length
@@ -304,6 +304,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
 
     /**
      * array_splice方法
+     * 返回新的set
      *
      * @param integer $offset
      * @param integer $length
@@ -334,7 +335,21 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
+     * array_chunk方法
+     * 返回新的Set
+     *
+     * @param integer $size
+     * @param boolean $preserve_keys
+     * @access public
+     * @return Lysine\Utils\Set
+     */
+    public function chunk($size, $preserve_keys = false) {
+        return new self(array_chunk($this->set, $size, $preserve_keys));
+    }
+
+    /**
      * 自定义排序
+     * 修改自身
      *
      * @param callable $cmp_function
      * @access public
@@ -349,6 +364,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * 自定义分组
      * 使用自定义function依次调用每个元素
      * 根据返回的key把所有元素重新分组
+     * 修改自身
      *
      * @param callable $fn
      * @param boolean $replace 是否覆盖相同key的元素
