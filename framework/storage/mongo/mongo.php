@@ -1,7 +1,9 @@
 <?php
 namespace Lysine\Storage;
 
+use MongoCollection;
 use Lysine\IStorage;
+use Lysine\Storage\Mongo\Select;
 
 /**
  * mongodb数据库连接
@@ -33,6 +35,17 @@ class Mongo extends \Mongo implements IStorage {
      */
     public function listCollections($dbname) {
         return $this->selectDB($dbname)->listCollections();
+    }
+
+    public function select($target) {
+        if ( !($target instanceof MongoCollection) ) {
+            if (!is_array($target) || count($target) != 2)
+                throw new \InvalidArgumentException();
+            list($db, $collection) = $target;
+            $target = $this->selectCollection($db, $collection);
+        }
+
+        return new Select($target);
     }
 
     /**
