@@ -120,7 +120,7 @@ abstract class Mapper {
      */
     public function recordToProps(array $record) {
         $prop_of_field = $this->getMeta()->getPropOfField();
-        foreach ($record as $filed => $value) {
+        foreach ($record as $field => $value) {
             if (!isset($prop_of_field[$field])) continue;
             $props[$prop_of_field[$field]] = $value;
         }
