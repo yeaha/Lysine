@@ -23,6 +23,7 @@ class Mongo extends \Mongo implements IStorage {
      */
     public function __construct(array $config) {
         list($dsn, $options) = self::parseConfig($config);
+        if (!isset($options['persist'])) $options['persist'] = $dsn;
         parent::__construct($dsn, $options);
     }
 
@@ -57,21 +58,9 @@ class Mongo extends \Mongo implements IStorage {
      * @return array
      */
     static public function parseConfig(array $config) {
-        if (isset($config['dsn'])) {
-            $dsn = $config['dsn'];
-        } elseif (isset($config['servers']) && is_array($config['servers'])) {
-            $servers = array();
-            foreach ($config['servers'] as $server) {
-                if (is_array($server))
-                    $server = implode(':', $server);
-                $servers[] = $server;
-            }
-            $dsn = 'mongodb://'. implode(',', $servers);
-        } else {
-            $server = isset($config['server']) ? $config['server'] : ini_get('mongo.default_host');
-            $port = isset($config['port']) ? $config['port'] : ini_get('mongo.default_port');
-            $dsn = sprintf('mongodb://%s:%s', $server, $port);
-        }
+        $dsn = isset($config['dsn'])
+             ? $config['dsn']
+             : sprintf('mongodb://%s/%s', ini_get('mongo.default_host'), ini_get('mongo.default_port'));
 
         $options = (isset($config['options']) && is_array($config['options']))
                  ? $config['options']
