@@ -32,8 +32,11 @@ class MongoMapper extends Mapper {
         if (count($explode) != 2)
             throw new \UnexpectedValueException($this->class .': Invalid collection meta');
 
+        $mongo = $this->getStorage();
+        if (!$mongo->connected) $mongo->connect();
+
         list($db, $collection) = $explode;
-        $this->collection = $this->getStorage()->selectCollection($db, $collection);
+        $this->collection = $mongo->selectCollection($db, $collection);
 
         return $this->collection;
     }

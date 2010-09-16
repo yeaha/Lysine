@@ -31,8 +31,11 @@ abstract class MongoActiveRecord extends ActiveRecord {
     public function getCollection() {
         if ($this->coll) return $this->coll;
 
+        $mongo = $this->getStorage();
+        if (!$mongo->connected) $mongo->connect();
+
         list($db, $collection) = self::parseCollection();
-        $this->coll = $this->getStorage()->selectCollection($db, $collection);
+        $this->coll = $mongo->selectCollection($db, $collection);
 
         return $this->coll;
     }
