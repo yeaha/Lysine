@@ -59,14 +59,10 @@ class Events extends Singleton {
      * @access public
      * @return void
      */
-    final public function fireEvent($target, $name, $args = null) {
+    final public function fireEvent($target, $name, array $args = array()) {
         $key = $this->keyOf($target);
 
         if (!isset($this->events[$key][$name])) return;
-
-        $args = ($args === null)
-              ? array()
-              : is_array($args) ? $args : array_slice(func_get_args(), 2);
 
         foreach ($this->events[$key][$name] as $callback)
             call_user_func_array($callback, $args);
