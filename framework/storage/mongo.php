@@ -107,6 +107,7 @@ namespace Lysine\Storage\Mongo {
 
         public function __get($name) {
             $db = parent::__get('db');
+            if ($name == 'db') return $db;
             return $db->selectCollection($name);
         }
 
