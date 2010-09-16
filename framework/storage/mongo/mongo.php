@@ -1,8 +1,9 @@
 <?php
 namespace Lysine\Storage;
 
-use MongoCollection;
 use Lysine\IStorage;
+use Lysine\Storage\Mongo\DB as MongoDB;
+use Lysine\Storage\Mongo\Collection as MongoCollection;
 
 /**
  * mongodb数据库连接
@@ -24,6 +25,18 @@ class Mongo extends \Mongo implements IStorage {
         list($dsn, $options) = self::parseConfig($config);
         if (!isset($options['persist'])) $options['persist'] = $dsn;
         parent::__construct($dsn, $options);
+    }
+
+    public function __get($dbname) {
+        return $this->selectDB($dbname);
+    }
+
+    public function selectDB($name) {
+        return new MongoDB($this, $name);
+    }
+
+    public function selectCollection($db, $collection) {
+        return new MongoCollection($this->selectDB($db), $collection);
     }
 
     /**
