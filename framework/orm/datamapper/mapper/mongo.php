@@ -34,7 +34,7 @@ class MongoMapper extends Mapper {
      * @access protected
      * @return mixed
      */
-    protected function doPut(array $record) {
+    protected function doInsert(array $record) {
         $meta = $this->getMeta();
         $primary_key = $meta->getPrimaryKey();
         if (!isset($record[$primary_key]))
@@ -56,7 +56,7 @@ class MongoMapper extends Mapper {
      * @access protected
      * @return boolean
      */
-    protected function doReplace($id, array $record) {
+    protected function doUpdate($id, array $record) {
         $meta = $this->getMeta();
         $this->getStorage()->update(
             $meta->getCollection(),

@@ -32,7 +32,7 @@ class DBMapper extends Mapper {
      * @access protected
      * @return mixed
      */
-    protected function doPut(array $record) {
+    protected function doInsert(array $record) {
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
@@ -52,7 +52,7 @@ class DBMapper extends Mapper {
      * @access protected
      * @return boolean
      */
-    protected function doReplace($id, array $record) {
+    protected function doUpdate($id, array $record) {
         $meta = $this->getMeta();
         $adapter = $this->getStorage();
         $table_name = $meta->getCollection();

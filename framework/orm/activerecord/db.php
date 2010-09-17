@@ -41,7 +41,7 @@ abstract class DBActiveRecord extends ActiveRecord {
      * @access protected
      * @return mixed
      */
-    protected function put() {
+    protected function insert() {
         $pk = static::$primary_key;
         $table_name = static::$collection;
         $adapter = $this->getStorage();
@@ -63,7 +63,7 @@ abstract class DBActiveRecord extends ActiveRecord {
      * @access protected
      * @return boolean
      */
-    protected function replace() {
+    protected function update() {
         $table_name = static::$collection;
         $pk = $adapter->qcol(static::$primary_key);
         $record = $this->toArray(/* only dirty */true);

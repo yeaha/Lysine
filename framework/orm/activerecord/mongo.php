@@ -20,7 +20,7 @@ abstract class MongoActiveRecord extends ActiveRecord {
      * @access protected
      * @return mixed
      */
-    protected function put() {
+    protected function insert() {
         $record = $this->toArray();
         $primary_key = static::$primary_key;
 
@@ -41,7 +41,7 @@ abstract class MongoActiveRecord extends ActiveRecord {
      * @access protected
      * @return boolean
      */
-    protected function replace() {
+    protected function update() {
         $this->getStorage()->update(
             static::$collection,
             array(static::$primary_key => $this->id()),

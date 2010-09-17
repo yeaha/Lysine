@@ -16,11 +16,11 @@ abstract class ORM {
     const BEFORE_SAVE_EVENT = 'before save';
     const AFTER_SAVE_EVENT = 'after save';
 
-    const BEFORE_PUT_EVENT = 'before put';
-    const AFTER_PUT_EVENT = 'after put';
+    const BEFORE_INSERT_EVENT = 'before insert';
+    const AFTER_INSERT_EVENT = 'after insert';
 
-    const BEFORE_REPLACE_EVENT = 'before replace';
-    const AFTER_REPLACE_EVENT = 'after replace';
+    const BEFORE_UPDATE_EVENT = 'before update';
+    const AFTER_UPDATE_EVENT = 'after update';
 
     const BEFORE_DELETE_EVENT = 'before delete';
     const AFTER_DELETE_EVENT = 'after delete';
@@ -33,11 +33,11 @@ abstract class ORM {
     public function __before_save() {}
     public function __after_save() {}
 
-    public function __before_put() {}
-    public function __after_put() {}
+    public function __before_insert() {}
+    public function __after_insert() {}
 
-    public function __before_replace() {}
-    public function __after_replace() {}
+    public function __before_update() {}
+    public function __after_update() {}
 
     public function __before_delete() {}
     public function __after_delete() {}

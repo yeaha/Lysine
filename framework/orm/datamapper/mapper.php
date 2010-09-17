@@ -54,7 +54,7 @@ abstract class Mapper {
      * @access protected
      * @return mixed 新数据的主键值
      */
-    abstract protected function doPut(array $record);
+    abstract protected function doInsert(array $record);
 
     /**
      * 保存更新数据到存储服务
@@ -65,7 +65,7 @@ abstract class Mapper {
      * @access protected
      * @return boolean
      */
-    abstract protected function doReplace($id, array $record);
+    abstract protected function doUpdate($id, array $record);
 
     /**
      * 删除指定主键的数据
@@ -170,11 +170,11 @@ abstract class Mapper {
         $data->fireEvent(ORM::BEFORE_SAVE_EVENT, $data);
 
         if ($data->isFresh()) {
-            $data->fireEvent(ORM::BEFORE_PUT_EVENT, $data);
-            if ($result = $this->put($data)) $data->fireEvent(ORM::AFTER_PUT_EVENT, $data);
+            $data->fireEvent(ORM::BEFORE_INSERT_EVENT, $data);
+            if ($result = $this->insert($data)) $data->fireEvent(ORM::AFTER_INSERT_EVENT, $data);
         } elseif ($data->isDirty()) {
-            $data->fireEvent(ORM::BEFORE_REPLACE_EVENT, $data);
-            if ($result = $this->replace($data)) $data->fireEvent(ORM::AFTER_REPLACE_EVENT, $data);
+            $data->fireEvent(ORM::BEFORE_UPDATE_EVENT, $data);
+            if ($result = $this->update($data)) $data->fireEvent(ORM::AFTER_UPDATE_EVENT, $data);
         }
 
         $data->fireEvent(ORM::AFTER_SAVE_EVENT, $data);
@@ -190,9 +190,9 @@ abstract class Mapper {
      * @access protected
      * @return mixed
      */
-    protected function put(Data $data) {
+    protected function insert(Data $data) {
         $record = $this->propsToRecord($data->toArray());
-        if (!$id = $this->doPut($record)) return false;
+        if (!$id = $this->doInsert($record)) return false;
 
         $record[$this->getMeta()->getPrimaryKey()] = $id;
         $data->__fill($this->recordToProps($record));
@@ -207,9 +207,9 @@ abstract class Mapper {
      * @access protected
      * @return boolean
      */
-    protected function replace(Data $data) {
+    protected function update(Data $data) {
         $record = $this->propsToRecord($data->toArray(/* only dirty */true));
-        if (!$this->doReplace($data->id(), $record)) return false;
+        if (!$this->doUpdate($data->id(), $record)) return false;
 
         $data->__fill($data->toArray());
 

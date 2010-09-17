@@ -277,13 +277,13 @@ abstract class Data extends ORM implements IData {
                                             break;
             case ORM::AFTER_SAVE_EVENT:     $this->__after_save();
                                             break;
-            case ORM::BEFORE_PUT_EVENT:     $this->__before_put();
+            case ORM::BEFORE_INSERT_EVENT:  $this->__before_insert();
                                             break;
-            case ORM::AFTER_PUT_EVENT:      $this->__after_put();
+            case ORM::AFTER_INSERT_EVENT:   $this->__after_insert();
                                             break;
-            case ORM::BEFORE_REPLACE_EVENT: $this->__before_replace();
+            case ORM::BEFORE_UPDATE_EVENT:  $this->__before_update();
                                             break;
-            case ORM::AFTER_REPLACE_EVENT:  $this->__after_replace();
+            case ORM::AFTER_UPDATE_EVENT:   $this->__after_update();
                                             break;
             case ORM::BEFORE_DELETE_EVENT:  $this->__before_delete();
                                             break;

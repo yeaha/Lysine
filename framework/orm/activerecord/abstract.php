@@ -141,7 +141,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @access protected
      * @return mixed 新主键值
      */
-    abstract protected function put();
+    abstract protected function insert();
 
     /**
      * 更新数据
@@ -150,7 +150,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @access protected
      * @return boolean
      */
-    abstract protected function replace();
+    abstract protected function update();
 
     /**
      * 删除当前实例
@@ -360,14 +360,14 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         $this->fireEvent(ORM::BEFORE_SAVE_EVENT, $this);
 
         if ($this->fresh) {
-            $this->fireEvent(ORM::BEFORE_PUT_EVENT, $this);
-            if ($result = $this->put()) {
+            $this->fireEvent(ORM::BEFORE_INSERT_EVENT, $this);
+            if ($result = $this->insert()) {
                 $this->set($pk, $result);
-                $this->fireEvent(ORM::AFTER_PUT_EVENT, $this);
+                $this->fireEvent(ORM::AFTER_INSERT_EVENT, $this);
             }
         } else {
-            $this->fireEvent(ORM::BEFORE_REPLACE_EVENT, $this);
-            if ($result = $this->replace()) $this->fireEvent(ORM::AFTER_REPLACE_EVENT, $this);
+            $this->fireEvent(ORM::BEFORE_UPDATE_EVENT, $this);
+            if ($result = $this->update()) $this->fireEvent(ORM::AFTER_UPDATE_EVENT, $this);
         }
 
         if ($result) {
@@ -432,13 +432,13 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
                                             break;
             case ORM::AFTER_SAVE_EVENT:     $this->__after_save();
                                             break;
-            case ORM::BEFORE_PUT_EVENT:     $this->__before_put();
+            case ORM::BEFORE_INSERT_EVENT:  $this->__before_insert();
                                             break;
-            case ORM::AFTER_PUT_EVENT:      $this->__after_put();
+            case ORM::AFTER_INSERT_EVENT:   $this->__after_insert();
                                             break;
-            case ORM::BEFORE_REPLACE_EVENT: $this->__before_replace();
+            case ORM::BEFORE_UPDATE_EVENT:  $this->__before_update();
                                             break;
-            case ORM::AFTER_REPLACE_EVENT:  $this->__after_replace();
+            case ORM::AFTER_UPDATE_EVENT:   $this->__after_update();
                                             break;
             case ORM::BEFORE_DELETE_EVENT:  $this->__before_delete();
                                             break;
