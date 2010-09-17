@@ -12,36 +12,6 @@ use Lysine\Utils\Set;
  */
 class MongoMapper extends Mapper {
     /**
-     * mongodb collection连接实例
-     *
-     * @var MongoCollection
-     * @access private
-     */
-    private $collection;
-
-    /**
-     * 获得当前模型的MongoCollection实例
-     *
-     * @access public
-     * @return MongoCollection
-     */
-    public function getCollection() {
-        if ($this->collection) return $this->collection;
-
-        $explode = explode('.', $this->getMeta()->getCollection());
-        if (count($explode) != 2)
-            throw new \UnexpectedValueException($this->class .': Invalid collection meta');
-
-        $mongo = $this->getStorage();
-        if (!$mongo->connected) $mongo->connect();
-
-        list($db, $collection) = $explode;
-        $this->collection = $mongo->selectCollection($db, $collection);
-
-        return $this->collection;
-    }
-
-    /**
      * 根据主键查询一条数据
      *
      * @param mixed $key
@@ -49,8 +19,11 @@ class MongoMapper extends Mapper {
      * @return array
      */
     protected function doFind($key) {
-        $primary_key = $this->getMeta()->getPrimaryKey();
-        return $this->getCollection()->findOne(array($primary_key => $key));
+        $meta = $this->getMeta();
+        return $this->getStorage()->findOne(
+            $meta->getCollection(),
+            array($meta->getPrimaryKey() => $key)
+        );
     }
 
     /**
@@ -62,11 +35,16 @@ class MongoMapper extends Mapper {
      * @return mixed
      */
     protected function doPut(array $record) {
-        $primary_key = $this->getMeta()->getPrimaryKey();
+        $meta = $this->getMeta();
+        $primary_key = $meta->getPrimaryKey();
         if (!isset($record[$primary_key]))
             throw new \LogicException($this->class .': Must set primary key value before save');
 
-        $this->getCollection()->insert($record, array('safe' => true));
+        $this->getStorage()->insert(
+            $meta->getCollection(),
+            $record,
+            array('safe' => true)
+        );
         return $record[$primary_key];
     }
 
@@ -79,9 +57,13 @@ class MongoMapper extends Mapper {
      * @return boolean
      */
     protected function doReplace($id, array $record) {
-        $primary_key = $this->getMeta()->getPrimaryKey();
-        $record = array('$set' => $record);
-        $this->getCollection()->update(array($primary_key => $id), $record, array('safe' => true));
+        $meta = $this->getMeta();
+        $this->getStorage()->update(
+            $meta->getCollection(),
+            array($meta->getPrimaryKey() => $id),
+            array('$set' => $record),
+            array('safe' => true)
+        );
         return true;
     }
 
@@ -93,8 +75,12 @@ class MongoMapper extends Mapper {
      * @return boolean
      */
     protected function doDelete($id) {
-        $primary_key = $this->getMeta()->getPrimaryKey();
-        $this->getCollection()->remove(array($primary_key => $id), array('justOne' => true, 'safe' => true));
+        $meta = $this->getMeta();
+        $this->getStorage()->remove(
+            $meta->getCollection(),
+            array($meta->getPrimaryKey() => $id),
+            array('justOne' => true, 'safe' => true)
+        );
         return true;
     }
 
@@ -106,7 +92,11 @@ class MongoMapper extends Mapper {
      * @return Lysine\Utils\Set
      */
     public function findByQuery(array $query) {
-        $cur = $this->getCollection()->find($query);
+        $meta = $this->getMeta();
+        $cur = $this->getStorage()->find(
+            $meta->getCollection(),
+            $query
+        );
 
         $instances = array();
         while ($record = $cur->getNext()) {

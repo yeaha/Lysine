@@ -15,32 +15,6 @@ use Lysine\ORM\ActiveRecord;
  */
 abstract class MongoActiveRecord extends ActiveRecord {
     /**
-     * MongoCollection连接实例
-     *
-     * @var MongoCollection
-     * @access private
-     */
-    private $coll;
-
-    /**
-     * 获得模型对应的MongoCollection连接实例
-     *
-     * @access public
-     * @return MongoCollection
-     */
-    public function getCollection() {
-        if ($this->coll) return $this->coll;
-
-        $mongo = $this->getStorage();
-        if (!$mongo->connected) $mongo->connect();
-
-        list($db, $collection) = self::parseCollection();
-        $this->coll = $mongo->selectCollection($db, $collection);
-
-        return $this->coll;
-    }
-
-    /**
      * 保存新数据
      *
      * @access protected
@@ -53,7 +27,11 @@ abstract class MongoActiveRecord extends ActiveRecord {
         if (!isset($record[$primary_key]))
             throw new \LogicException($this->class .': Must set primary key value before save');
 
-        $this->getCollection()->insert($record, array('safe' => true));
+        $this->getStorage()->insert(
+            static::$collection,
+            $record,
+            array('safe' => true)
+        );
         return $record[$primary_key];
     }
 
@@ -64,9 +42,12 @@ abstract class MongoActiveRecord extends ActiveRecord {
      * @return boolean
      */
     protected function replace() {
-        $record = $this->toArray();
-        $primary_key = static::$primary_key;
-        $this->getCollection()->update(array($primary_key => $id), $record, array('safe' => true));
+        $this->getStorage()->update(
+            static::$collection,
+            array(static::$primary_key => $this->id()),
+            array('$set' => $this->toArray(/* only dirty */true)),
+            array('safe' => true)
+        );
         return true;
     }
 
@@ -77,8 +58,11 @@ abstract class MongoActiveRecord extends ActiveRecord {
      * @return boolean
      */
     protected function delete() {
-        $primary_key = static::$primary_key;
-        $this->getCollection()->remove(array($primary_key => $this->id()), array('justOne' => true, 'safe' => true));
+        $this->getStorage()->remove(
+            static::$collection,
+            array(static::$primary_key => $this->id()),
+            array('justOne' => true, 'safe' => true)
+        );
         return true;
     }
 
@@ -102,31 +86,17 @@ abstract class MongoActiveRecord extends ActiveRecord {
      * @return Lysine\ORM\ActiveRecord
      */
     static public function find($key, IStorage $storage = null) {
-        $primary_key = static::$primary_key;
-        list($db, $collection) = self::parseCollection();
+        if (!$storage) $storage = static::getStorage();
+        $record = $storage->findOne(
+            static::$collection,
+            array(static::$primary_key => $key)
+        );
 
-        $storage = static::getStorage();
-        if (!$record = $storage->selectCollection($db, $collection)->findOne(array($primary_key => $key)))
-            return false;
+        if (!$record) return false;
 
         $class = get_called_class();
         $ar = new $class($record, false);
         $ar->setStorage($storage);
         return $ar;
-    }
-
-    /**
-     * 解析mongo collection名字配置
-     *
-     * @static
-     * @access private
-     * @return array
-     */
-    static private function parseCollection() {
-        $explode = explode('.', static::$collection);
-        if (count($explode) != 2)
-            throw new \UnexpectedValueException(get_class($this) .': Invalid collection ['. static::$collection .']');
-
-        return $explode;
     }
 }
