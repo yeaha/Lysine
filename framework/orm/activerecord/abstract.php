@@ -2,6 +2,7 @@
 namespace Lysine\ORM;
 
 use Lysine\ORM;
+use Lysine\ORM\Registry;
 use Lysine\IStorage;
 use Lysine\Utils\Events;
 use Lysine\Storage\Pool;
@@ -176,7 +177,11 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             $this->record = $record;
             $this->fresh = $fresh;
 
-            if ($fresh) $this->dirty_record = array_keys($record);
+            if ($fresh) {
+                $this->dirty_record = array_keys($record);
+            } else {
+                Registry::set($this);
+            }
         }
 
         $this->fireEvent(ORM::AFTER_INIT_EVENT, $this);
@@ -364,6 +369,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             if ($result = $this->insert()) {
                 $this->set($pk, $result);
                 $this->fireEvent(ORM::AFTER_INSERT_EVENT, $this);
+                Registry::set($this);
             }
         } else {
             $this->fireEvent(ORM::BEFORE_UPDATE_EVENT, $this);
@@ -391,10 +397,11 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         if (static::$readonly)
             throw new \LogicException(get_class($this) .' is readonly!');
 
+        $id = $this->id();
         $this->fireEvent(ORM::BEFORE_DELETE_EVENT, $this);
         if (!$this->delete()) return false;
 
-        $this->fireEvent(ORM::AFTER_DELETE_EVENT, $this);
+        $this->fireEvent(ORM::AFTER_DELETE_EVENT, $id);
 
         $this->record = $this->dirty_record = $this->referer = $this->props = array();
         $this->storage = null;

@@ -4,6 +4,7 @@ namespace Lysine\ORM\DataMapper;
 use Lysine\ORM;
 use Lysine\ORM\DataMapper\Data;
 use Lysine\ORM\DataMapper\Meta;
+use Lysine\ORM\Registry;
 use Lysine\Storage\Pool;
 
 /**
@@ -151,9 +152,10 @@ abstract class Mapper {
      * @return Lysine\ORM\DataMapper\Data
      */
     public function find($id) {
-        if ($record = $this->doFind($id))
-            return $this->package($record);
-        return false;
+        if ($id instanceof Data) return $id;
+        if ($data = Registry::get($this->class, $id)) return $data;
+        if (!$record = $this->doFind($id)) return false;
+        return $this->package($record);
     }
 
     /**
@@ -197,6 +199,7 @@ abstract class Mapper {
         $record[$this->getMeta()->getPrimaryKey()] = $id;
         $data->__fill($this->recordToProps($record));
 
+        Registry::set($data);
         return $id;
     }
 
@@ -229,10 +232,12 @@ abstract class Mapper {
 
         if ($data->isFresh()) return true;
 
-        $data->fireEvent(ORM::BEFORE_DELETE_EVENT, $data);
-        if (!$this->doDelete($data->id())) return false;
+        $id = $data->id();
 
-        $data->fireEvent(ORM::AFTER_DELETE_EVENT, $data);
+        $data->fireEvent(ORM::BEFORE_DELETE_EVENT, $data);
+        if (!$this->doDelete($id)) return false;
+
+        $data->fireEvent(ORM::AFTER_DELETE_EVENT, $id);
         return true;
     }
 
@@ -247,6 +252,8 @@ abstract class Mapper {
         $data_class = $this->class;
         $data = new $data_class;
         $data->__fill($this->recordToProps($record));
+
+        Registry::set($data);
         return $data;
     }
 

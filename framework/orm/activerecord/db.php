@@ -5,6 +5,7 @@ use Lysine\IStorage;
 use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\Pool;
 use Lysine\ORM\ActiveRecord;
+use Lysine\ORM\Registry;
 
 /**
  * 数据库数据和业务模型映射封装
@@ -165,13 +166,10 @@ abstract class DBActiveRecord extends ActiveRecord {
      * @return mixed
      */
     static public function find($key, IStorage $storage = null) {
-        $select = static::select($storage);
+        $class = get_called_class();
+        if ($ar = Registry::get($class, $key)) return $ar;
 
         $pk = static::$primary_key;
-        if (is_array($key)) {
-            return $select->whereIn($pk, $key)->get();
-        } else {
-            return $select->where("{$pk} = ?", $key)->get(1);
-        }
+        return static::select($storage)->where("{$pk} = ?", $key)->get(1);
     }
 }

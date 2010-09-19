@@ -4,6 +4,7 @@ namespace Lysine\ORM\ActiveRecord;
 use Lysine\IStorage;
 use Lysine\Storage\Pool;
 use Lysine\ORM\ActiveRecord;
+use Lysine\ORM\Registry;
 
 /**
  * Mongo数据AR模式封装
@@ -86,6 +87,9 @@ abstract class MongoActiveRecord extends ActiveRecord {
      * @return Lysine\ORM\ActiveRecord
      */
     static public function find($key, IStorage $storage = null) {
+        $class = get_called_class();
+        if ($ar = Registry::get($class, $key)) return $ar;
+
         if (!$storage) $storage = static::getStorage();
         $record = $storage->findOne(
             static::$collection,
@@ -94,7 +98,6 @@ abstract class MongoActiveRecord extends ActiveRecord {
 
         if (!$record) return false;
 
-        $class = get_called_class();
         $ar = new $class($record, false);
         $ar->setStorage($storage);
         return $ar;
