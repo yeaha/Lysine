@@ -33,27 +33,9 @@ abstract class Router_Abstract {
      * @return string
      */
     static public function url($actions, $params = array()) {
-        switch (func_num_args()) {
-            case 1:
-                if (!is_array($actions)) $actions = array($actions);
-                break;
-            case 2:
-                if (!is_array($actions)) $actions = array($actions);
-
-                if (!is_array($params)) {
-                    array_push($actions, $params);
-                    $params = array();
-                }
-                break;
-            default:
-                $actions = func_get_args();
-                $count = count($actions);
-                if (is_array($actions[$count - 1])) {
-                    $params = array_pop($actions);
-                } else {
-                    $params = array();
-                }
-        }
+        $args = func_get_args();
+        $params = is_array(end($args)) ? array_pop($args) : array();
+        $actions = is_array(reset($args)) ? array_shift($args) : $args;
 
         $url = '/'. implode('/', $actions);
         if ($params) $url .= '?'. http_build_query($params);
