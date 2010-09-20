@@ -11,9 +11,8 @@ class Request extends Injection {
 
     protected $_requestUri;
 
-    /* 需要php 5.3.3+才不会出现重复声明构造函数的错误
+    // 需要php 5.3.3+才不会出现重复声明构造函数的错误
     private function __construct() {}
-    */
 
     static public function instance() {
         if (!self::$instance) self::$instance = new self();
