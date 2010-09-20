@@ -52,6 +52,9 @@ abstract class Router_Abstract {
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 class Router extends Router_Abstract {
+    const BEFORE_DISPATCH_EVENT = 'before dispatch';
+    const AFTER_DISPATCH_EVENT = 'after dispatch';
+
     /**
      * Controller类的名字空间
      *
@@ -111,22 +114,29 @@ class Router extends Router_Abstract {
 
     /**
      * 解析url，返回对应的controller
+     * 先根据url组装Controller类的名字加载
+     * 再尝试正则路由匹配
      *
      * @param string $url
      * @access protected
      * @return array
      */
     protected function match($url) {
-        foreach ($this->dispatch_map as $re => $class) {
-            if (preg_match($re, $url, $match))
-                return array($class, array_slice($match, 1));
-        }
-
         // url: /user/login
         // controller: \Controller\User\Login
         $class = str_replace('/', '\\', trim($url, '/'));
         if (!$class) $class = 'index';
-        return array($this->namespace .'\\'. $class, array());
+        $class = $this->namespace .'\\'. $class;
+        if (class_exists($class)) return array($class, null);
+
+        foreach ($this->dispatch_map as $re => $class) {
+            if (!preg_match($re, $url, $match)) continue;
+            return class_exists($class)
+                 ? array($class, array_slice($match, 1))
+                 : array(null, null);
+        }
+
+        return array(null, null);
     }
 
     /**
@@ -139,33 +149,28 @@ class Router extends Router_Abstract {
      * @return mixed
      */
     public function dispatch($url, array $params = array()) {
-        list($classname, $args) = $this->match($url);
-
-        if (!class_exists($classname))
-            throw HttpError::page_not_found($url);
+        list($class, $args) = $this->match($url);
+        if (!$class) throw HttpError::page_not_found($url);
 
         if ($params) $args = array_merge($args, $params);
-        Events::instance()->fireEvent($this, 'before dispatch', $classname, $args);
+        Events::instance()->fireEvent($this, self::BEFORE_DISPATCH_EVENT, array($class, $args));
 
-        // 反射对象，检查controller类
-        $class = new \ReflectionClass($classname);
-        $controller = new $classname();
-
-        $method = req()->method();
-        if (req()->isAJAX()) {
-            if ($class->hasMethod('ajax_'. $method)) {
-                $method = 'ajax_'. $method;
-            } elseif ($class->hasMethod('ajax')) {
-                $method = 'ajax';
-            }
-        }
-
-        if ($class->hasMethod('beforeRun')) {
+        $controller = new $class();
+        if (method_exists($controller, 'beforeRun')) {
             // 如果beforeRun返回了内容，就直接完成动作
             // 可以在这里进行某些阻断操作
             // 正常的内容不应该通过这里输出
             $resp = call_user_func_array(array($controller, 'beforeRun'), $args);
             if ($resp) return $resp;
+        }
+
+        $method = req()->method();
+        if (req()->isAJAX()) {
+            if (method_exists($controller, 'ajax_'. $method)) {
+                $method = 'ajax_'. $method;
+            } elseif (method_exists($controller, 'ajax')) {
+                $method = 'ajax';
+            }
         }
 
         // 执行controller动作并返回结果
@@ -179,9 +184,9 @@ class Router extends Router_Abstract {
         $resp = call_user_func_array(array($controller, $method), $args);
 
         // 这里有机会对输出结果进行进一步处理
-        if ($class->hasMethod('afterRun')) $controller->afterRun($resp);
+        if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
 
-        Events::instance()->fireEvent($this, 'after dispatch', $classname, $args, $resp);
+        Events::instance()->fireEvent($this, self::AFTER_DISPATCH_EVENT, array($class, $args, $resp));
 
         return $resp;
     }
