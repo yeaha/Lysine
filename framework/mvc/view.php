@@ -1,6 +1,8 @@
 <?php
 namespace Lysine;
 
+use Lysine\Error;
+
 class View {
     /**
      * 视图文件存放路径
@@ -145,12 +147,9 @@ class View {
      * @return string
      */
     protected function findFile($file) {
-        if (!$file) throw new \InvalidArgumentException('Invalid view file');
-
+        if (!$file) throw Error::invalid_argument('findFile()', __CLASS__);
         $file = sprintf('%s/%s.%s', $this->view_dir, $file, $this->file_ext);
-
-        if (!is_readable($file))
-            throw new \RuntimeException('View file('. $file .') is not exist or readable!');
+        if (!is_readable($file)) throw Error::file_not_found($file);
 
         return $file;
     }

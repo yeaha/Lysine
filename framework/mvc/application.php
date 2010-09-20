@@ -1,6 +1,8 @@
 <?php
 namespace Lysine;
 
+use Lysine\Error;
+use Lysine\HttpError;
 use Lysine\Utils\Injection;
 
 /**
@@ -112,7 +114,7 @@ class Application extends Injection {
      */
     public function setAutoloader($loader, $throw = true, $prepend = false) {
         if (!is_callable($loader))
-            throw new \InvalidArgumentException('Invalid auto loader');
+            throw Error::not_callable('Application loader');
 
         spl_autoload_unregister(array($this, 'autoload'));
         spl_autoload_register($loader, $throw, $prepend);
@@ -191,7 +193,7 @@ class Application extends Injection {
     public function run() {
         $req = req();
         if (!in_array($req->method(), array('get', 'post', 'put', 'delete')))
-            throw Request_Exception('Method Not Allowed', 405);
+            throw HttpError::method_not_allowed($req->method());
 
         $url = parse_url($req->requestUri());
         return $this->dispatch($url['path']);

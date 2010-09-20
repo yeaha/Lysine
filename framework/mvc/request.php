@@ -1,6 +1,7 @@
 <?php
 namespace Lysine;
 
+use Lysine\HttpError;
 use Lysine\Utils\Injection;
 
 class Request extends Injection {
@@ -100,7 +101,7 @@ class Request extends Injection {
             return $this->_requestUri = $uri;
         }
 
-        throw new \Exception('Unable to get request URI');
+        throw new HttpError('Unable to get request URI', 500);
     }
 
     public function requestBaseUri() {
@@ -165,11 +166,5 @@ class Request extends Injection {
 
     public function ip() {
         return $this->server('remote_addr', '127.0.0.1');
-    }
-}
-
-class Request_Exception extends \Exception {
-    public function getHeader() {
-        return Response::httpStatus($this->getCode());
     }
 }

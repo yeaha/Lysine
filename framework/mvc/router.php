@@ -1,6 +1,7 @@
 <?php
 namespace Lysine;
 
+use Lysine\HttpError;
 use Lysine\Utils\Events;
 
 /**
@@ -159,7 +160,7 @@ class Router extends Router_Abstract {
         list($classname, $args) = $this->match($url);
 
         if (!class_exists($classname))
-            throw new Request_Exception('Page Not Found', 404);
+            throw HttpError::page_not_found($url);
 
         if ($params) $args = array_merge($args, $params);
         Events::instance()->fireEvent($this, 'before dispatch', $classname, $args);
@@ -189,7 +190,10 @@ class Router extends Router_Abstract {
         // 不检查method是否存在，用is_callable()
         // 保留__call()重载方法的方式
         if (!is_callable(array($controller, $method)))
-            throw new Request_Exception('Not Acceptable', 406);
+            throw HttpError::not_acceptable(array(
+                'controller' => $controller,
+                'method' => $method,
+            ));
         $resp = call_user_func_array(array($controller, $method), $args);
 
         // 这里有机会对输出结果进行进一步处理
