@@ -165,6 +165,6 @@ class Request extends Injection {
     }
 
     public function ip() {
-        return $this->server('remote_addr', '127.0.0.1');
+        return $this->server('remote_addr', '0.0.0.0');
     }
 }
