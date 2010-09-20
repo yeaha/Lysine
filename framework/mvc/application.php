@@ -3,7 +3,7 @@ namespace Lysine\MVC;
 
 use Lysine\Error;
 use Lysine\HttpError;
-use Lysine\MVC\Response;
+use Lysine\MVC\Response_Redirect;
 use Lysine\MVC\Router;
 use Lysine\MVC\Router_Abstract;
 use Lysine\Utils\Injection;
