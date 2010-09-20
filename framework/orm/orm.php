@@ -65,7 +65,7 @@ class Registry {
     /**
      * 是否使用调查表
      */
-    static public function $enabled = true;
+    static public $enabled = true;
 
     /**
      * 注册模型实例
