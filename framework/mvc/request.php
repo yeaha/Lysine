@@ -9,7 +9,7 @@ class Request extends Injection {
 
     protected $method;
 
-    protected $_requestUri;
+    protected $requestUri;
 
     // 需要php 5.3.3+才不会出现重复声明构造函数的错误
     private function __construct() {}
@@ -85,19 +85,19 @@ class Request extends Injection {
     }
 
     public function requestUri() {
-        if ($this->_requestUri !== null) return $this->_requestUri;
+        if ($this->requestUri !== null) return $this->requestUri;
 
         $uri = $this->server('http_x_rewrite_url');
-        if ($uri) return $this->_requestUri = $uri;
+        if ($uri) return $this->requestUri = $uri;
 
         $uri = $this->server('request_uri');
-        if ($uri) return $this->_requestUri = $uri;
+        if ($uri) return $this->requestUri = $uri;
 
         $uri = $this->server('orig_path_info');
         if ($uri) {
             $query = $this->server('query_string');
             if (!empty($query)) $uri .= '?'. $query;
-            return $this->_requestUri = $uri;
+            return $this->requestUri = $uri;
         }
 
         throw new HttpError('Unable to get request URI', 500);
