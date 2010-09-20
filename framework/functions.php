@@ -1,6 +1,6 @@
 <?php
 function app() {
-    return \Lysine\Application::instance();
+    return \Lysine\MVC\Application::instance();
 }
 
 function cfg($path = null) {
@@ -12,7 +12,7 @@ function req() {
     static $instance;
     if (!$instance) {
         $class = cfg('app', 'request_class');
-        $instance = $class ? new $class() : \Lysine\Request::instance();
+        $instance = $class ? new $class() : \Lysine\MVC\Request::instance();
     }
     return $instance;
 }

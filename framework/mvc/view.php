@@ -1,5 +1,5 @@
 <?php
-namespace Lysine;
+namespace Lysine\MVC;
 
 use Lysine\Error;
 

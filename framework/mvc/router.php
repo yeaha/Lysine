@@ -1,5 +1,5 @@
 <?php
-namespace Lysine;
+namespace Lysine\MVC;
 
 use Lysine\HttpError;
 use Lysine\Utils\Events;
@@ -120,7 +120,7 @@ class Router extends Router_Abstract {
      *
      * @param array $map
      * @access public
-     * @return Lysine\Router
+     * @return Lysine\MVC\Router
      */
     public function setDispatchMap(array $map) {
         $this->dispatch_map = $map;

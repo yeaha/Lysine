@@ -1,5 +1,5 @@
 <?php
-namespace Lysine;
+namespace Lysine\MVC;
 
 class Response {
     static public function httpStatus($code) {

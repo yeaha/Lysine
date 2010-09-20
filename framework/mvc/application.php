@@ -1,8 +1,11 @@
 <?php
-namespace Lysine;
+namespace Lysine\MVC;
 
 use Lysine\Error;
 use Lysine\HttpError;
+use Lysine\MVC\Response;
+use Lysine\MVC\Router;
+use Lysine\MVC\Router_Abstract;
 use Lysine\Utils\Injection;
 
 /**
@@ -16,7 +19,7 @@ class Application extends Injection {
     /**
      * 单例
      *
-     * @var Lysine\Application
+     * @var Lysine\MVC\Application
      * @access protected
      * @static
      */
@@ -25,7 +28,7 @@ class Application extends Injection {
     /**
      * 路由器
      *
-     * @var Lysine\Router_Abstract
+     * @var Lysine\MVC\Router_Abstract
      * @access protected
      */
     protected $router;
@@ -43,7 +46,7 @@ class Application extends Injection {
      *
      * @static
      * @access public
-     * @return Lysine\Application
+     * @return Lysine\MVC\Application
      */
     static public function instance() {
         if (!self::$instance) self::$instance = new self();
@@ -65,7 +68,7 @@ class Application extends Injection {
      *
      * @param Router_Abstract $router
      * @access public
-     * @return Lysine\Application
+     * @return Lysine\MVC\Application
      */
     public function setRouter(Router_Abstract $router) {
         $this->router = $router;
@@ -76,7 +79,7 @@ class Application extends Injection {
      * 获得当前使用的路由类
      *
      * @access public
-     * @return Lysine\Router_Abstract
+     * @return Lysine\MVC\Router_Abstract
      */
     public function getRouter() {
         if (!$this->router) $this->router = new Router();
@@ -90,7 +93,7 @@ class Application extends Injection {
      *
      * @param mixed $path
      * @access public
-     * @return Lysine\Application
+     * @return Lysine\MVC\Application
      */
     public function includePath($path) {
         if (is_array($path)) {
@@ -110,7 +113,7 @@ class Application extends Injection {
      * @param boolean $throw
      * @param boolean $prepend
      * @access public
-     * @return Lysine\Application
+     * @return Lysine\MVC\Application
      */
     public function setAutoloader($loader, $throw = true, $prepend = false) {
         if (!is_callable($loader))
@@ -166,7 +169,7 @@ class Application extends Injection {
      * @param string $url
      * @param int $code
      * @access public
-     * @return Lysine\Response_Redirect
+     * @return Lysine\MVC\Response_Redirect
      */
     public function redirect($url, $code = 303) {
         return new Response_Redirect($url, $code);

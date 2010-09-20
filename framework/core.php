@@ -1,6 +1,8 @@
 <?php
 namespace Lysine;
 
+use Lysine\MVC\Response;
+
 const DIR = __DIR__;
 
 class Config {
