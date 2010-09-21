@@ -50,6 +50,7 @@ return array(
     'Lysine\Utils\ILogger' => './interfaces.php',
     'Lysine\Utils\Injection' => './utils/injection.php',
     'Lysine\Utils\Logger' => './utils/logger.php',
+    'Lysine\Utils\Profiler' => './utils/profiler.php',
     'Lysine\Utils\Registry' => './utils/registry.php',
     'Lysine\Utils\Set' => './utils/set.php',
     'Lysine\Utils\Singleton' => './utils/singleton.php',
