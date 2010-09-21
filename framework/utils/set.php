@@ -373,11 +373,11 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function groupBy($fn, $replace = false) {
         $group = array();
-        foreach ($this->map($fn) as $idx => $val) {
+        foreach ($this->map($fn) as $idx => $result) {
             if ($replace) {
-                $group[$idx] = $this->set[$idx];
+                $group[$result] = $this->set[$idx];
             } else {
-                $group[$idx][] = $this->set[$idx];
+                $group[$result][$idx] = $this->set[$idx];
             }
         }
 
