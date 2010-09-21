@@ -177,7 +177,7 @@ class Router extends Router_Abstract {
         // 不检查method是否存在，用is_callable()
         // 保留__call()重载方法的方式
         if (!is_callable(array($controller, $method)))
-            throw HttpError::not_acceptable(array(
+            throw HttpError::method_not_allowed(array(
                 'controller' => $controller,
                 'method' => $method,
             ));

@@ -196,7 +196,9 @@ class Application extends Injection {
     public function run() {
         $req = req();
         if (!in_array($req->method(), array('get', 'post', 'put', 'delete')))
-            throw HttpError::method_not_allowed($req->method());
+            throw HttpError::bad_request(array(
+                'method' => $req->method(),
+            ));
 
         $url = parse_url($req->requestUri());
         return $this->dispatch($url['path']);

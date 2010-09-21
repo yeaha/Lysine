@@ -87,11 +87,12 @@ class StorageError extends Error {
         return new self("Connect failed! Storage service: {$storage_name}");
     }
 
-    static public function operate_failed($storage_name, $operate, array $more = array()) {
+    static public function operate_failed($storage_name, $operate, $more = null) {
         $message = "Operate failed! Storage: {$storage_name}, Operate: {$operate}";
-        $more['storage'] = $storage_name;
-        $more['operate'] = $operate;
-        return new self($message, 0, $more);
+        $ex = new self($message, 0, $more);
+        $ex->storage = $storage_name;
+        $ex->operate = $operate;
+        return $ex;
     }
 }
 
@@ -103,32 +104,40 @@ class HttpError extends Error {
         return Response::httpStatus($this->getCode());
     }
 
-    static public function bad_request() {
-        return new self('Bad Request', 400);
+    static public function bad_request(array $more) {
+        return new self('Bad Request', 400, $more);
     }
 
-    static public function unauthorized() {
-        return new self('Unauthorized', 401);
+    static public function unauthorized(array $more) {
+        return new self('Unauthorized', 401, $more);
     }
 
-    static public function forbidden() {
-        return new self('Forbidden', 403);
+    static public function forbidden(array $more) {
+        return new self('Forbidden', 403, $more);
     }
 
     static public function page_not_found($url) {
         return new self('Page Not Found', 404, array('url' => $url));
     }
 
-    static public function method_not_allowed($method) {
-        return new self('Method Not Allowed', 405, array('method' => $method));
+    static public function method_not_allowed(array $more = array()) {
+        return new self('Method Not Allowed', 405, $more);
     }
 
-    static public function not_acceptable($more = null) {
+    static public function not_acceptable(array $more) {
         return new self('Not Acceptable', 406, $more);
     }
 
-    static public function internal_server_error() {
-        return new self('Internal Server Error', 500);
+    static public function conflict(array $more) {
+        return new self('Conflict', 409, $more);
+    }
+
+    static public function precondition_failed($more) {
+        return new self('Precondition Failed', 412, $more);
+    }
+
+    static public function internal_server_error(array $more) {
+        return new self('Internal Server Error', 500, $more);
     }
 }
 
