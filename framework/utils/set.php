@@ -254,9 +254,9 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function filter($fn) {
         $set = array();
+        foreach ($this->map($fn) as $idx => $val)
+            if ($val) $set[$idx] = $this->set[$idx];
 
-        foreach ($this->set as $key => $el)
-            if (call_user_func($fn, $el)) $set[$key] = $el;
         return new self($set);
     }
 
@@ -373,12 +373,11 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      */
     public function groupBy($fn, $replace = false) {
         $group = array();
-        foreach ($this->set as $idx => $el) {
-            $key = call_user_func($fn, $el);
+        foreach ($this->map($fn) as $idx => $val) {
             if ($replace) {
-                $group[$key] = $el;
+                $group[$idx] = $this->set[$idx];
             } else {
-                $group[$key][$idx] = $el;
+                $group[$idx][] = $this->set[$idx];
             }
         }
 
