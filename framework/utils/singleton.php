@@ -39,6 +39,6 @@ abstract class Singleton {
      * @access private
      * @return void
      */
-    final private function __construct() {
+    private function __construct() {
     }
 }
