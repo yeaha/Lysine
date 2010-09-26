@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Storage\Cache;
 
+use Lysine\Error;
 use Lysine\Storage\Cache;
 
 class Memcached extends Cache {
@@ -12,7 +13,7 @@ class Memcached extends Cache {
 
     public function __construct(array $config) {
         if (!extension_loaded('memcached'))
-            throw new \RuntimeException('Require memcached extension');
+            throw Error::require_extension('memcached');
 
         $memcached = new \Memcached();
 

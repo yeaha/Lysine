@@ -2,6 +2,7 @@
 namespace Lysine\Storage;
 
 use Lysine\Config;
+use Lysine\StorageError;
 use Lysine\Utils\Singleton;
 
 /**
@@ -48,13 +49,13 @@ class Pool extends Singleton {
      */
     public function setDispatcher($name, $fn) {
         if (!is_callable($fn))
-            throw new \UnexpectedValueException('Storage dispatcher is not callable');
+            throw StorageError::not_callable("Storage dispatcher ${name}");
 
         // 检查是否已经有这个名字的storage
         $path = self::$config_path;
         $path[] = $name;
         if ($config = Config::get($path))
-            throw new \LogicException('Storage ['. $name .'] is exist, can not replace with dispatcher');
+            throw new StorageError('Storage ['. $name .'] is exist, can not replace with dispatcher');
 
         $this->dispatcher[$name] = $fn;
     }
@@ -76,7 +77,7 @@ class Pool extends Singleton {
             $name = call_user_func_array($dispatcher, $args);
 
             if ($name === null)
-                throw new \LogicException('Storage dispatcher ['. $dispatcher_name .'] not return a storage name');
+                throw new StorageError('Storage dispatcher ['. $dispatcher_name .'] not return a storage name');
         }
 
         if (isset($this->storages[$name])) return $this->storages[$name];
@@ -86,7 +87,7 @@ class Pool extends Singleton {
         $config = Config::get($path);
 
         if (!$config)
-            throw new \RuntimeException('Storage ['. $name .'] config not found');
+            throw StorageError::undefined_storage($name);
 
         $class = $config['class'];
         unset($config['class']);

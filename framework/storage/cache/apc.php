@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Storage\Cache;
 
+use Lysine\Error;
 use Lysine\Storage\Cache;
 
 class Apc extends Cache {
@@ -8,7 +9,7 @@ class Apc extends Cache {
 
     public function __construct(array $config) {
         if (!extension_loaded('apc'))
-            throw new \RuntimeException('Require APC extension');
+            throw Error::require_extension('APC');
 
         parent::__construct($config);
     }

@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Storage\Cache;
 
+use Lysine\Error;
 use Lysine\Storage\Cache;
 
 class Xcache extends Cache {
@@ -8,7 +9,7 @@ class Xcache extends Cache {
 
     public function __construct(array $config) {
         if (!extension_loaded('xcache'))
-            throw new \RuntimeException('Require XCACHE extension');
+            throw Error::require_extension('xcache');
 
         parent::__construct($config);
     }

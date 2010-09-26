@@ -57,24 +57,28 @@ class Error extends \Exception {
 
     static public function invalid_argument($function, $class = null) {
         if ($class) $function = "{$class}::{$function}";
-        return new self("Invalid argument of {$function}");
+        return new static("Invalid argument of {$function}");
     }
 
     static public function call_undefined($function, $class = null) {
         if ($class) $function = "{$class}::{$function}";
-        return new self("Call to undefined {$function}");
+        return new static("Call to undefined {$function}");
     }
 
     static public function undefined_property($class, $property) {
-        return new self("Undefined property {$property} of {$class}");
+        return new static("Undefined property {$property} of {$class}");
     }
 
     static public function not_callable($function) {
-        return new self("{$function} is not callable");
+        return new static("{$function} is not callable");
     }
 
     static public function file_not_found($file) {
-        return new self("{$file} is not exist or readable");
+        return new static("{$file} is not exist or readable");
+    }
+
+    static public function require_extension($extension) {
+        return new static("Require {$extension} extension");
     }
 }
 
@@ -85,14 +89,6 @@ class StorageError extends Error {
 
     static public function connect_failed($storage_name) {
         return new self("Connect failed! Storage service: {$storage_name}");
-    }
-
-    static public function operate_failed($storage_name, $operate, $more = null) {
-        $message = "Operate failed! Storage: {$storage_name}, Operate: {$operate}";
-        $ex = new self($message, 0, $more);
-        $ex->storage = $storage_name;
-        $ex->operate = $operate;
-        return $ex;
     }
 }
 

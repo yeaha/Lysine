@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Storage\Cache;
 
+use Lysine\Error;
 use Lysine\Storage\Cache;
 
 class Eaccelerator extends Cache {
@@ -8,7 +9,7 @@ class Eaccelerator extends Cache {
 
     public function __construct(array $config) {
         if (!extension_loaded('eaccelerator'))
-            throw new \RuntimeException('Require EACCELERATOR extension');
+            throw Error::require_extension('eaccelerator');
 
         parent::__construct($config);
     }

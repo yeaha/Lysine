@@ -1,6 +1,8 @@
 <?php
 namespace Lysine\Utils;
 
+use Lysine\Error;
+
 /**
  * Injection类
  * 可注入自定义方法
@@ -30,7 +32,7 @@ class Injection {
             foreach ($fn as $k => $v) $this->inject($k, $v);
         } else {
             if (!is_callable($callable))
-                throw new \InvalidArgumentException('Injection::inject() parameter 2 is not callable');
+                throw new Error::not_callable('Injection::inject() parameter 2');
             $this->method[$fn] = $callable;
         }
         return $this;
@@ -47,7 +49,7 @@ class Injection {
      */
     final public function call($fn, array $args) {
         if (!array_key_exists($fn, $this->method))
-            throw new \BadMethodCallException(get_class($this) .': Undefined method ['. $fn .']');
+            throw new Error::call_undefined($fn, get_class($this));
 
         array_unshift($args, $this);
         return call_user_func_array($this->method[$fn], $args);
