@@ -32,7 +32,7 @@ class Injection {
             foreach ($fn as $k => $v) $this->inject($k, $v);
         } else {
             if (!is_callable($callable))
-                throw new Error::not_callable('Injection::inject() parameter 2');
+                throw Error::not_callable('Injection::inject() parameter 2');
             $this->method[$fn] = $callable;
         }
         return $this;
@@ -49,7 +49,7 @@ class Injection {
      */
     final public function call($fn, array $args) {
         if (!array_key_exists($fn, $this->method))
-            throw new Error::call_undefined($fn, get_class($this));
+            throw Error::call_undefined($fn, get_class($this));
 
         array_unshift($args, $this);
         return call_user_func_array($this->method[$fn], $args);
