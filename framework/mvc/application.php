@@ -6,25 +6,16 @@ use Lysine\HttpError;
 use Lysine\MVC\Response_Redirect;
 use Lysine\MVC\Router;
 use Lysine\MVC\Router_Abstract;
-use Lysine\Utils\Injection;
+use Lysine\Utils\Singleton;
 
 /**
  * Application
  *
- * @uses Injection
+ * @uses Singleton
  * @package MVC
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Application extends Injection {
-    /**
-     * 单例
-     *
-     * @var Lysine\MVC\Application
-     * @access protected
-     * @static
-     */
-    static public $instance;
-
+class Application extends Singleton {
     /**
      * 路由器
      *
@@ -42,24 +33,12 @@ class Application extends Injection {
     protected $include_path = array();
 
     /**
-     * 获得app单例
-     *
-     * @static
-     * @access public
-     * @return Lysine\MVC\Application
-     */
-    static public function instance() {
-        if (!self::$instance) self::$instance = new self();
-        return self::$instance;
-    }
-
-    /**
      * 构造函数
      *
      * @access private
      * @return void
      */
-    private function __construct() {
+    protected function __construct() {
         spl_autoload_register(array($this, 'autoload'));
     }
 
