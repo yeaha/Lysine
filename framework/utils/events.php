@@ -28,7 +28,7 @@ class Events extends Singleton {
      */
     final protected function keyOf($target) {
         if (!is_object($target))
-            throw new Error::invalid_argument('keyOf', __CLASS__);
+            throw Error::invalid_argument('keyOf', __CLASS__);
         return spl_object_hash($target);
     }
 
@@ -43,7 +43,7 @@ class Events extends Singleton {
      */
     final public function addEvent($target, $name, $callback) {
         if (!is_callable($callback))
-            throw new Error::not_callable('Events::addEvent() parameter 3');
+            throw Error::not_callable('Events::addEvent() parameter 3');
 
         $key = $this->keyOf($target);
         if (!isset($this->events[$key][$name])) $this->events[$key][$name] = array();
