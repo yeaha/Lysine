@@ -128,7 +128,7 @@ class Router extends Router_Abstract {
         $class = str_replace('/', '\\', trim($url, '/'));
         if (!$class) $class = 'index';
         $class = $this->namespace .'\\'. $class;
-        if (class_exists($class)) return array($class, null);
+        if (class_exists($class)) return array($class, array());
 
         foreach ($this->dispatch_map as $re => $class) {
             if (!preg_match($re, $url, $match)) continue;
