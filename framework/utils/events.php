@@ -91,16 +91,16 @@ class Events extends Singleton {
      * @param string $event
      * @param array $args
      * @access public
-     * @return boolean
+     * @return integer 事件回调次数
      */
     public function fire($obj, $event, array $args = array()) {
         $key = $this->keyOf($obj);
-        $fire = false;
+        $fire = 0;  // 回调次数
 
         if (isset($this->listen[$key][$event])) {
             foreach ($this->listen[$key][$event] as $callback)
                 call_user_func_array($callback, $args);
-            $fire = true;
+            $fire += count($this->listen[$key][$event]);
         }
 
         // 订阅回调参数
@@ -115,8 +115,8 @@ class Events extends Singleton {
                 if ($sevent != '*' && $sevent != $event) continue;
                 foreach ($callback_set as $callback)
                     call_user_func_array($callback, $args);
+                $fire += count($callback_set);
             }
-            $fire = true;
         }
 
         return $fire;
