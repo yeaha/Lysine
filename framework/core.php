@@ -108,15 +108,15 @@ class HttpError extends Error {
     }
 
     static public function bad_request(array $more) {
-        return new self('Bad Request', 400, $more);
+        return new self('Bad Request', 400, null, $more);
     }
 
     static public function unauthorized(array $more) {
-        return new self('Unauthorized', 401, $more);
+        return new self('Unauthorized', 401, null, $more);
     }
 
     static public function forbidden(array $more) {
-        return new self('Forbidden', 403, $more);
+        return new self('Forbidden', 403, null, $more);
     }
 
     static public function page_not_found($url) {
