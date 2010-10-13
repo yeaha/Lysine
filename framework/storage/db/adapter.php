@@ -244,13 +244,21 @@ abstract class Adapter implements IAdapter {
         $columns = array_keys($row);
         $sql = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
-            $this->qtable($table_name),
-            implode(',', $this->qcol($colunms)),
+            $this->qtab($table_name),
+            implode(',', $this->qcol($columns)),
             implode(',', array_fill(0, count($columns), '?'))
         );
 
         $sth = $this->dbh->prepare($sql);
-        foreach ($rowset as $row) $sth->execute(array_values($row));
+        try {
+            foreach ($rowset as $row) $sth->execute(array_values($row));
+        } catch (\PDOException $ex) {
+            throw new StorageError($ex->getMessage(), $ex->getCode(), null, array(
+                'sql' => $sql,
+                'bind' => $row,
+                'native_code' => $ex->errorInfo[0]
+            ));
+        }
         return $sth->rowCount();
     }
 

@@ -27,15 +27,8 @@ class Config {
 class Error extends \Exception {
     private $more = array();
 
-    public function __construct($message, $code = 0, $more = null) {
-        $previous = null;
-
-        if (is_array($more)) {
-            $this->more = $more;
-        } elseif ($more && $more instanceof \Exception) {
-            $previous = $more;
-        }
-
+    public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
+        $this->more = $more;
         parent::__construct($message, $code, $previous);
     }
 
@@ -92,7 +85,21 @@ class StorageError extends Error {
     }
 }
 
-class OrmError extends Error {
+class OrmError extends StorageError {
+    static public function insert_failed($class, $record, $previous = null, array $more = array()) {
+        $more = array_merge($more, array('class' => $class, 'record' => $record));
+        return new static("{$class} insert failed", 0, $previous, $more);
+    }
+
+    static public function update_failed($class, $record, $previous = null, array $more = array()) {
+        $more = array_merge($more, array('class' => $class, 'record' => $record));
+        return new static("{$class} update failed", 0, $previous, $more);
+    }
+
+    static public function delete_failed($class, $id, $previous = null, array $more = array()) {
+        $more = array_merge($more, array('class' => $class, 'primary_key' => $id));
+        return new static("{$class} delete failed", 0, $previous, $more);
+    }
 }
 
 class HttpError extends Error {
@@ -113,27 +120,27 @@ class HttpError extends Error {
     }
 
     static public function page_not_found($url) {
-        return new self('Page Not Found', 404, array('url' => $url));
+        return new self('Page Not Found', 404, null, array('url' => $url));
     }
 
     static public function method_not_allowed(array $more = array()) {
-        return new self('Method Not Allowed', 405, $more);
+        return new self('Method Not Allowed', 405, null, $more);
     }
 
     static public function not_acceptable(array $more) {
-        return new self('Not Acceptable', 406, $more);
+        return new self('Not Acceptable', 406, null, $more);
     }
 
     static public function conflict(array $more) {
-        return new self('Conflict', 409, $more);
+        return new self('Conflict', 409, null, $more);
     }
 
     static public function precondition_failed($more) {
-        return new self('Precondition Failed', 412, $more);
+        return new self('Precondition Failed', 412, null, $more);
     }
 
     static public function internal_server_error(array $more) {
-        return new self('Internal Server Error', 500, $more);
+        return new self('Internal Server Error', 500, null, $more);
     }
 }
 
