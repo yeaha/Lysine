@@ -81,6 +81,8 @@ class Events extends Singleton {
         if (is_array($class))
             list($class, $event) = $class;
 
+        $class = ltrim($class, '\\');
+
         $this->subscribe[$class][$event][] = $callback;
     }
 
