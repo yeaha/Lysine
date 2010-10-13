@@ -6,6 +6,7 @@ use Lysine\ORM\DataMapper\Data;
 use Lysine\ORM\DataMapper\Meta;
 use Lysine\ORM\Registry;
 use Lysine\Storage\Pool;
+use Lysine\OrmError;
 
 /**
  * 封装领域模型存储服务数据映射关系
@@ -194,9 +195,16 @@ abstract class Mapper {
      */
     protected function insert(Data $data) {
         $record = $this->propsToRecord($data->toArray());
-        if (!$id = $this->doInsert($record)) return false;
+        $primary_key = $this->getMeta()->getPrimaryKey();
+        if (!$record[$primary_key]) unset($record[$primary_key]);
 
-        $record[$this->getMeta()->getPrimaryKey()] = $id;
+        try {
+            if (!$id = $this->doInsert($record)) return false;
+        } catch (\Exception $ex) {
+            throw OrmError::insert_failed($this->class, $record, $ex);
+        }
+
+        $record[$primary_key] = $id;
         $data->__fill($this->recordToProps($record));
 
         Registry::set($data);
@@ -212,7 +220,12 @@ abstract class Mapper {
      */
     protected function update(Data $data) {
         $record = $this->propsToRecord($data->toArray(/* only dirty */true));
-        if (!$this->doUpdate($data->id(), $record)) return false;
+
+        try {
+            if (!$this->doUpdate($data->id(), $record)) return false;
+        } catch (\Exception $ex) {
+            throw OrmError::update_failed($this->class, $record, $ex);
+        }
 
         $data->__fill($data->toArray());
 
@@ -235,7 +248,12 @@ abstract class Mapper {
         $id = $data->id();
 
         $data->fireEvent(ORM::BEFORE_DELETE_EVENT, $data);
-        if (!$this->doDelete($id)) return false;
+
+        try {
+            if (!$this->doDelete($id)) return false;
+        } catch (\Exception $ex) {
+            throw OrmError::delete_failed($this->class, $id, $ex);
+        }
 
         $data->fireEvent(ORM::AFTER_DELETE_EVENT, $id);
         return true;

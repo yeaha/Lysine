@@ -84,7 +84,10 @@ class DBMapper extends Mapper {
      * @return Lysine\Storage\DB\Select
      */
     public function select() {
-        $processor = array($this, 'package');
+        $mapper = $this;
+        $processor = function($row) use ($mapper) {
+            return $row ? $mapper->package($row) : false;
+        };
 
         $meta = $this->getMeta();
         $select = $this->getStorage()

@@ -110,7 +110,7 @@ class Pgsql extends Adapter {
 
         $seq_name = $this->seqName($table_name, $column);
         try {
-            return $this->execute("SELECT CURRVAL('{$seq_name}')")->fetchCol();
+            return $this->execute("SELECT CURRVAL('{$seq_name}')")->getCol();
         } catch (Exception $ex) {
             return false;
         }
@@ -149,15 +149,11 @@ class Pgsql extends Adapter {
      */
     protected function parseTableName($table_name) {
         $parts = explode('.', $table_name);
-        foreach ($parts as &$p) $p = trim($p, '"');
+        foreach ($parts as $k => $v) $parts[$k] = trim($v, '"');
 
-        $result = array();
-        $result['table'] = array_pop($parts);
-
+        $table = array_pop($parts);
         $schema = array_pop($parts);
-        if ($schema) $result['schema'] = $schema;
-
-        return $result;
+        return array($schema, $table);
     }
 
     /**

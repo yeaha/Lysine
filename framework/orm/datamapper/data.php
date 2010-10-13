@@ -130,7 +130,7 @@ abstract class Data extends ORM implements IData {
      * @access public
      * @return Lysine\ORM\DataMapper\Data
      */
-    public function set($prop, $val, $direct = false) {
+    public function set($prop, $val = false, $direct = false) {
         if ($this->isReadonly())
             throw new \LogicException(get_class($this) .' is readonly');
 

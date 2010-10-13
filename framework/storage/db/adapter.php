@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Storage\DB;
 
+use Lysine\StorageError;
 use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\DB\Expr;
 use Lysine\Storage\DB\Select;
@@ -66,7 +67,7 @@ abstract class Adapter implements IAdapter {
         if (method_exists($this->dbh, $fn))
             return call_user_func_array(array($this->dbh, $fn), $args);
 
-        throw new \BadMethodCallException('Bad method: '. $fn);
+        throw StorageError::call_undefined($fn, get_class($this));
     }
 
     /**
@@ -200,12 +201,11 @@ abstract class Adapter implements IAdapter {
                 $sth = $this->dbh->query($sql);
             }
         } catch (\PDOException $ex) {
-            throw new Exception(
-                $ex->getMessage(),
-                $ex->getCode(),
-                $ex,
-                $ex->errorInfo[0]
-            );
+            throw new StorageError($ex->getMessage(), $ex->getCode(), null, array(
+                'sql' => $sql,
+                'bind' => $bind,
+                'native_code' => $ex->errorInfo[0]
+            ));
         }
 
         $sth->setFetchMode(\PDO::FETCH_ASSOC);
