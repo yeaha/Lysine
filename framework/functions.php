@@ -134,6 +134,27 @@ function array_set(&$target, $path, $val) {
     return true;
 }
 
+// 触发对象事件
+function fireEvent($obj, $event, $args = null) {
+    $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
+    return \Lysine\Utils\Events::instance()->fire($obj, $event, $args);
+}
+
+// 监听对象事件
+function listenEvent($obj, $event, $callback) {
+    return \Lysine\Utils\Events::instance()->listen($obj, $event, $callback);
+}
+
+// 订阅类事件
+function subscribeEvent($class, $callback) {
+    return \Lysine\Utils\Events::instance()->subscribe($class, $callback);
+}
+
+// 取消监听事件
+function clearEvent($obj, $event = null) {
+    return \Lysine\Utils\Events::instance()->clear($obj, $event);
+}
+
 function dump($var) {
     echo '<pre>';
     var_dump($var);

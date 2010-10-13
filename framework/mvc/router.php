@@ -6,7 +6,6 @@ const BEFORE_DISPATCH_EVENT = 'before dispatch';
 const AFTER_DISPATCH_EVENT = 'after dispatch';
 
 use Lysine\HttpError;
-use Lysine\Utils\Events;
 
 /**
  * http路由基类
@@ -154,7 +153,7 @@ class Router extends Router_Abstract {
         if (!$class) throw HttpError::page_not_found($url);
 
         if ($params) $args = array_merge($args, $params);
-        Events::instance()->fireEvent($this, BEFORE_DISPATCH_EVENT, array($class, $args));
+        fireEvent($this, BEFORE_DISPATCH_EVENT, array($class, $args));
 
         $controller = new $class();
         if (method_exists($controller, 'beforeRun')) {
@@ -187,7 +186,7 @@ class Router extends Router_Abstract {
         // 这里有机会对输出结果进行进一步处理
         if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
 
-        Events::instance()->fireEvent($this, AFTER_DISPATCH_EVENT, array($class, $args, $resp));
+        fireEvent($this, AFTER_DISPATCH_EVENT, array($class, $args, $resp));
 
         return $resp;
     }

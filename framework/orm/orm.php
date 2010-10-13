@@ -27,20 +27,20 @@ abstract class ORM {
     // }}}
 
     // {{{ 内置事件响应方法
-    public function __before_init() {}
-    public function __after_init() {}
+    protected function __before_init() {}
+    protected function __after_init() {}
 
-    public function __before_save() {}
-    public function __after_save() {}
+    protected function __before_save() {}
+    protected function __after_save() {}
 
-    public function __before_insert() {}
-    public function __after_insert() {}
+    protected function __before_insert() {}
+    protected function __after_insert() {}
 
-    public function __before_update() {}
-    public function __after_update() {}
+    protected function __before_update() {}
+    protected function __after_update() {}
 
-    public function __before_delete() {}
-    public function __after_delete() {}
+    protected function __before_delete() {}
+    protected function __after_delete() {}
     // }}}
 
     abstract public function id();
@@ -83,7 +83,7 @@ class Registry {
 
         $class = get_class($obj);
         $key = $class . $id;
-        $obj->addEvent(ORM::AFTER_DELETE_EVENT, function() use ($class, $id) {
+        listenEvent($obj, ORM::AFTER_DELETE_EVENT, function() use ($class, $id) {
             Registry::remove($class, $id);
         });
 

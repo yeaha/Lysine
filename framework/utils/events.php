@@ -1,89 +1,142 @@
 <?php
-/**
- * 事件触发
- *
- * @package Utils
- * @author yangyi <yangyi@surveypie.com>
- */
 namespace Lysine\Utils;
 
 use Lysine\Error;
 use Lysine\Utils\Singleton;
 
+/**
+ * 对象事件机制封装
+ *
+ * @uses Singleton
+ * @package Utils
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
 class Events extends Singleton {
     /**
-     * 事件列表
+     * 事件监听列表
      *
      * @var array
-     * @access protected
+     * @access private
      */
-    private $events = array();
+    private $listen = array();
 
     /**
-     * 生成对象的唯一标示
+     * 事件订阅列表
      *
-     * @param object $target
-     * @access protected
+     * @var array
+     * @access private
+     */
+    private $subscribe = array();
+
+    /**
+     * 得到对象唯一标示
+     *
+     * @param object $obj
+     * @access private
      * @return string
      */
-    final protected function keyOf($target) {
-        if (!is_object($target))
+    private function keyOf($obj) {
+        if (!is_object($obj))
             throw Error::invalid_argument('keyOf', __CLASS__);
-        return spl_object_hash($target);
+        return spl_object_hash($obj);
     }
 
     /**
-     * 监听事件
+     * 监听对象某个事件
      *
-     * @param object $target
-     * @param string $name
-     * @param callable $callback
+     * @param object $obj
+     * @param string $event
+     * @param callback $callback
      * @access public
      * @return void
      */
-    final public function addEvent($target, $name, $callback) {
+    public function listen($obj, $event, $callback) {
         if (!is_callable($callback))
-            throw Error::not_callable('Events::addEvent() parameter 3');
+            throw Error::not_callable('Events::listen() parameter 3');
 
-        $key = $this->keyOf($target);
-        if (!isset($this->events[$key][$name])) $this->events[$key][$name] = array();
-
-        $this->events[$key][$name][] = $callback;
+        $key = $this->keyOf($obj);
+        $this->listen[$key][$event][] = $callback;
     }
 
     /**
-     * 触发事件
+     * 订阅类的某个或者所有事件
      *
-     * @param object $target
-     * @param string $name
-     * @param mixed $args
+     * [code]
+     * // 订阅Topic类的所有事件
+     * $event->subscribe('Topic', $callback);
+     * // 订阅Topic类的delete事件
+     * $event->subscribe(array('Topic', 'delete'), $callback);
+     * [/code]
+     *
+     * @param mixed $class
+     * @param callback $callback
      * @access public
      * @return void
      */
-    final public function fireEvent($target, $name, array $args = array()) {
-        $key = $this->keyOf($target);
+    public function subscribe($class, $callback) {
+        if (!is_callable($callback))
+            throw Error::not_callable('Events::subscribe() parameter 2');
 
-        if (!isset($this->events[$key][$name])) return;
+        $event = '*';
+        if (is_array($class))
+            list($class, $event) = $class;
 
-        foreach ($this->events[$key][$name] as $callback)
-            call_user_func_array($callback, $args);
+        $this->subscribe[$class][$event][] = $callback;
     }
 
     /**
-     * 取消监听
+     * 触发对象事件
      *
-     * @param object $target
-     * @param string $name
+     * @param object $obj
+     * @param string $event
+     * @param array $args
+     * @access public
+     * @return boolean
+     */
+    public function fire($obj, $event, array $args = array()) {
+        $key = $this->keyOf($obj);
+        $fire = false;
+
+        if (isset($this->listen[$key][$event])) {
+            foreach ($this->listen[$key][$event] as $callback)
+                call_user_func_array($callback, $args);
+            $fire = true;
+        }
+
+        // 订阅回调参数
+        // 第一个参数是事件发起对象
+        // 第二个参数是事件类型
+        // 第三个参数是事件参数
+        $args = array($obj, $event, $args);
+
+        $class = get_class($obj);
+        if (isset($this->subscribe[$class][$event]) || isset($this->subscribe[$class]['*'])) {
+            foreach ($this->subscribe[$class] as $sevent => $callback_set) {
+                if ($sevent != '*' && $sevent != $event) continue;
+                foreach ($callback_set as $callback)
+                    call_user_func_array($callback, $args);
+            }
+            $fire = true;
+        }
+
+        return $fire;
+    }
+
+    /**
+     * 取消对象事件监听
+     *
+     * @param object $obj
+     * @param string $event
      * @access public
      * @return void
      */
-    final public function clearEvent($target, $name = null) {
-        $key = $this->keyOf($target);
+    public function clear($obj, $event = null) {
+        $key = $this->keyOf($obj);
 
-        if ($name) {
-            unset($this->events[$key][$name]);
+        if ($event) {
+            unset($this->listen[$key][$event]);
         } else {
-            unset($this->events[$key]);
+            unset($this->listen[$key]);
         }
     }
 }

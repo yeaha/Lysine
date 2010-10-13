@@ -4,7 +4,6 @@ namespace Lysine\ORM;
 use Lysine\ORM;
 use Lysine\ORM\Registry;
 use Lysine\IStorage;
-use Lysine\Utils\Events;
 use Lysine\Storage\Pool;
 
 /**
@@ -194,7 +193,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return void
      */
     public function __destruct() {
-        Events::instance()->clearEvent($this);
+        clearEvent($this);
     }
 
     /**
@@ -410,26 +409,14 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
     }
 
     /**
-     * 监听事件
-     *
-     * @param string $event
-     * @param callback $callback
-     * @access public
-     * @return void
-     */
-    public function addEvent($event, $callback) {
-        Events::instance()->addEvent($this, $event, $callback);
-    }
-
-    /**
      * 触发事件
      *
      * @param string $event
      * @param mixed $args
-     * @access public
+     * @access protected
      * @return void
      */
-    public function fireEvent($event, $args = null) {
+    protected function fireEvent($event, $args = null) {
         switch ($event) {
             case ORM::BEFORE_INIT_EVENT:    $this->__before_init();
                                             break;
@@ -453,12 +440,8 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
                                             break;
         }
 
-        if ($args === null) {
-            Events::instance()->fireEvent($this, $event);
-        } else {
-            $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-            Events::instance()->fireEvent($this, $event, $args);
-        }
+        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
+        fireEvent($this, $event, $args);
     }
 
     /**

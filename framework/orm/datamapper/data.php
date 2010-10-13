@@ -2,7 +2,6 @@
 namespace Lysine\ORM\DataMapper;
 
 use Lysine\ORM;
-use Lysine\Utils\Events;
 
 /**
  * 领域模型接口
@@ -66,7 +65,7 @@ abstract class Data extends ORM implements IData {
      * @return void
      */
     public function __destruct() {
-        Events::instance()->clearEvent($this);
+        clearEvent($this);
     }
 
     /**
@@ -252,18 +251,6 @@ abstract class Data extends ORM implements IData {
     }
 
     /**
-     * 监听事件
-     *
-     * @param string $event
-     * @param callable $callback
-     * @access public
-     * @return void
-     */
-    public function addEvent($event, $callback) {
-        Events::instance()->addEvent($this, $event, $callback);
-    }
-
-    /**
      * 触发事件
      *
      * @param string $event
@@ -291,12 +278,8 @@ abstract class Data extends ORM implements IData {
                                             break;
         }
 
-        if ($args === null) {
-            Events::instance()->fireEvent($this, $event);
-        } else {
-            $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-            Events::instance()->fireEvent($this, $event, $args);
-        }
+        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
+        fireEvent($this, $event, $args);
     }
 
     /**
