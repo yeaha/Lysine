@@ -1,0 +1,5 @@
+这个例子实现了角色访问控制 (Role Base Access Control)
+
+nginx配置文件在config/nginx.conf
+数据库使用postgresql，数据库脚本在db/install.sql
+修改config/_storage.php里面的数据库配置
