@@ -178,8 +178,9 @@ class Router extends Router_Abstract {
         // 保留__call()重载方法的方式
         if (!is_callable(array($controller, $method)))
             throw HttpError::method_not_allowed(array(
-                'controller' => $controller,
+                'url' => $url,
                 'method' => $method,
+                'controller' => $class,
             ));
         $resp = call_user_func_array(array($controller, $method), $args);
 
