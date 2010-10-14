@@ -114,27 +114,27 @@ class Router extends Router_Abstract {
 
     /**
      * 解析url，返回对应的controller
-     * 先根据url组装Controller类的名字加载
-     * 再尝试正则路由匹配
+     * 先尝试正则路由匹配
+     * 再根据url组装Controller类的名字加载
      *
      * @param string $url
      * @access protected
      * @return array
      */
     protected function match($url) {
-        // url: /user/login
-        // controller: \Controller\User\Login
-        $class = str_replace('/', '\\', trim($url, '/'));
-        if (!$class) $class = 'index';
-        $class = $this->namespace .'\\'. $class;
-        if (class_exists($class)) return array($class, array());
-
         foreach ($this->dispatch_map as $re => $class) {
             if (!preg_match($re, $url, $match)) continue;
             return class_exists($class)
                  ? array($class, array_slice($match, 1))
                  : array(null, null);
         }
+
+        // url: /user/login
+        // controller: \Controller\User\Login
+        $class = str_replace('/', '\\', trim($url, '/'));
+        if (!$class) $class = 'index';
+        $class = $this->namespace .'\\'. $class;
+        if (class_exists($class)) return array($class, array());
 
         return array(null, null);
     }
