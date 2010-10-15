@@ -155,6 +155,22 @@ function clearEvent($obj, $event = null) {
     return \Lysine\Utils\Events::instance()->clear($obj, $event);
 }
 
+function startWith($haystack, $needle, $case_insensitive = false) {
+    if ($case_insensitive) {
+        return stripos($haystack, $needle) === 0;
+    } else {
+        return strpos($haystack, $needle) === 0;
+    }
+}
+
+// 检查对象实例或者类名是否属于指定名字空间
+function inNamespace($ns, $class) {
+    if (is_object($class)) $class = get_class($class);
+    $class = ltrim($class, '\\');
+    $ns = trim($ns, '\\') . '\\';
+    return startWith($class, $ns, true);
+}
+
 function dump($var) {
     echo '<pre>';
     var_dump($var);
