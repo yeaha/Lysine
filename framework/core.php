@@ -119,8 +119,9 @@ class HttpError extends Error {
         return new self('Forbidden', 403, null, $more);
     }
 
-    static public function page_not_found($url) {
-        return new self('Page Not Found', 404, null, array('url' => $url));
+    static public function page_not_found($url, $more = array()) {
+        $more['url'] = $url;
+        return new self('Page Not Found', 404, null, $more);
     }
 
     static public function method_not_allowed(array $more = array()) {
