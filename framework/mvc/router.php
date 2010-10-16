@@ -1,4 +1,22 @@
 <?php
+/**
+ * 路由名字空间配置说明
+ *
+ * 所有的controller都使用Action这个namespace
+ * /login == Action\login
+ * $config['app']['router']['namespace'] = 'Action';
+ *
+ * /login == Controller\login
+ * /admin/login == Admin\Controller\login
+ * /other/login == Other\Action\login
+ * $config['app']['router']['namespace'] = array(
+ *     '__default' => 'Controller',
+ *     'admin' => 'Admin\Controller',
+ *     'other' => 'Other\Action',
+ * );
+ *
+ * 如果没有配置，或者没有找到，默认使用"Controller"
+ */
 namespace Lysine\MVC;
 
 // 路由事件
@@ -56,7 +74,15 @@ abstract class Router_Abstract {
  */
 class Router extends Router_Abstract {
     /**
-     * Controller类的名字空间
+     * 默认Controller namespace
+     *
+     * @var string
+     * @access protected
+     */
+    protected $default = 'Controller';
+
+    /**
+     * Controller类的名字空间配置
      *
      * @var mixed
      * @access protected
@@ -83,21 +109,41 @@ class Router extends Router_Abstract {
         $cfg = cfg('app', 'router');
         $cfg = is_array($cfg) ? $cfg : array();
 
-        $this->dispatch_map = isset($cfg['map']) ? $cfg['map'] : array();
-
-        $this->namespace = isset($cfg['namespace'])
-                              ? $cfg['namespace']
-                              : 'Controller';
+        if (isset($cfg['map'])) $this->dispatch_map = $cfg['map'];
+        if (isset($cfg['namespace'])) $this->namespace = $cfg['namespace'];
     }
 
     /**
-     * 返回controller所在的namespace名字
+     * 得到url对应的controller namespace
      *
      * @access public
      * @return string
      */
-    public function getNamespace() {
-        return $this->namespace;
+    public function getNamespace($url) {
+        $default = $this->default;
+        $namespace = $this->namespace;
+        if (!$namespace) return array($default, $url);
+        if (!is_array($namespace)) return array($namespace, $url);
+
+        if (isset($namespace['__default__'])) {
+            $default = $namespace['__default__'];
+            unset($namespace['__default__']);
+        }
+
+        // 匹配到namespace的url需要把匹配部分去掉
+        // /admin/abc 匹配到 Admin\Controller
+        // 如果不去掉/admin
+        // 后面的match返回的controller class就是Admin\Controller\admin\abc
+        // 正确的应该是Admin\Controller\abc
+        foreach ($namespace as $start_with => $ns) {
+            $regex = '#^(/*)'. $start_with .'(/(.+)?)?$#';
+            if (!preg_match($regex, $url)) continue;
+
+            $url = preg_replace('#^(/*)'. $start_with .'#', '', $url);
+            return array(rtrim($ns, '\\'), $url);
+        }
+
+        return array($default, $url);
     }
 
     /**
@@ -123,20 +169,18 @@ class Router extends Router_Abstract {
      */
     protected function match($url) {
         foreach ($this->dispatch_map as $re => $class) {
-            if (!preg_match($re, $url, $match)) continue;
-            return class_exists($class)
-                 ? array($class, array_slice($match, 1))
-                 : array(null, null);
+            if (preg_match($re, $url, $match))
+                return array($class, array_slice($match, 1));
         }
 
         // url: /user/login
         // controller: \Controller\User\Login
+        list($namespace, $url) = $this->getNamespace($url);
+
         $class = str_replace('/', '\\', trim($url, '/'));
         if (!$class) $class = 'index';
-        $class = $this->namespace .'\\'. $class;
-        if (class_exists($class)) return array($class, array());
-
-        return array(null, null);
+        $class = $namespace .'\\'. $class;
+        return array($class, array());
     }
 
     /**
@@ -149,11 +193,12 @@ class Router extends Router_Abstract {
      * @return mixed
      */
     public function dispatch($url, array $params = array()) {
+        $url = strtolower(rtrim($url, '/'));
         list($class, $args) = $this->match($url);
-        if (!$class) throw HttpError::page_not_found($url);
+        if (!$class || !class_exists($class)) throw HttpError::page_not_found($url, array('controller' => $class));
 
         if ($params) $args = array_merge($args, $params);
-        fireEvent($this, BEFORE_DISPATCH_EVENT, array($class, $args));
+        fireEvent($this, BEFORE_DISPATCH_EVENT, array($url, $class, $args));
 
         $controller = new $class();
         if (method_exists($controller, 'beforeRun')) {
@@ -187,7 +232,7 @@ class Router extends Router_Abstract {
         // 这里有机会对输出结果进行进一步处理
         if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
 
-        fireEvent($this, AFTER_DISPATCH_EVENT, array($class, $args, $resp));
+        fireEvent($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
 
         return $resp;
     }
