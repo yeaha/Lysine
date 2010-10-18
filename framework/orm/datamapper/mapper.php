@@ -107,10 +107,14 @@ abstract class Mapper {
      * @access public
      * @return Lysine\IStorage
      */
-    public function getStorage() {
-        return Pool::instance()->get(
-            $this->getMeta()->getStorage()
-        );
+    public function getStorage($args = null) {
+        if ($args === null) {
+            $args = array();
+        } else {
+            $args = is_array($args) ? $args : func_get_args();
+        }
+        array_unshift($args, $this->getMeta()->getStorage());
+        return call_user_func_array(array(Pool::instance(), 'get'), $args);
     }
 
     /**
