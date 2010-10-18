@@ -2,6 +2,7 @@
 namespace Lysine\ORM\DataMapper;
 
 use Lysine\IStorage;
+use Lysine\ORM\DataMapper\Data;
 
 /**
  * 数据库映射关系封装
@@ -14,33 +15,36 @@ class DBMapper extends Mapper {
     /**
      * 根据主键从数据库查询数据
      *
-     * @param mixed $key
+     * @param mixed $id
      * @param IStorage $storage
      * @access protected
      * @return array
      */
-    protected function doFind($key, IStorage $storage = null) {
-        $meta = $this->getMeta();
+    protected function doFind($id, IStorage $storage = null) {
         $adapter = $storage ? $storage : $this->getStorage();
+
+        $meta = $this->getMeta();
         $table_name = $adapter->qtab($meta->getCollection());
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
-        return $adapter->execute("SELECT * FROM {$table_name} WHERE {$primary_key} = ?", $key)->getRow();
+        return $adapter->execute("SELECT * FROM {$table_name} WHERE {$primary_key} = ?", $id)->getRow();
     }
 
     /**
      * 插入新数据到数据库
      *
-     * @param array $record
+     * @param Data $data
      * @param IStorage $storage
      * @access protected
-     * @return mixed
+     * @return mixed 新主键
      */
-    protected function doInsert(array $record, IStorage $storage = null) {
+    protected function doInsert(Data $data, IStorage $storage = null) {
+        $record = $this->propsToRecord($data->toArray());
+        $adapter = $storage ? $storage : $this->getStorage();
+
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
-        $adapter = $storage ? $storage : $this->getStorage();
 
         if (!$adapter->insert($table_name, $record)) return false;
 
@@ -51,15 +55,16 @@ class DBMapper extends Mapper {
     /**
      * 更新数据到数据库
      *
-     * @param mixed $id
-     * @param array $record
+     * @param Data $data
      * @param IStorage $storage
      * @access protected
-     * @return boolean
+     * @return integer affected row count
      */
-    protected function doUpdate($id, array $record, IStorage $storage = null) {
-        $meta = $this->getMeta();
+    protected function doUpdate(Data $data, IStorage $storage = null) {
+        $record = $this->propsToRecord($data->toArray());
         $adapter = $storage ? $storage : $this->getStorage();
+
+        $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -69,18 +74,19 @@ class DBMapper extends Mapper {
     /**
      * 从数据库里删除领域模型数据
      *
-     * @param mixed $id
+     * @param Data $data
      * @param IStorage $storage
      * @access public
-     * @return boolean
+     * @return integer affected row count
      */
-    protected function doDelete($id, IStorage $storage = null) {
-        $meta = $this->getMeta();
+    protected function doDelete(Data $data, IStorage $storage = null) {
         $adapter = $storage ? $storage : $this->getStorage();
+
+        $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
-        return $adapter->delete($table_name, "{$primary_key} = ?", $id);
+        return $adapter->delete($table_name, "{$primary_key} = ?", $data->id());
     }
 
     /**

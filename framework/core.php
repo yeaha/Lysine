@@ -1,6 +1,7 @@
 <?php
 namespace Lysine;
 
+use Lysine\ORM;
 use Lysine\MVC\Response;
 
 const DIR = __DIR__;
@@ -86,18 +87,35 @@ class StorageError extends Error {
 }
 
 class OrmError extends StorageError {
-    static public function insert_failed($class, $record, $previous = null, array $more = array()) {
-        $more = array_merge($more, array('class' => $class, 'record' => $record));
+    static public function readonly($class) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class} is readonly");
+    }
+
+    static public function insert_failed(ORM $obj, $previous = null, array $more = array()) {
+        $class = get_class($obj);
+        $more['class'] = $class;
+        $more['record'] = $obj->toArray();
+        $more['method'] = 'insert';
+
         return new static("{$class} insert failed", 0, $previous, $more);
     }
 
-    static public function update_failed($class, $record, $previous = null, array $more = array()) {
-        $more = array_merge($more, array('class' => $class, 'record' => $record));
+    static public function update_failed(ORM $obj, $previous = null, array $more = array()) {
+        $class = get_class($obj);
+        $more['class'] = $class;
+        $more['record'] = $obj->toArray();
+        $more['method'] = 'update';
+
         return new static("{$class} update failed", 0, $previous, $more);
     }
 
-    static public function delete_failed($class, $id, $previous = null, array $more = array()) {
-        $more = array_merge($more, array('class' => $class, 'primary_key' => $id));
+    static public function delete_failed(ORM $obj, $previous = null, array $more = array()) {
+        $class = get_class($obj);
+        $more['class'] = $class;
+        $more['primary_key'] = $obj->id();
+        $more['method'] = 'delete';
+
         return new static("{$class} delete failed", 0, $previous, $more);
     }
 }

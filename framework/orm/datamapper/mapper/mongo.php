@@ -2,6 +2,7 @@
 namespace Lysine\ORM\DataMapper;
 
 use Lysine\IStorage;
+use Lysine\ORM\DataMapper\Data;
 use Lysine\Utils\Set;
 
 /**
@@ -15,16 +16,16 @@ class MongoMapper extends Mapper {
     /**
      * 根据主键查询一条数据
      *
-     * @param mixed $key
+     * @param mixed $id
      * @param IStorage $storage
      * @access protected
      * @return array
      */
-    protected function doFind($key, IStorage $storage = null) {
+    protected function doFind($id, IStorage $storage = null) {
         $meta = $this->getMeta();
         return $this->getStorage()->findOne(
             $meta->getCollection(),
-            array($meta->getPrimaryKey() => $key)
+            array($meta->getPrimaryKey() => $id)
         );
     }
 
@@ -32,40 +33,37 @@ class MongoMapper extends Mapper {
      * 保存一条新数据
      * 返回主键值
      *
-     * @param array $record
+     * @param Data $data
      * @param IStorage $storage
      * @access protected
-     * @return mixed
+     * @return mixed 新主键
      */
-    protected function doInsert(array $record, IStorage $storage = null) {
-        $meta = $this->getMeta();
-        $primary_key = $meta->getPrimaryKey();
-        if (!isset($record[$primary_key]))
+    protected function doInsert(Data $data, IStorage $storage = null) {
+        if (!$id = $data->id())
             throw new \LogicException($this->class .': Must set primary key value before save');
 
         $this->getStorage()->insert(
-            $meta->getCollection(),
-            $record,
+            $this->getMeta()->getCollection(),
+            $this->propsToRecord($data->toArray()),
             array('safe' => true)
         );
-        return $record[$primary_key];
+        return $id;
     }
 
     /**
      * 更新一条数据
      *
-     * @param mixed $id
-     * @param array $record
+     * @param Data $data
      * @param IStorage $storage
      * @access protected
      * @return boolean
      */
-    protected function doUpdate($id, array $record, IStorage $storage = null) {
+    protected function doUpdate(Data $data, IStorage $storage = null) {
         $meta = $this->getMeta();
         $this->getStorage()->update(
             $meta->getCollection(),
-            array($meta->getPrimaryKey() => $id),
-            array('$set' => $record),
+            array($meta->getPrimaryKey() => $data->id()),
+            array('$set' => $this->propsToRecord($data->toArray())),
             array('safe' => true)
         );
         return true;
@@ -74,16 +72,16 @@ class MongoMapper extends Mapper {
     /**
      * 删除指定主键的数据
      *
-     * @param mixed $id
+     * @param Data $data
      * @param IStorage $storage
      * @access protected
      * @return boolean
      */
-    protected function doDelete($id, IStorage $storage = null) {
+    protected function doDelete(Data $data, IStorage $storage = null) {
         $meta = $this->getMeta();
         $this->getStorage()->remove(
             $meta->getCollection(),
-            array($meta->getPrimaryKey() => $id),
+            array($meta->getPrimaryKey() => $data->id()),
             array('justOne' => true, 'safe' => true)
         );
         return true;

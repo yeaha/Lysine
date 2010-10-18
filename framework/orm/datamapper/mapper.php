@@ -53,36 +53,35 @@ abstract class Mapper {
     /**
      * 保存数据到存储服务
      *
-     * @param array $record
+     * @param Data $data
      * @param IStorage $storage
      * @abstract
      * @access protected
      * @return mixed 新数据的主键值
      */
-    abstract protected function doInsert(array $record, IStorage $storage = null);
+    abstract protected function doInsert(Data $data, IStorage $storage = null);
 
     /**
      * 保存更新数据到存储服务
      *
-     * @param string $id 主键值
-     * @param array $record
+     * @param Data $data
      * @param IStorage $storage
      * @abstract
      * @access protected
      * @return boolean
      */
-    abstract protected function doUpdate($id, array $record, IStorage $storage = null);
+    abstract protected function doUpdate(Data $data, IStorage $storage = null);
 
     /**
      * 删除指定主键的数据
      *
-     * @param mixed $id
+     * @param Data $data
      * @param IStorage $storage
      * @abstract
      * @access protected
      * @return boolean
      */
-    abstract protected function doDelete($id, IStorage $storage = null);
+    abstract protected function doDelete(Data $data, IStorage $storage = null);
 
     /**
      * 构造函数
@@ -177,7 +176,7 @@ abstract class Mapper {
      */
     public function save(Data $data) {
         if ($data->isReadonly())
-            throw new \LogicException($this->class .' is readonly');
+            throw OrmError::readonly($data);
 
         $data->fireEvent(ORM::BEFORE_SAVE_EVENT, $data);
 
@@ -203,17 +202,14 @@ abstract class Mapper {
      * @return mixed
      */
     protected function insert(Data $data) {
-        $record = $this->propsToRecord($data->toArray());
-        $primary_key = $this->getMeta()->getPrimaryKey();
-        if (!$record[$primary_key]) unset($record[$primary_key]);
-
         try {
-            if (!$id = $this->doInsert($record)) return false;
+            if (!$id = $this->doInsert($data)) return false;
         } catch (\Exception $ex) {
-            throw OrmError::insert_failed($this->class, $record, $ex);
+            throw OrmError::insert_failed($data, $ex);
         }
 
-        $record[$primary_key] = $id;
+        $primary_key = $this->getMeta()->getPrimaryKey();
+        $record = array($primary_key => $id);
         $data->__fill($this->recordToProps($record));
 
         Registry::set($data);
@@ -228,16 +224,12 @@ abstract class Mapper {
      * @return boolean
      */
     protected function update(Data $data) {
-        $record = $this->propsToRecord($data->toArray(/* only dirty */true));
-
         try {
-            if (!$this->doUpdate($data->id(), $record)) return false;
+            if (!$this->doUpdate($data)) return false;
         } catch (\Exception $ex) {
-            throw OrmError::update_failed($this->class, $record, $ex);
+            throw OrmError::update_failed($data, $ex);
         }
-
         $data->__fill($data->toArray());
-
         return true;
     }
 
@@ -250,22 +242,18 @@ abstract class Mapper {
      */
     public function delete(Data $data) {
         if ($data->isReadonly())
-            throw new \LogicException($this->class .' is readonly');
+            throw OrmError::readonly($data);
 
-        if ($data->isFresh()) return true;
-
-        $id = $data->id();
+        if ($data->isFresh()) return false;
 
         $data->fireEvent(ORM::BEFORE_DELETE_EVENT, $data);
-
         try {
-            if (!$this->doDelete($id)) return false;
+            if (!$this->doDelete($data)) return false;
         } catch (\Exception $ex) {
-            throw OrmError::delete_failed($this->class, $id, $ex);
+            throw OrmError::delete_failed($data, $ex);
         }
-
-        $data->fireEvent(ORM::AFTER_DELETE_EVENT, $id);
-        Registry::remove($this->class, $id);
+        $data->fireEvent(ORM::AFTER_DELETE_EVENT, $data);
+        Registry::remove($this->class, $data->id());
         return true;
     }
 
