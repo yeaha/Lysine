@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
+use Lysine\IStorage;
 use Lysine\ORM;
 use Lysine\ORM\DataMapper\Data;
 use Lysine\ORM\DataMapper\Meta;
@@ -42,42 +43,46 @@ abstract class Mapper {
      * 根据主键查找数据
      *
      * @param mixed $id
+     * @param IStorage $storage
      * @abstract
      * @access protected
      * @return array
      */
-    abstract protected function doFind($id);
+    abstract protected function doFind($id, IStorage $storage = null);
 
     /**
      * 保存数据到存储服务
      *
      * @param array $record
+     * @param IStorage $storage
      * @abstract
      * @access protected
      * @return mixed 新数据的主键值
      */
-    abstract protected function doInsert(array $record);
+    abstract protected function doInsert(array $record, IStorage $storage = null);
 
     /**
      * 保存更新数据到存储服务
      *
      * @param string $id 主键值
      * @param array $record
+     * @param IStorage $storage
      * @abstract
      * @access protected
      * @return boolean
      */
-    abstract protected function doUpdate($id, array $record);
+    abstract protected function doUpdate($id, array $record, IStorage $storage = null);
 
     /**
      * 删除指定主键的数据
      *
      * @param mixed $id
+     * @param IStorage $storage
      * @abstract
      * @access protected
      * @return boolean
      */
-    abstract protected function doDelete($id);
+    abstract protected function doDelete($id, IStorage $storage = null);
 
     /**
      * 构造函数

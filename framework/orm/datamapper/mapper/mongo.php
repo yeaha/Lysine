@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
+use Lysine\IStorage;
 use Lysine\Utils\Set;
 
 /**
@@ -15,10 +16,11 @@ class MongoMapper extends Mapper {
      * 根据主键查询一条数据
      *
      * @param mixed $key
+     * @param IStorage $storage
      * @access protected
      * @return array
      */
-    protected function doFind($key) {
+    protected function doFind($key, IStorage $storage = null) {
         $meta = $this->getMeta();
         return $this->getStorage()->findOne(
             $meta->getCollection(),
@@ -31,10 +33,11 @@ class MongoMapper extends Mapper {
      * 返回主键值
      *
      * @param array $record
+     * @param IStorage $storage
      * @access protected
      * @return mixed
      */
-    protected function doInsert(array $record) {
+    protected function doInsert(array $record, IStorage $storage = null) {
         $meta = $this->getMeta();
         $primary_key = $meta->getPrimaryKey();
         if (!isset($record[$primary_key]))
@@ -53,10 +56,11 @@ class MongoMapper extends Mapper {
      *
      * @param mixed $id
      * @param array $record
+     * @param IStorage $storage
      * @access protected
      * @return boolean
      */
-    protected function doUpdate($id, array $record) {
+    protected function doUpdate($id, array $record, IStorage $storage = null) {
         $meta = $this->getMeta();
         $this->getStorage()->update(
             $meta->getCollection(),
@@ -71,10 +75,11 @@ class MongoMapper extends Mapper {
      * 删除指定主键的数据
      *
      * @param mixed $id
+     * @param IStorage $storage
      * @access protected
      * @return boolean
      */
-    protected function doDelete($id) {
+    protected function doDelete($id, IStorage $storage = null) {
         $meta = $this->getMeta();
         $this->getStorage()->remove(
             $meta->getCollection(),

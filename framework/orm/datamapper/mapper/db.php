@@ -1,6 +1,8 @@
 <?php
 namespace Lysine\ORM\DataMapper;
 
+use Lysine\IStorage;
+
 /**
  * 数据库映射关系封装
  *
@@ -13,12 +15,13 @@ class DBMapper extends Mapper {
      * 根据主键从数据库查询数据
      *
      * @param mixed $key
+     * @param IStorage $storage
      * @access protected
      * @return array
      */
-    protected function doFind($key) {
+    protected function doFind($key, IStorage $storage = null) {
         $meta = $this->getMeta();
-        $adapter = $this->getStorage();
+        $adapter = $storage ? $storage : $this->getStorage();
         $table_name = $adapter->qtab($meta->getCollection());
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -29,14 +32,15 @@ class DBMapper extends Mapper {
      * 插入新数据到数据库
      *
      * @param array $record
+     * @param IStorage $storage
      * @access protected
      * @return mixed
      */
-    protected function doInsert(array $record) {
+    protected function doInsert(array $record, IStorage $storage = null) {
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
-        $adapter = $this->getStorage();
+        $adapter = $storage ? $storage : $this->getStorage();
 
         if (!$adapter->insert($table_name, $record)) return false;
 
@@ -49,12 +53,13 @@ class DBMapper extends Mapper {
      *
      * @param mixed $id
      * @param array $record
+     * @param IStorage $storage
      * @access protected
      * @return boolean
      */
-    protected function doUpdate($id, array $record) {
+    protected function doUpdate($id, array $record, IStorage $storage = null) {
         $meta = $this->getMeta();
-        $adapter = $this->getStorage();
+        $adapter = $storage ? $storage : $this->getStorage();
         $table_name = $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -65,12 +70,13 @@ class DBMapper extends Mapper {
      * 从数据库里删除领域模型数据
      *
      * @param mixed $id
+     * @param IStorage $storage
      * @access public
      * @return boolean
      */
-    protected function doDelete($id) {
+    protected function doDelete($id, IStorage $storage = null) {
         $meta = $this->getMeta();
-        $adapter = $this->getStorage();
+        $adapter = $storage ? $storage : $this->getStorage();
         $table_name = $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -80,20 +86,21 @@ class DBMapper extends Mapper {
     /**
      * 发起数据库查询
      *
+     * @param IStorage $storage
      * @access public
      * @return Lysine\Storage\DB\Select
      */
-    public function select() {
+    public function select(IStorage $storage = null) {
         $mapper = $this;
         $processor = function($row) use ($mapper) {
             return $row ? $mapper->package($row) : false;
         };
 
         $meta = $this->getMeta();
-        $select = $this->getStorage()
-                       ->select($meta->getCollection())
-                       ->setKeyColumn($meta->getPrimaryKey())
-                       ->setProcessor($processor);
+        $adapter = $storage ? $storage : $this->getStorage();
+        $select = $adapter->select($meta->getCollection())
+                          ->setKeyColumn($meta->getPrimaryKey())
+                          ->setProcessor($processor);
         return $select;
     }
 }
