@@ -256,7 +256,6 @@ abstract class Mapper {
         }
 
         $data->fireEvent(ORM::AFTER_DELETE_EVENT, $id);
-        Registry::remove($this->class, $id);
         return true;
     }
 
