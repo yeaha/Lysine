@@ -43,7 +43,41 @@ abstract class ORM {
     protected function __after_delete() {}
     // }}}
 
+    // {{{ 事件关联方法
+    static protected $event_methods = array(
+        self::BEFORE_INIT_EVENT => '__before_init',
+        self::AFTER_INIT_EVENT => '__after_init',
+        self::BEFORE_SAVE_EVENT => '__before_save',
+        self::AFTER_SAVE_EVENT => '__after_save',
+        self::BEFORE_INSERT_EVENT => '__before_insert',
+        self::AFTER_INSERT_EVENT => '__after_insert',
+        self::BEFORE_UPDATE_EVENT => '__before_update',
+        self::AFTER_UPDATE_EVENT => '__after_update',
+        self::BEFORE_DELETE_EVENT => '__before_delete',
+        self::AFTER_DELETE_EVENT => '__after_delete',
+    );
+    // }}}
+
     abstract public function id();
+
+    /**
+     * 触发事件
+     *
+     * @param string $event
+     * @param mixed $args
+     * @access public
+     * @return integer
+     */
+    public function fireEvent($event, $args = null) {
+        if (isset(self::$event_methods[$event])) {
+            $method = self::$event_methods[$event];
+            $this->$method();
+        }
+
+        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
+        array_unshift($args, $this);
+        return fireEvent($this, $event, $args);
+    }
 }
 
 namespace Lysine\ORM;

@@ -178,17 +178,17 @@ abstract class Mapper {
         if ($data->isReadonly())
             throw OrmError::readonly($data);
 
-        $data->fireEvent(ORM::BEFORE_SAVE_EVENT, $data);
+        $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         if ($data->isFresh()) {
             $data->fireEvent(ORM::BEFORE_INSERT_EVENT, $data);
-            if ($result = $this->insert($data)) $data->fireEvent(ORM::AFTER_INSERT_EVENT, $data);
+            if ($result = $this->insert($data)) $data->fireEvent(ORM::AFTER_INSERT_EVENT);
         } elseif ($data->isDirty()) {
             $data->fireEvent(ORM::BEFORE_UPDATE_EVENT, $data);
-            if ($result = $this->update($data)) $data->fireEvent(ORM::AFTER_UPDATE_EVENT, $data);
+            if ($result = $this->update($data)) $data->fireEvent(ORM::AFTER_UPDATE_EVENT);
         }
 
-        $data->fireEvent(ORM::AFTER_SAVE_EVENT, $data);
+        $data->fireEvent(ORM::AFTER_SAVE_EVENT);
 
         return $result;
     }
@@ -246,13 +246,13 @@ abstract class Mapper {
 
         if ($data->isFresh()) return false;
 
-        $data->fireEvent(ORM::BEFORE_DELETE_EVENT, $data);
+        $data->fireEvent(ORM::BEFORE_DELETE_EVENT);
         try {
             if (!$this->doDelete($data)) return false;
         } catch (\Exception $ex) {
             throw OrmError::delete_failed($data, $ex);
         }
-        $data->fireEvent(ORM::AFTER_DELETE_EVENT, $data);
+        $data->fireEvent(ORM::AFTER_DELETE_EVENT);
         Registry::remove($this->class, $data->id());
         return true;
     }

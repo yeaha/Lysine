@@ -253,38 +253,6 @@ abstract class Data extends ORM implements IData {
     }
 
     /**
-     * 触发事件
-     *
-     * @param string $event
-     * @param mixed $args
-     * @access public
-     * @return void
-     */
-    public function fireEvent($event, $args = null) {
-        switch ($event) {
-            case ORM::BEFORE_SAVE_EVENT:    $this->__before_save();
-                                            break;
-            case ORM::AFTER_SAVE_EVENT:     $this->__after_save();
-                                            break;
-            case ORM::BEFORE_INSERT_EVENT:  $this->__before_insert();
-                                            break;
-            case ORM::AFTER_INSERT_EVENT:   $this->__after_insert();
-                                            break;
-            case ORM::BEFORE_UPDATE_EVENT:  $this->__before_update();
-                                            break;
-            case ORM::AFTER_UPDATE_EVENT:   $this->__after_update();
-                                            break;
-            case ORM::BEFORE_DELETE_EVENT:  $this->__before_delete();
-                                            break;
-            case ORM::AFTER_DELETE_EVENT:   $this->__after_delete();
-                                            break;
-        }
-
-        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-        fireEvent($this, $event, $args);
-    }
-
-    /**
      * 根据主键生成实例
      *
      * @param mixed $key

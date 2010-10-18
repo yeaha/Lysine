@@ -170,7 +170,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return void
      */
     public function __construct(array $record = array(), $fresh = true) {
-        $this->fireEvent(ORM::BEFORE_INIT_EVENT, $this);
+        $this->fireEvent(ORM::BEFORE_INIT_EVENT);
 
         if ($record) {
             $this->record = $record;
@@ -183,7 +183,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             }
         }
 
-        $this->fireEvent(ORM::AFTER_INIT_EVENT, $this);
+        $this->fireEvent(ORM::AFTER_INIT_EVENT);
     }
 
     /**
@@ -361,18 +361,18 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         // 说明这是从数据库中获得的数据，而且没改过，不需要保存
         if (!$this->dirty_record && isset($record[$pk]) && !$record[$pk]) return $this;
 
-        $this->fireEvent(ORM::BEFORE_SAVE_EVENT, $this);
+        $this->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         if ($this->fresh) {
-            $this->fireEvent(ORM::BEFORE_INSERT_EVENT, $this);
+            $this->fireEvent(ORM::BEFORE_INSERT_EVENT);
             if ($result = $this->insert()) {
                 $this->set($pk, $result);
-                $this->fireEvent(ORM::AFTER_INSERT_EVENT, $this);
+                $this->fireEvent(ORM::AFTER_INSERT_EVENT);
                 Registry::set($this);
             }
         } else {
-            $this->fireEvent(ORM::BEFORE_UPDATE_EVENT, $this);
-            if ($result = $this->update()) $this->fireEvent(ORM::AFTER_UPDATE_EVENT, $this);
+            $this->fireEvent(ORM::BEFORE_UPDATE_EVENT);
+            if ($result = $this->update()) $this->fireEvent(ORM::AFTER_UPDATE_EVENT);
         }
 
         if ($result) {
@@ -380,7 +380,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             $this->dirty_record = $this->referer = $this->props = array();
         }
 
-        $this->fireEvent(ORM::AFTER_SAVE_EVENT, $this);
+        $this->fireEvent(ORM::AFTER_SAVE_EVENT);
         return $this;
     }
 
@@ -397,51 +397,15 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
             throw new \LogicException(get_class($this) .' is readonly!');
 
         $id = $this->id();
-        $this->fireEvent(ORM::BEFORE_DELETE_EVENT, $this);
+        $this->fireEvent(ORM::BEFORE_DELETE_EVENT);
         if (!$this->delete()) return false;
 
-        $this->fireEvent(ORM::AFTER_DELETE_EVENT, $id);
+        $this->fireEvent(ORM::AFTER_DELETE_EVENT);
 
         $this->record = $this->dirty_record = $this->referer = $this->props = array();
         $this->storage = null;
 
         return true;
-    }
-
-    /**
-     * 触发事件
-     *
-     * @param string $event
-     * @param mixed $args
-     * @access protected
-     * @return void
-     */
-    protected function fireEvent($event, $args = null) {
-        switch ($event) {
-            case ORM::BEFORE_INIT_EVENT:    $this->__before_init();
-                                            break;
-            case ORM::AFTER_INIT_EVENT:     $this->__after_init();
-                                            break;
-            case ORM::BEFORE_SAVE_EVENT:    $this->__before_save();
-                                            break;
-            case ORM::AFTER_SAVE_EVENT:     $this->__after_save();
-                                            break;
-            case ORM::BEFORE_INSERT_EVENT:  $this->__before_insert();
-                                            break;
-            case ORM::AFTER_INSERT_EVENT:   $this->__after_insert();
-                                            break;
-            case ORM::BEFORE_UPDATE_EVENT:  $this->__before_update();
-                                            break;
-            case ORM::AFTER_UPDATE_EVENT:   $this->__after_update();
-                                            break;
-            case ORM::BEFORE_DELETE_EVENT:  $this->__before_delete();
-                                            break;
-            case ORM::AFTER_DELETE_EVENT:   $this->__after_delete();
-                                            break;
-        }
-
-        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-        fireEvent($this, $event, $args);
     }
 
     /**
