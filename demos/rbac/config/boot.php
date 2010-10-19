@@ -3,12 +3,7 @@ require_once __DIR__ .'/../../../framework/core.php';
 
 define('ROOT_DIR', realpath(__DIR__ .'/../'));
 
-$config = array(
-    'app' => require_once ROOT_DIR .'/config/_app.php',
-    'storage' => require_once ROOT_DIR .'/config/_storage.php',
-);
-
-Lysine\Config::import($config);
+Lysine\Config::import(require_once ROOT_DIR .'/config/_config.php');
 
 require_once ROOT_DIR .'/lib/functions.php';
 set_exception_handler('__on_exception');
