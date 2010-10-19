@@ -3,3 +3,9 @@
 nginx配置文件在config/nginx.conf
 数据库使用postgresql，数据库脚本在db/install.sql
 修改config/_storage.php里面的数据库配置
+
+1、RBAC逻辑在app/model/rbac.php内实现
+2、RBAC配置在config/_rbac.php
+3、在config/boot.php内，通过listen_event()，把router的before dispatch event事件绑定到\Model\Rbac::check()方法，如果检查未通过则抛出http 403异常
+4、用set_exception_handler()捕获异常给__on_exception()函数处理，__on_exception()在lib/functions.php内
+
