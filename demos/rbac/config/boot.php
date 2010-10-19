@@ -16,4 +16,4 @@ set_exception_handler('__on_exception');
 app()->includePath(ROOT_DIR .'/app');
 
 use Lysine\MVC;
-listenEvent(app()->getRouter(), MVC\BEFORE_DISPATCH_EVENT, array(Model\Rbac::instance(), 'check'));
+listen_event(app()->getRouter(), MVC\BEFORE_DISPATCH_EVENT, array(Model\Rbac::instance(), 'check'));

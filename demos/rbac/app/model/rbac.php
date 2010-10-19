@@ -10,16 +10,21 @@ class Rbac extends Singleton {
     );
 
     private function getRule($class) {
-        $basename = strtolower(app()->getRouter()->getNamespace());
-        $class = explode('\\', trim(preg_replace('/^'.$basename.'/', '', strtolower($class)), '\\'));
-        $cfg = cfg('app', 'rbac');
+        $rules = array();
+        foreach (cfg('app', 'rbac') as $namespace => $config) {
+            if (!in_namespace($class, $namespace)) continue;
+            $rules = $config;
+            $class = preg_replace('/^\\\?'. preg_quote($namespace) .'/i', '', $class);
+            break;
+        }
 
         $rule = isset($cfg['_config']) ? $cfg['_config'] : $this->default_rule;
+        $class = preg_split('/\\\/', $class, null, PREG_SPLIT_NO_EMPTY);
 
         foreach ($class as $key) {
-            if (!isset($cfg[$key])) return $rule;
-            if (isset($cfg[$key]['_config'])) $rule = $cfg[$key]['_config'];
-            $cfg = $cfg[$key];
+            if (!isset($rules[$key])) return $rule;
+            if (isset($rules[$key]['_config'])) $rule = $rules[$key]['_config'];
+            $rules = $rules[$key];
         }
 
         return $rule;
@@ -32,7 +37,7 @@ class Rbac extends Singleton {
         ));
     }
 
-    public function check($class) {
+    public function check($url, $class) {
         $rule = $this->getRule($class);
         $user = User::current();
 
