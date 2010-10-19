@@ -9,11 +9,10 @@ $phar = new Phar("{$root_dir}/lysine.phar", 0, 'lysine.phar');
 $phar->buildFromDirectory("{$root_dir}/framework");
 $phar->setStub("<?php
 try {
-    Phar::loadPhar('/path/to/lysine.phar');
     require 'phar://lysine.phar/core.php';
 } catch (PharException \$e) {
-    echo \$e->getMessage();
-    die('Cannot initialize Phar');
+    echo \$e->getMessage() . PHP_EOL;
+    die('Cannot initialize Lysine');
 }
 __HALT_COMPILER();
 ?>");
