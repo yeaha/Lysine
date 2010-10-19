@@ -193,7 +193,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return void
      */
     public function __destruct() {
-        clearEvent($this);
+        clear_event($this);
     }
 
     /**

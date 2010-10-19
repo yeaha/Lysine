@@ -155,27 +155,27 @@ function array_set(&$target, $path, $val) {
 }
 
 // 触发对象事件
-function fireEvent($obj, $event, $args = null) {
+function fire_event($obj, $event, $args = null) {
     $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
     return \Lysine\Utils\Events::instance()->fire($obj, $event, $args);
 }
 
 // 监听对象事件
-function listenEvent($obj, $event, $callback) {
+function listen_event($obj, $event, $callback) {
     return \Lysine\Utils\Events::instance()->listen($obj, $event, $callback);
 }
 
 // 订阅类事件
-function subscribeEvent($class, $callback) {
+function subscribe_event($class, $callback) {
     return \Lysine\Utils\Events::instance()->subscribe($class, $callback);
 }
 
 // 取消监听事件
-function clearEvent($obj, $event = null) {
+function clear_event($obj, $event = null) {
     return \Lysine\Utils\Events::instance()->clear($obj, $event);
 }
 
-function startWith($haystack, $needle, $case_insensitive = false) {
+function start_with($haystack, $needle, $case_insensitive = false) {
     if ($case_insensitive) {
         return stripos($haystack, $needle) === 0;
     } else {
@@ -184,11 +184,11 @@ function startWith($haystack, $needle, $case_insensitive = false) {
 }
 
 // 检查对象实例或者类名是否属于指定名字空间
-function inNamespace($ns, $class) {
+function in_namespace($class, $namespace) {
     if (is_object($class)) $class = get_class($class);
     $class = ltrim($class, '\\');
-    $ns = trim($ns, '\\') . '\\';
-    return startWith($class, $ns, true);
+    $namespace = trim($namespace, '\\') . '\\';
+    return start_with($class, $namespace, true);
 }
 
 function dump($var) {

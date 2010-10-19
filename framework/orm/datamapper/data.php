@@ -65,7 +65,7 @@ abstract class Data extends ORM implements IData {
      * @return void
      */
     public function __destruct() {
-        clearEvent($this);
+        clear_event($this);
     }
 
     /**

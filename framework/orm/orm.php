@@ -76,7 +76,7 @@ abstract class ORM {
 
         $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
         array_unshift($args, $this);
-        return fireEvent($this, $event, $args);
+        return fire_event($this, $event, $args);
     }
 }
 
@@ -117,7 +117,7 @@ class Registry {
 
         $class = get_class($obj);
         $key = $class . $id;
-        listenEvent($obj, ORM::AFTER_DELETE_EVENT, function() use ($class, $id) {
+        listen_event($obj, ORM::AFTER_DELETE_EVENT, function() use ($class, $id) {
             Registry::remove($class, $id);
         });
 

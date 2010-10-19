@@ -198,7 +198,7 @@ class Router extends Router_Abstract {
         if (!$class || !class_exists($class)) throw HttpError::page_not_found($url, array('controller' => $class));
 
         if ($params) $args = array_merge($args, $params);
-        fireEvent($this, BEFORE_DISPATCH_EVENT, array($url, $class, $args));
+        fire_event($this, BEFORE_DISPATCH_EVENT, array($url, $class, $args));
 
         $controller = new $class();
         if (method_exists($controller, 'beforeRun')) {
@@ -232,7 +232,7 @@ class Router extends Router_Abstract {
         // 这里有机会对输出结果进行进一步处理
         if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
 
-        fireEvent($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
+        fire_event($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
 
         return $resp;
     }
