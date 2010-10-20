@@ -195,7 +195,9 @@ abstract class Adapter implements IAdapter {
 
         try {
             if ($bind) {
-                $sth = $this->dbh->prepare($sql);
+                $sth = ($sql instanceof \PDOStatement)
+                     ? $sql
+                     : $this->dbh->prepare($sql);
                 $sth->execute($bind);
             } else {
                 $sth = $this->dbh->query($sql);
@@ -250,15 +252,8 @@ abstract class Adapter implements IAdapter {
         );
 
         $sth = $this->dbh->prepare($sql);
-        try {
-            foreach ($rowset as $row) $sth->execute(array_values($row));
-        } catch (\PDOException $ex) {
-            throw new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
-                'sql' => $sql,
-                'bind' => $row,
-                'native_code' => $ex->errorInfo[0]
-            ));
-        }
+        foreach ($rowset as $row)
+            $this->execute($sth, array_values($row));
         return $sth->rowCount();
     }
 
