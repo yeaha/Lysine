@@ -201,7 +201,7 @@ abstract class Adapter implements IAdapter {
                 $sth = $this->dbh->query($sql);
             }
         } catch (\PDOException $ex) {
-            throw new StorageError($ex->getMessage(), $ex->getCode(), null, array(
+            throw new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
                 'sql' => $sql,
                 'bind' => $bind,
                 'native_code' => $ex->errorInfo[0]
@@ -253,7 +253,7 @@ abstract class Adapter implements IAdapter {
         try {
             foreach ($rowset as $row) $sth->execute(array_values($row));
         } catch (\PDOException $ex) {
-            throw new StorageError($ex->getMessage(), $ex->getCode(), null, array(
+            throw new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
                 'sql' => $sql,
                 'bind' => $row,
                 'native_code' => $ex->errorInfo[0]
