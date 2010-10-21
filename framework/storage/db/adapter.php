@@ -194,14 +194,10 @@ abstract class Adapter implements IAdapter {
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
         try {
-            if ($bind) {
-                $sth = ($sql instanceof \PDOStatement)
-                     ? $sql
-                     : $this->dbh->prepare($sql);
-                $sth->execute($bind);
-            } else {
-                $sth = $this->dbh->query($sql);
-            }
+            $sth = ($sql instanceof \PDOStatement)
+                 ? $sql
+                 : $this->dbh->prepare($sql);
+            $sth->execute($bind);
         } catch (\PDOException $ex) {
             throw new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
                 'sql' => $sql,
@@ -229,32 +225,37 @@ abstract class Adapter implements IAdapter {
     /**
      * 插入记录
      *
-     * @param string $table_name
-     * @param array $rowset
-     * @param boolean $batch true = 插入多条记录
+     * @param string $table
+     * @param array $row
+     * @param boolean $return_prepare
      * @access public
      * @return integer
      */
-    public function insert($table_name, array $rowset, $batch = false) {
-        if (!$rowset) return 0;
+    public function insert($table, array $row, $return_prepare = false) {
+        $bind = array(); $expr = array();
+        foreach ($row as $col => $val) {
+            if ($val instanceof Expr) {
+                $expr[$col] = $val;
+            } else {
+                $bind[$col] = $val;
+            }
+        }
+
+        $cols = array_merge(array_keys($bind), array_keys($expr));
+        $vals = $bind
+              ? array_merge(array_fill(0, count($bind), '?'), array_values($expr))
+              : array_values($expr);
+
+        $sql = sprintf('INSERT INTO %s (%s) VALUES (%s)',
+            $this->qtab($table),
+            implode(',', $this->qcol($cols)),
+            implode(',', $vals));
 
         $this->connect();
-
-        if (!$batch) $rowset = array($rowset);
-
-        $row = reset($rowset);
-        $columns = array_keys($row);
-        $sql = sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $this->qtab($table_name),
-            implode(',', $this->qcol($columns)),
-            implode(',', array_fill(0, count($columns), '?'))
-        );
-
         $sth = $this->dbh->prepare($sql);
-        foreach ($rowset as $row)
-            $this->execute($sth, array_values($row));
-        return $sth->rowCount();
+
+        if ($return_prepare) return $sth;
+        return $this->execute($sth, array_values($bind))->rowCount();
     }
 
     /**
@@ -273,10 +274,12 @@ abstract class Adapter implements IAdapter {
      * @return integer
      */
     public function update($table_name, array $row, $where, $bind = null) {
-        $this->connect();
+        // 返回prepare后的结果
+        $return_prepare = false;
 
         // 先解析where
         if (is_array($where)) {
+            $return_prepare = (bool)$bind;
             list($where, $where_bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         } else {
             $args = func_get_args();
@@ -290,6 +293,12 @@ abstract class Adapter implements IAdapter {
         $set = $bind = array();
         foreach ($row as $col => $val) {
             $holder_here = $holder ? $holder : ':'. $col;
+
+            if ($val instanceof Expr) {
+                $set[] = $this->qcol($col) .' = '. $val;
+                continue;
+            }
+
             $set[] = $this->qcol($col) .' = '. $holder_here;
 
             if ($holder_here == '?') {
@@ -303,7 +312,11 @@ abstract class Adapter implements IAdapter {
         $sql = sprintf('UPDATE %s SET %s', $this->qtab($table_name), implode(',', $set));
         if ($where) $sql .= ' WHERE '. $where;
 
-        return $this->execute($sql, $bind)->rowCount();
+        $this->connect();
+        $sth = $this->dbh->prepare($sql);
+
+        if ($return_prepare) return $sth;
+        return $this->execute($sth, $bind)->rowCount();
     }
 
     /**
