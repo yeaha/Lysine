@@ -59,22 +59,22 @@ function dbexpr($expr) {
 
 // 把postgresql数组转换为php数组
 function pg_decode_array($pg_array) {
-    return \Lysine\Storage\Db\Adapter\Pgsql::decodeArray($pg_array);
+    return \Lysine\Storage\DB\Adapter\Pgsql::decodeArray($pg_array);
 }
 
 // 把php数组转换为postgresql数组
 function pg_encode_array($php_array) {
-    return \Lysine\Storage\Db\Adapter\Pgsql::encodeArray($php_array);
+    return \Lysine\Storage\DB\Adapter\Pgsql::encodeArray($php_array);
 }
 
 // 把postgresql hstore数据转换为php数组
 function pg_decode_hstore($hstore) {
-    return \Lysine\Storage\Db\Adapter\Pgsql::decodeHstore($hstore);
+    return \Lysine\Storage\DB\Adapter\Pgsql::decodeHstore($hstore);
 }
 
 // 把转换php数组为postgresql hstore数据
 function pg_encode_hstore($php_array) {
-    return \Lysine\Storage\Db\Adapter\Pgsql::encodeHstore($php_array);
+    return \Lysine\Storage\DB\Adapter\Pgsql::encodeHstore($php_array);
 }
 
 function url() {
