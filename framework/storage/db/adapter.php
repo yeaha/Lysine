@@ -289,13 +289,12 @@ abstract class Adapter implements IAdapter {
 
         $set = $bind = array();
         foreach ($row as $col => $val) {
-            $holder_here = $holder ? $holder : ':'. $col;
-
             if ($val instanceof Expr) {
                 $set[] = $this->qcol($col) .' = '. $val;
                 continue;
             }
 
+            $holder_here = $holder ? $holder : ':'. $col;
             $set[] = $this->qcol($col) .' = '. $holder_here;
 
             if ($holder_here == '?') {
