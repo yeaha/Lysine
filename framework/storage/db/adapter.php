@@ -232,19 +232,16 @@ abstract class Adapter implements IAdapter {
      * @return integer
      */
     public function insert($table, array $row, $return_prepare = false) {
-        $bind = array(); $expr = array();
+        $bind = $cols = $vals = array();
         foreach ($row as $col => $val) {
+            $cols[] = $col;
             if ($val instanceof Expr) {
-                $expr[$col] = $val;
+                $vals[] = $val;
             } else {
-                $bind[$col] = $val;
+                $vals[] = '?';
+                $bind[] = $val;
             }
         }
-
-        $cols = array_merge(array_keys($bind), array_keys($expr));
-        $vals = $bind
-              ? array_merge(array_fill(0, count($bind), '?'), array_values($expr))
-              : array_values($expr);
 
         $sql = sprintf('INSERT INTO %s (%s) VALUES (%s)',
             $this->qtab($table),
@@ -255,7 +252,7 @@ abstract class Adapter implements IAdapter {
         $sth = $this->dbh->prepare($sql);
 
         if ($return_prepare) return $sth;
-        return $this->execute($sth, array_values($bind))->rowCount();
+        return $this->execute($sth, $bind)->rowCount();
     }
 
     /**
