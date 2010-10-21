@@ -165,8 +165,10 @@ class HttpError extends Error {
 
 function autoload($class) {
     static $files = null;
-    if ($files === null) $files = require \Lysine\DIR . '/class_files.php';
+    if ($files === null)
+        $files = array_change_key_case(require \Lysine\DIR . '/class_files.php');
 
+    $class = strtolower($class);
     if (substr($class, 0, 1) == '\\') $class = ltrim($class, '\\');
 
     if (!array_key_exists($class, $files)) return false;
