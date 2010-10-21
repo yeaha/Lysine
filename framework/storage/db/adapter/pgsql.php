@@ -619,16 +619,32 @@ EOF;
      * 把php数组转换为postgresql hstore字符串
      *
      * @param array $array
+     * @param boolean $new_style 使用postgresql 9.0之后的新格式
      * @static
      * @access public
      * @return string
      */
-    public static function encodeHstore(array $array) {
-        $result = array();
-        foreach ($array as $k => $v) {
-            $v = str_replace('"', '\"', $v);
-            $result[] = sprintf('"%s"=>"%s"', $k, $v);
+    public static function encodeHstore(array $array, $new_style = false) {
+        if (!$new_style) {
+            $result = array();
+            foreach ($array as $k => $v) {
+                $v = str_replace('"', '\"', $v);
+                $result[] = sprintf('"%s"=>"%s"', $k, $v);
+            }
+            return implode(',', $result);
+        } else {
+            $result = 'hstore(ARRAY[%s], ARRAY[%s])';
+            $cols = $vals = array();
+            foreach ($array as $k => $v) {
+                $cols[] = $k;
+                $vals[] = str_replace("'", "''", $v);
+            }
+
+            return new Expr(sprintf(
+                $result,
+                "'". implode("','", $cols) ."'",
+                "'". implode("','", $vals) ."'"
+            ));
         }
-        return implode(',', $result);
     }
 }

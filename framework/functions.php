@@ -73,8 +73,8 @@ function pg_decode_hstore($hstore) {
 }
 
 // 把转换php数组为postgresql hstore数据
-function pg_encode_hstore($php_array) {
-    return \Lysine\Storage\DB\Adapter\Pgsql::encodeHstore($php_array);
+function pg_encode_hstore($php_array, $new_style = false) {
+    return \Lysine\Storage\DB\Adapter\Pgsql::encodeHstore($php_array, $new_style);
 }
 
 function url() {
