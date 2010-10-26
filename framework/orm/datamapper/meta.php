@@ -20,10 +20,10 @@ class Meta {
     /**
      * 类定义元数据有效的key
      */
-    static private $class_meta_keys = array(
-        'storage',          // 存储服务配置，一般是设置为存储服务名
-        'collection',       // 存储集合名字
-        'readonly',         // 只读模型
+    static private $default_class_meta = array(
+        'storage' => NULL,          // 存储服务配置，一般是设置为存储服务名
+        'collection' => NULL,       // 存储集合名字
+        'readonly' => FALSE,        // 只读模型
     );
 
     /**
@@ -236,6 +236,13 @@ class Meta {
              : false;
     }
 
+    public function toArray() {
+        $result = array('props' => $this->props);
+        foreach (array_keys(static::$default_class_meta) as $key)
+            $result[$key] = $this->$key;
+        return $result;
+    }
+
     /**
      * 格式化并清理获得的元数据
      *
@@ -245,7 +252,7 @@ class Meta {
      * @return array
      */
     static public function sanitize(array $meta) {
-        $class_keys = self::$class_meta_keys;
+        $class_keys = array_keys(self::$default_class_meta);
         foreach ($meta as $key => $val) {
             if ($key == 'props') continue;
             if (!in_array($key, $class_keys)) unset($meta[$key]);
@@ -354,10 +361,9 @@ class MetaInspector {
         $class = new \ReflectionClass($class_name);
 
         $class_comment = $class->getDocComment();
-        if ($class_comment === false)
-            throw new \UnexpectedValueException('Undefined class ['. $class->getName() .'] meta comment');
-
-        $meta = self::parseComment($class_comment);
+        $meta = ($class_comment === false)
+              ? array()
+              : self::parseComment($class_comment);
 
         $prop_meta = array();
         foreach ($class->getProperties() as $prop) {
@@ -381,8 +387,14 @@ class MetaInspector {
         $meta = Meta::sanitize($meta);
 
         if ($parent_class = get_parent_class($class_name)) {
-            $parent_meta = Meta::factory($parent_class);
-            $meta['props'] = array_merge($parent_meta->getPropMeta(), $meta['props']);
+            $parent_meta = Meta::factory($parent_class)->toArray();
+            foreach ($parent_meta as $key => $val) {
+                if ($key == 'props') {
+                    $meta['props'] = array_merge($val, $meta['props']);
+                } elseif (!isset($meta[$key])) {
+                    $meta[$key] = $val;
+                }
+            }
         }
 
         return $meta;
@@ -404,10 +416,17 @@ class MetaInspector {
             $line = trim($line, "/* \t");
             if (!$line) continue;
 
-            if (preg_match('/^@(\w+)\s*(.+)?/', $line, $match)) {
-                $key = strtolower($match[1]);
-                $result[$key] = isset($match[2]) ? $match[2] : true;
+            if (!preg_match('/^@(\w+)\s*(.+)/', $line, $match)) continue;
+
+            $key = strtolower($match[1]);
+            $val = $match[2];
+            $lval = strtolower($val);
+            if ($lval == 'true') {
+                $val = true;
+            } elseif ($lval == 'false') {
+                $val = false;
             }
+            $result[$key] = $val;
         }
 
         return $result;
