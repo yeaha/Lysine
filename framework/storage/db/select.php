@@ -437,6 +437,27 @@ class Select {
     }
 
     /**
+     * count()查询
+     *
+     * @access public
+     * @return integer
+     */
+    public function count($col = null, $distinct = false) {
+        if ($col) {
+            $col = $this->adapter->qcol($col);
+            $expr = $distinct ? "count(distinct({$col}))" : "count({$col})";
+        } else {
+            $expr = 'count(1)';
+        }
+
+        $old_cols = $this->cols;
+        $this->setCols(dbexpr($expr));
+        $count = $this->execute()->getCol();
+        $this->setCols($old_cols);
+        return $count;
+    }
+
+    /**
      * 生成sql语句的where部分
      *
      * @access protected
