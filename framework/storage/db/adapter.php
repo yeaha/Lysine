@@ -6,6 +6,10 @@ use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\DB\Expr;
 use Lysine\Storage\DB\Select;
 
+const BEFORE_EXECUTE_EVENT = 'before execute event';
+const AFTER_EXECUTE_EVENT = 'after execute event';
+const EXECUTE_EXCEPTION_EVENT = 'execute exception event';
+
 /**
  * PDO数据库连接
  * 对pdo连接对象加了一些装饰方法
@@ -33,6 +37,14 @@ abstract class Adapter implements IAdapter {
     protected $dbh;
 
     /**
+     * 是否处于事务中
+     *
+     * @var boolean
+     * @access protected
+     */
+    protected $in_transaction = false;
+
+    /**
      * 构造函数
      *
      * @param string $dsn
@@ -50,6 +62,16 @@ abstract class Adapter implements IAdapter {
             throw new \RuntimeException('Need '. $extension .' extension!');
 
         $this->config = static::parseConfig($config);
+    }
+
+    /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct() {
+        if ($this->in_transaction) $this->rollback();
     }
 
     /**
@@ -158,7 +180,9 @@ abstract class Adapter implements IAdapter {
      */
     public function begin() {
         $this->connect();
-        return $this->dbh->beginTransaction();
+        if ($result = $this->dbh->beginTransaction())
+            $this->in_transaction = true;
+        return $result;
     }
 
     /**
@@ -168,7 +192,11 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function rollback() {
-        return $this->dbh->rollBack();
+        if (!$this->in_transaction) return false;
+
+        if ($result = $this->dbh->rollBack())
+            $this->in_transaction = false;
+        return $result;
     }
 
     /**
@@ -178,7 +206,21 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function commit() {
-        return $this->dbh->commit();
+        if (!$this->in_transaction) return false;
+
+        if ($result = $this->dbh->commit())
+            $this->in_transaction = false;
+        return $result;
+    }
+
+    /**
+     * 是否处于事务中
+     *
+     * @access public
+     * @return boolean
+     */
+    public function inTransaction() {
+        return $this->in_transaction;
     }
 
     /**
@@ -193,18 +235,24 @@ abstract class Adapter implements IAdapter {
         $this->connect();
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
+        fire_event($this, BEFORE_EXECUTE_EVENT, array($sql, $bind));
+
         try {
             $sth = ($sql instanceof \PDOStatement)
                  ? $sql
                  : $this->dbh->prepare($sql);
             $sth->execute($bind);
         } catch (\PDOException $ex) {
-            throw new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
+            $error = new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
                 'sql' => $sql,
                 'bind' => $bind,
                 'native_code' => $ex->errorInfo[0]
             ));
+            fire_event($this, EXECUTE_EXCEPTION_EVENT, $error);
+            throw $error;
         }
+
+        fire_event($this, AFTER_EXECUTE_EVENT, array($sql, $bind));
 
         $sth->setFetchMode(\PDO::FETCH_ASSOC);
         return $sth;

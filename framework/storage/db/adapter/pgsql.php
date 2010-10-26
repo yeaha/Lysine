@@ -15,14 +15,6 @@ class Pgsql extends Adapter {
     private $savepoint = 0;
 
     /**
-     * 是否处于事务中
-     *
-     * @var boolean
-     * @access private
-     */
-    private $in_transaction = false;
-
-    /**
      * 开始事务
      *
      * @access public
