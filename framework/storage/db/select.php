@@ -458,6 +458,37 @@ class Select {
     }
 
     /**
+     * 分页查询结果
+     *
+     * @param integer $page_size
+     * @param integer $page
+     * @access public
+     * @return mixed
+     */
+    public function getPage($page_size, $page) {
+        $old_offset = $this->offset;
+        $this->offset( ($page - 1) * $page_size );
+        $result = $this->offset($offset)->get($page_size);
+
+        $this->offset = $old_offset;
+        return $result;
+    }
+
+    /**
+     * 获得分页信息
+     *
+     * @param integer $page_size
+     * @param integer $current_page
+     * @param integer $total
+     * @access public
+     * @return array
+     */
+    public function getPageInfo($page_size, $current_page, $total = null) {
+        if (!$total) $total = $this->count();
+        return page($total, $page_size, $current_page);
+    }
+
+    /**
      * 生成sql语句的where部分
      *
      * @access protected

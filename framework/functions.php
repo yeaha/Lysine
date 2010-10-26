@@ -191,6 +191,35 @@ function in_namespace($class, $namespace) {
     return start_with($class, $namespace, true);
 }
 
+// 计算分页
+function page($total, $page_size, $current_page = 1) {
+    $page_count = ceil($total / $page_size);
+    if (!$page_count) $page_count = 1;
+
+    $page = array(
+        'total' => $total,
+        'page_size' => $page_size,
+        'page_count' => $page_count,
+        'current' => $current_page,
+        'has_prev' => false,
+        'prev' => null,
+        'has_next' => false,
+        'next' => null,
+    );
+
+    if ($current_page > 1) {
+        $page['has_prev'] = true;
+        $page['prev'] = $current_page - 1;
+    }
+
+    if ($current_page < $page_count) {
+        $page['has_next'] = true;
+        $page['next'] = $current_page + 1;
+    }
+
+    return $page;
+}
+
 function dump($var) {
     echo '<pre>';
     var_dump($var);
