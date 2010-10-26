@@ -453,7 +453,8 @@ class Select {
         $old_cols = $this->cols;
         $this->setCols(dbexpr($expr));
         $count = $this->execute()->getCol();
-        $this->setCols($old_cols);
+
+        $this->cols = $old_cols;
         return $count;
     }
 
