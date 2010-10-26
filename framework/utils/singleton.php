@@ -30,15 +30,4 @@ abstract class Singleton {
 
         return self::$instance[$class];
     }
-
-    /**
-     * 构造函数
-     * 无法通过new直接调用
-     *
-     * @final
-     * @access private
-     * @return void
-     */
-    private function __construct() {
-    }
 }
