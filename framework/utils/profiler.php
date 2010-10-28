@@ -26,8 +26,7 @@ class Profiler extends Singleton {
     public function __toString() {
         $lines = array();
         foreach ($this->time as $name => $use_time) {
-            $lines[] = $name;
-            $lines[] = 'use time: '. $use_time;
+            $lines[] = sprintf('%s: %ss', $name, $use_time);
         }
 
         return implode(PHP_EOL, $lines);
