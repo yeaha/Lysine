@@ -485,7 +485,16 @@ class Select {
      * @return array
      */
     public function getPageInfo($page_size, $current_page, $total = null) {
-        if (!$total) $total = $this->count();
+        if (!$total) {
+            $old_offset = $this->offset;
+            $old_limit = $this->limit;
+            $this->offset = $this->limit = null;
+
+            $total = $this->count();
+
+            $this->offset = $old_offset;
+            $this->limit = $old_limit;
+        }
         return page($total, $page_size, $current_page);
     }
 
