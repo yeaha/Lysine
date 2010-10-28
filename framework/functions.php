@@ -18,33 +18,40 @@ function req() {
 }
 
 function get($key = null, $default = false) {
-    return req()->get($key, $default);
+    if ($key === null) return $_GET;
+    return isset($_GET[$key]) ? $_GET[$key] : $default;
 }
 
 function post($key = null, $default = false) {
-    return req()->post($key, $default);
+    if ($key === null) return $_POST;
+    return isset($_POST[$key]) ? $_POST[$key] : $default;
 }
 
 function request($key = null, $default = false) {
-    return req()->request($key, $default);
+    if ($key === null) return $_REQUEST;
+    return isset($_REQUEST[$key]) ? $_REQUEST[$key] : $default;
 }
 
 function env($key = null, $default = false) {
-    return req()->env($key, $default);
+    if ($key === null) return $_ENV;
+    $key = strtoupper($key);
+    return isset($_ENV[$key]) ? $_ENV[$key] : $default;
 }
 
 function server($key = null, $default = false) {
-    return req()->server($key, $default);
+    if ($key === null) return $_SERVER;
+    $key = strtoupper($key);
+    return isset($_SERVER[$key]) ? $_SERVER[$key] : $default;
 }
 
 function session() {
-    $args = func_get_args();
-    return call_user_func_array(array(req(), 'session'), $args);
+    if (!isset($_SESSION)) return false;
+    return array_get($_SESSION, func_get_args());
 }
 
 function cookie() {
-    $args = func_get_args();
-    return call_user_func_array(array(req(), 'cookie'), $args);
+    if (!isset($_COOKIE)) return false;
+    return array_get($_COOKIE, func_get_args());
 }
 
 function storage($name = null) {

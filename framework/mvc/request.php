@@ -13,42 +13,35 @@ class Request extends Singleton {
         return $this->request($key);
     }
 
-    protected function _getFrom($source, $key = null, $default = false) {
-        if (is_null($key)) return $source;
-        return isset($source[$key]) ? $source[$key] : $default;
-    }
-
     public function get($key = null, $default = false) {
-        return $this->_getFrom($_GET, $key, $default);
+        return get($key, $default);
     }
 
     public function post($key = null, $default = false) {
-        return $this->_getFrom($_POST, $key, $default);
+        return post($key, $default);
     }
 
     public function request($key = null, $default = false) {
-        return $this->_getFrom($_REQUEST, $key, $default);
+        return request($key, $default);
     }
 
     public function env($key = null, $default = false) {
-        return $this->_getFrom($_ENV, strtoupper($key), $default);
+        return env($key, $default);
     }
 
     public function server($key = null, $default = false) {
-        return $this->_getFrom($_SERVER, strtoupper($key), $default);
+        return server($key, $default);
     }
 
     public function file() {
     }
 
     public function cookie() {
-        if (!isset($_COOKIE)) return false;
-        return array_get($_COOKIE, func_get_args());
+        return call_user_func_array('cookie', func_get_args());
     }
 
     public function session() {
-        if (!isset($_SESSION)) return false;
-        return array_get($_SESSION, func_get_args());
+        return call_user_func_array('session', func_get_args());
     }
 
     public function header($key) {
