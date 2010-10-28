@@ -495,7 +495,7 @@ class Select {
             $this->offset = $old_offset;
             $this->limit = $old_limit;
         }
-        return page($total, $page_size, $current_page);
+        return cal_page($total, $page_size, $current_page);
     }
 
     /**

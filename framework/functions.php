@@ -191,8 +191,8 @@ function in_namespace($class, $namespace) {
     return start_with($class, $namespace, true);
 }
 
-// 计算分页
-function page($total, $page_size, $current_page = 1) {
+// 计算分页 calculate page
+function cal_page($total, $page_size, $current_page = 1) {
     $page_count = ceil($total / $page_size);
     if (!$page_count) $page_count = 1;
 
