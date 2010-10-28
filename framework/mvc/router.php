@@ -218,6 +218,14 @@ class Router extends Router_Abstract {
             }
         }
 
+        if (req()->isFlash()) {
+            if (method_exists($controller, 'flash_'. $method)) {
+                $method = 'flash_'. $method;
+            } elseif (method_exists($controller, 'ajax')) {
+                $method = 'flash';
+            }
+        }
+
         // 执行controller动作并返回结果
         // 不检查method是否存在，用is_callable()
         // 保留__call()重载方法的方式

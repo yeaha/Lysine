@@ -113,6 +113,12 @@ class Request extends Singleton {
         return strtolower($this->header('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
 
+    // copy from qeephp
+    public function isFlash() {
+        $agent = strtolower($this->header('USER_AGENT'));
+        return strpos($agent, 'shockwave flash') !== false || strpos($agent, 'adobeair') !== false;
+    }
+
     protected function _getAccept($key) {
         $result = array();
         if (!$accept = $this->server($key)) return $result;
