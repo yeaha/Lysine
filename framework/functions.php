@@ -199,7 +199,8 @@ function cal_page($total, $page_size, $current_page = 1) {
     $page = array(
         'total' => $total,
         'page_size' => $page_size,
-        'page_count' => $page_count,
+        'first' => 1,
+        'last' => $page_count,
         'current' => $current_page,
         'has_prev' => false,
         'prev' => null,
@@ -207,12 +208,12 @@ function cal_page($total, $page_size, $current_page = 1) {
         'next' => null,
     );
 
-    if ($current_page > 1) {
+    if ($current_page > $page['first']) {
         $page['has_prev'] = true;
         $page['prev'] = $current_page - 1;
     }
 
-    if ($current_page < $page_count) {
+    if ($current_page < $page['last']) {
         $page['has_next'] = true;
         $page['next'] = $current_page + 1;
     }
