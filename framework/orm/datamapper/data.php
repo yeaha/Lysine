@@ -77,6 +77,30 @@ abstract class Data extends ORM implements IData {
      * @return mixed
      */
     public function __get($prop) {
+        return $this->getProp($prop);
+    }
+
+    /**
+     * 魔法方法
+     * 设置属性
+     *
+     * @param string $prop
+     * @param mixed $val
+     * @access public
+     * @return void
+     */
+    public function __set($prop, $val) {
+        $this->setProp($prop, $val);
+    }
+
+    /**
+     * 读取属性
+     *
+     * @param string $prop
+     * @access public
+     * @return mixed
+     */
+    public function getProp($prop) {
         if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
             if ($getter = $prop_meta['getter']) {
                 if (!method_exists($this, $getter))
@@ -91,14 +115,21 @@ abstract class Data extends ORM implements IData {
     /**
      * 设置属性
      *
-     * @param string $prop
+     * @param mixed $prop
      * @param mixed $val
+     * @param boolean $direct
      * @access public
      * @return void
      */
-    public function __set($prop, $val) {
+    public function setProp($prop, $val = null, $direct = false) {
         if ($this->isReadonly())
             throw new \LogicException(get_class($this) .' is readonly');
+
+        if (is_array($prop)) {
+            $direct = (bool)$val;
+            foreach ($prop as $p => $val) $this->setProp($p, $val, $direct);
+            return;
+        }
 
         $meta = static::getMeta();
 
@@ -116,34 +147,10 @@ abstract class Data extends ORM implements IData {
                 throw new \BadMethodCallException(get_class($this) .': Undefined setter method ['. $setter .']');
             $this->$setter($val);
         } else {
-            $this->set($prop, $val);
+            $this->$prop = $val;
+            if (!$direct && !in_array($prop, $this->dirty_props))
+                $this->dirty_props[] = $prop;
         }
-    }
-
-    /**
-     * 设置属性
-     *
-     * @param mixed $prop
-     * @param mixed $val
-     * @param boolean $direct
-     * @access public
-     * @return Lysine\ORM\DataMapper\Data
-     */
-    public function set($prop, $val = false, $direct = false) {
-        if ($this->isReadonly())
-            throw new \LogicException(get_class($this) .' is readonly');
-
-        if (is_array($prop)) {
-            $props = $prop;
-            $direct = (bool)$val;
-        } else {
-            $props = array($prop => $val);
-        }
-
-        foreach ($props as $prop => $val) $this->$prop = $val;
-        if (!$direct) $this->dirty_props = array_unique(array_merge($this->dirty_props, array_keys($props)));
-
-        return $this;
     }
 
     /**
