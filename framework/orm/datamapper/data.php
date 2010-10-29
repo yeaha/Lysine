@@ -148,7 +148,7 @@ abstract class Data extends ORM implements IData {
             $this->$setter($val);
         } else {
             $this->$prop = $val;
-            if (!$direct && !in_array($prop, $this->dirty_props))
+            if (!$direct && !$prop_meta['internal'] && !in_array($prop, $this->dirty_props))
                 $this->dirty_props[] = $prop;
         }
     }
