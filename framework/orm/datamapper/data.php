@@ -2,6 +2,8 @@
 namespace Lysine\ORM\DataMapper;
 
 use Lysine\ORM;
+use Lysine\Error;
+use Lysine\OrmError;
 
 /**
  * 领域模型接口
@@ -104,7 +106,7 @@ abstract class Data extends ORM implements IData {
         if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
             if ($getter = $prop_meta['getter']) {
                 if (!method_exists($this, $getter))
-                    throw new \BadMethodCallException(get_class($this) .': Undefined getter method ['. $getter .']');
+                    throw Error::call_undefined($getter, get_class($this));
                 return $this->$getter();
             }
         }
@@ -123,7 +125,7 @@ abstract class Data extends ORM implements IData {
      */
     public function setProp($prop, $val = null, $direct = false) {
         if ($this->isReadonly())
-            throw new \LogicException(get_class($this) .' is readonly');
+            throw OrmError::readonly($this);
 
         if (is_array($prop)) {
             $direct = (bool)$val;
@@ -134,17 +136,17 @@ abstract class Data extends ORM implements IData {
         $meta = static::getMeta();
 
         if (!$prop_meta = $meta->getPropMeta($prop))
-            throw new \InvalidArgumentException(get_class($this) .': Undefined property ['. $prop .']');
+            throw Error::undefined_property(get_class($this), $prop);
 
         if ($prop_meta['readonly'])
-            throw new \LogicException(get_class($this) .': Property ['. $prop .'] is readonly');
+            throw OrmError::readonly_property($this, $prop);
 
         if (!$this->is_fresh && $prop_meta['primary_key'] && $this->$prop)
-            throw new \LogicException(get_class($this) .': Property ['. $prop .'] refuse replace');
+            throw OrmError::refuse_set_value($this, $prop);
 
         if ($setter = $prop_meta['setter']) {
             if (!method_exists($this, $setter))
-                throw new \BadMethodCallException(get_class($this) .': Undefined setter method ['. $setter .']');
+                throw Error::call_undefined($setter, get_class($this));
             $this->$setter($val);
         } else {
             $this->$prop = $val;
