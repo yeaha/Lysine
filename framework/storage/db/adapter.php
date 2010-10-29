@@ -240,7 +240,7 @@ abstract class Adapter implements IAdapter {
                  : $this->dbh->prepare($sql);
             $sth->execute($bind);
         } catch (\PDOException $ex) {
-            $error = new StorageError($ex->getMessage(), $ex->errorInfo[1], null, array(
+            $error = new StorageError($ex->getMessage(), $ex->errorInfo[1], $ex, array(
                 'sql' => $sql,
                 'bind' => $bind,
                 'native_code' => $ex->errorInfo[0]
