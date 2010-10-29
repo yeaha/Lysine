@@ -3,17 +3,22 @@
  * 路由名字空间配置说明
  *
  * 所有的controller都使用Action这个namespace
- * /login == Action\login
  * $config['app']['router']['namespace'] = 'Action';
+ * 对应结果
+ * /login == Action\login
+ * /admin/login == Action\admin\login
+ * /other/login == Action\other\login
  *
- * /login == Controller\login
- * /admin/login == Admin\Controller\login
- * /other/login == Other\Action\login
+ * 不同路径对应不同名字空间的controller
  * $config['app']['router']['namespace'] = array(
  *     '__default' => 'Controller',
  *     'admin' => 'Admin\Controller',
  *     'other' => 'Other\Action',
  * );
+ * 对应结果
+ * /login == Controller\login
+ * /admin/login == Admin\Controller\login
+ * /other/login == Other\Action\login
  *
  * 如果没有配置，或者没有找到，默认使用"Controller"
  */
