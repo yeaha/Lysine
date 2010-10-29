@@ -284,10 +284,8 @@ abstract class Mapper {
     static public function factory($class) {
         if (is_object($class)) $class = get_class($class);
 
-        if (!isset(self::$instance[$class])) {
-            $mapper_class = get_called_class();
-            self::$instance[$class] = new $mapper_class($class);
-        }
+        if (!isset(self::$instance[$class]))
+            self::$instance[$class] = new static($class);
         return self::$instance[$class];
     }
 }
