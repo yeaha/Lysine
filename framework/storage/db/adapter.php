@@ -6,8 +6,7 @@ use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\DB\Expr;
 use Lysine\Storage\DB\Select;
 
-const BEFORE_EXECUTE_EVENT = 'before execute event';
-const AFTER_EXECUTE_EVENT = 'after execute event';
+const EXECUTE_EVENT = 'execute event';
 const EXECUTE_EXCEPTION_EVENT = 'execute exception event';
 
 /**
@@ -235,8 +234,6 @@ abstract class Adapter implements IAdapter {
         $this->connect();
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
-        fire_event($this, BEFORE_EXECUTE_EVENT, array($sql, $bind));
-
         try {
             $sth = ($sql instanceof \PDOStatement)
                  ? $sql
@@ -252,7 +249,7 @@ abstract class Adapter implements IAdapter {
             throw $error;
         }
 
-        fire_event($this, AFTER_EXECUTE_EVENT, array($sql, $bind));
+        fire_event($this, EXECUTE_EVENT, array($sql, $bind));
 
         $sth->setFetchMode(\PDO::FETCH_ASSOC);
         return $sth;

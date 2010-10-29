@@ -209,16 +209,15 @@ class Router extends Router_Abstract {
             if ($resp) return $resp;
         }
 
-        $method = req()->method();
-        if (req()->isAJAX()) {
+        $request = req();
+        $method = $request->method();
+        if ($request->isAJAX()) {
             if (method_exists($controller, 'ajax_'. $method)) {
                 $method = 'ajax_'. $method;
             } elseif (method_exists($controller, 'ajax')) {
                 $method = 'ajax';
             }
-        }
-
-        if (req()->isFlash()) {
+        } elseif ($request->isFlash()) {
             if (method_exists($controller, 'flash_'. $method)) {
                 $method = 'flash_'. $method;
             } elseif (method_exists($controller, 'ajax')) {
