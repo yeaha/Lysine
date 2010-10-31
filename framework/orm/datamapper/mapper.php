@@ -178,12 +178,12 @@ abstract class Mapper {
         if ($data->isReadonly())
             throw OrmError::readonly($data);
 
+        $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
+
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
             if (!$prop_meta['allow_null'] && $data->$prop === null)
                 throw OrmError::not_allow_null($data, $prop);
         }
-
-        $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         if ($data->isFresh()) {
             $data->fireEvent(ORM::BEFORE_INSERT_EVENT, $data);
