@@ -38,7 +38,7 @@ abstract class Data extends ORM implements IData {
      *
      * @var boolean
      * @access protected
-     * @internal
+     * @internal true
      */
     protected $is_fresh = true;
 
@@ -47,7 +47,7 @@ abstract class Data extends ORM implements IData {
      *
      * @var array
      * @access protected
-     * @internal
+     * @internal true
      */
     protected $dirty_props = array();
 
@@ -56,7 +56,7 @@ abstract class Data extends ORM implements IData {
      *
      * @var boolean
      * @access protected
-     * @internal
+     * @internal true
      */
     protected $is_readonly;
 
