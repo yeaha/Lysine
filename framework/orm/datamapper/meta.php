@@ -34,7 +34,7 @@ class Meta {
         'field' => NULL,            // 存储字段名
         'type' => NULL,             // 数据类型
         'primary_key' => FALSE,     // 是否主键
-        'readonly' => FALSE,        // 是否只读属性
+        'refuse_update' => FALSE,   // 是否允许更新
         'allow_null' => TRUE,       // 允许为null
         'internal' => FALSE,        // 是否model自己的属性 和存储数据无直接映射关系
         'getter' => NULL,           // 自定义getter

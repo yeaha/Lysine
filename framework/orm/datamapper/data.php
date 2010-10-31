@@ -138,11 +138,11 @@ abstract class Data extends ORM implements IData {
         if (!$prop_meta = $meta->getPropMeta($prop))
             throw Error::undefined_property(get_class($this), $prop);
 
-        if ($prop_meta['readonly'])
-            throw OrmError::readonly_property($this, $prop);
+        if ($prop_meta['refuse_update'])
+            throw OrmError::refuse_update($this, $prop);
 
         if (!$this->is_fresh && $prop_meta['primary_key'] && $this->$prop)
-            throw OrmError::refuse_set_value($this, $prop);
+            throw OrmError::refuse_update($this, $prop);
 
         if ($setter = $prop_meta['setter']) {
             if (!method_exists($this, $setter))

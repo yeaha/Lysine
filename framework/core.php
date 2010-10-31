@@ -92,19 +92,14 @@ class OrmError extends StorageError {
         return new static("{$class} is readonly");
     }
 
-    static public function readonly_property($class, $prop) {
-        if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class}: Property {$prop} is readonly");
-    }
-
     static public function not_allow_null($class, $prop) {
         if ($class instanceof ORM) $class = get_class($class);
         return new static("{$class}: Property {$prop} not allow null");
     }
 
-    static public function refuse_set_value($class, $prop) {
+    static public function refuse_update($class, $prop) {
         if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class}: Property {$prop} refuse set value");
+        return new static("{$class}: Property {$prop} refuse update");
     }
 
     static public function insert_failed(ORM $obj, $previous = null, array $more = array()) {
