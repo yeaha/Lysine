@@ -68,7 +68,7 @@ class DBMapper extends Mapper {
         $table_name = $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
-        return $adapter->update($table_name, $record, "{$primary_key} = ?", $id);
+        return $adapter->update($table_name, $record, "{$primary_key} = ?", $data->id());
     }
 
     /**
