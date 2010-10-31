@@ -185,8 +185,8 @@ abstract class Mapper {
         $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
-            if (!$prop_meta['allow_null'] && $data->$prop === null)
-                throw OrmError::not_allow_null($data, $prop);
+            if (!$prop_meta['allow_empty'] && empty($data->$prop))
+                throw OrmError::not_allow_empty($data, $prop);
         }
 
         if ($data->isFresh()) {
