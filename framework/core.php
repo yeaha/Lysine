@@ -131,6 +131,15 @@ class OrmError extends StorageError {
 }
 
 class HttpError extends Error {
+    public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
+        if (isset($more['message'])) {
+            $message = $more['message'];
+            unset($more['message']);
+        }
+
+        parent::__construct($message, $code, $previous, $more);
+    }
+
     public function getHeader() {
         return Response::httpStatus($this->getCode());
     }
