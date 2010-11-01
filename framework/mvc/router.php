@@ -102,7 +102,7 @@ class Router extends Router_Abstract {
      * @var array
      * @access protected
      */
-    protected $dispatch_map = array();
+    protected $dispatch_rewrite = array();
 
     /**
      * 构造函数
@@ -114,7 +114,7 @@ class Router extends Router_Abstract {
         $cfg = cfg('app', 'router');
         $cfg = is_array($cfg) ? $cfg : array();
 
-        if (isset($cfg['map'])) $this->dispatch_map = $cfg['map'];
+        if (isset($cfg['rewrite'])) $this->dispatch_rewrite = $cfg['rewrite'];
         if (isset($cfg['namespace'])) $this->namespace = $cfg['namespace'];
     }
 
@@ -154,12 +154,12 @@ class Router extends Router_Abstract {
     /**
      * 设定url regex => controller映射关系
      *
-     * @param array $map
+     * @param array $rewrite
      * @access public
      * @return Lysine\MVC\Router
      */
-    public function setDispatchMap(array $map) {
-        $this->dispatch_map = $map;
+    public function setDispatchRewrite(array $rewrite) {
+        $this->dispatch_rewrite = $rewrite;
         return $this;
     }
 
@@ -173,7 +173,7 @@ class Router extends Router_Abstract {
      * @return array
      */
     protected function match($url) {
-        foreach ($this->dispatch_map as $re => $class) {
+        foreach ($this->dispatch_rewrite as $re => $class) {
             if (preg_match($re, $url, $match))
                 return array($class, array_slice($match, 1));
         }
