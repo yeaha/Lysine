@@ -144,13 +144,33 @@ abstract class Data extends ORM implements IData {
         if ($setter = $prop_meta['setter']) {
             if (!method_exists($this, $setter))
                 throw Error::call_undefined($setter, get_class($this));
-            $this->$setter($val);
+            $this->$setter($val, $direct);
         } else {
-            $this->$prop = $val;
-            if (!$direct && !$prop_meta['internal'] && !in_array($prop, $this->dirty_props))
-                $this->dirty_props[] = $prop;
+            $this->changeProp($prop, $val, $direct);
         }
 
+        return $this;
+    }
+
+    /**
+     * 修改属性值
+     * setProp()和changeProp()的区别在于
+     * setProp()会调用setter，检查refuse_update等等
+     * changeProp()主要是内部使用
+     *
+     * @param string $prop
+     * @param mixed $val
+     * @param boolean $direct
+     * @access protected
+     * @return Data
+     */
+    protected function changeProp($prop, $val, $direct = false) {
+        $this->$prop = $val;
+        if ($direct) return $this;
+
+        $prop_meta = static::getMeta()->getPropMeta($prop);
+        if (!$prop_meta['internal'] && !in_array($prop, $this->dirty_props))
+            $this->dirty_props[] = $prop;
         return $this;
     }
 
