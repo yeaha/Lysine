@@ -6,7 +6,7 @@ define('ROOT_DIR', realpath(__DIR__ .'/../'));
 $config = array(
     'app' => array(
         'router' => array(
-            'map' => array(
+            'rewrite' => array(
                 '#^/(.*)#' => '\Controller\index',
             ),
         ),
