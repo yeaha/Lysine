@@ -6,6 +6,7 @@ use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\DB\Expr;
 use Lysine\Storage\DB\Select;
 
+const CONNECT_EVENT = 'connect event';
 const EXECUTE_EVENT = 'execute event';
 const EXECUTE_EXCEPTION_EVENT = 'execute exception event';
 
@@ -145,6 +146,8 @@ abstract class Adapter implements IAdapter {
         if ($result_class == 'PDOStatement') {
             $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Storage\DB\Result'));
         }
+
+        fire_event($this, CONNECT_EVENT, $this);
 
         $this->dbh = $dbh;
         return $this;
