@@ -286,12 +286,12 @@ class Meta {
     /**
      * 设置缓存服务实例
      *
-     * @param Cache $cache
+     * @param mixed $cache
      * @static
      * @access public
      * @return void
      */
-    static public function setCache(Cache $cache) {
+    static public function setCache($cache) {
         self::$cache = $cache;
     }
 
@@ -303,14 +303,9 @@ class Meta {
      * @return Cache
      */
     static public function getCache() {
-        if (self::$cache === null) {
-            if ($config = Config::get('orm', 'datamapper', 'meta', '__cache')) {
-                self::$cache = Pool::instance()->get($config);
-            } else {
-                self::$cache = false;
-            }
-        }
-        return self::$cache;
+        if (!self::$cache) return false;
+        if (self::$cache instanceof Cache) return self::$cache;
+        return self::$cache = Pool::instance()->get(self::$cache);
     }
 
     /**
