@@ -102,6 +102,16 @@ class OrmError extends StorageError {
         return new static("{$class}: Property {$prop} refuse update");
     }
 
+    static public function undefined_collection($class) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class}: Undefined collection");
+    }
+
+    static public function undefined_primarykey($class) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class}: Undefined primary key");
+    }
+
     static public function insert_failed(ORM $obj, $previous = null, array $more = array()) {
         $class = get_class($obj);
         $more['class'] = $class;

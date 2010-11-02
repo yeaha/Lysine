@@ -4,6 +4,7 @@ namespace Lysine\ORM\DataMapper;
 use Lysine\Config;
 use Lysine\Storage\Pool;
 use Lysine\Storage\Cache;
+use Lysine\OrmError;
 
 /**
  * 领域模型元数据
@@ -181,7 +182,7 @@ class Meta {
      */
     public function getCollection() {
         if (!$this->collection)
-            throw new \UnexpectedValueException("Undefined {$this->class} collection");
+            throw OrmError::undefined_collection($this->class);
         return $this->collection;
     }
 
@@ -193,7 +194,7 @@ class Meta {
      */
     public function getPrimaryKey() {
         if (!$this->primary_key)
-            throw new \UnexpectedValueException("Undefined {$this->class} primary key");
+            throw OrmError::undefined_primarykey($this->class);
         return $this->primary_key;
     }
 
