@@ -7,6 +7,9 @@ use Lysine\Storage\DB\Expr;
 use Lysine\Storage\DB\Select;
 
 const CONNECT_EVENT = 'connect event';
+const INSERT_EVENT = 'insert event';
+const UPDATE_EVENT = 'update event';
+const DELETE_EVENT = 'delete event';
 const EXECUTE_EVENT = 'execute event';
 const EXECUTE_EXCEPTION_EVENT = 'execute exception event';
 
@@ -300,7 +303,11 @@ abstract class Adapter implements IAdapter {
         $sth = $this->dbh->prepare($sql);
 
         if ($return_prepare) return $sth;
-        return $this->execute($sth, $bind)->rowCount();
+
+        if ($affected = $this->execute($sth, $bind)->rowCount())
+            fire_event($this, INSERT_EVENT, $this, $table, $affected);
+
+        return $affected;
     }
 
     /**
@@ -311,14 +318,14 @@ abstract class Adapter implements IAdapter {
      * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', array(':id' => 1));
      * $adapter->update('table', array('passwd' => 'abc'), 'id = :id', 1);
      *
-     * @param string $table_name
+     * @param string $table
      * @param array $row
      * @param mixed $where
      * @param mixed $bind
      * @access public
      * @return integer
      */
-    public function update($table_name, array $row, $where, $bind = null) {
+    public function update($table, array $row, $where, $bind = null) {
         // 返回prepare后的结果
         $return_prepare = false;
 
@@ -353,14 +360,18 @@ abstract class Adapter implements IAdapter {
         }
         $bind = array_merge($bind, $where_bind);
 
-        $sql = sprintf('UPDATE %s SET %s', $this->qtab($table_name), implode(',', $set));
+        $sql = sprintf('UPDATE %s SET %s', $this->qtab($table), implode(',', $set));
         if ($where) $sql .= ' WHERE '. $where;
 
         $this->connect();
         $sth = $this->dbh->prepare($sql);
 
         if ($return_prepare) return $sth;
-        return $this->execute($sth, $bind)->rowCount();
+
+        if ($affected = $this->execute($sth, $bind)->rowCount())
+            fire_event($this, UPDATE_EVENT, $this, $table, $affected);
+
+        return $affected;
     }
 
     /**
@@ -372,18 +383,18 @@ abstract class Adapter implements IAdapter {
      * $adapter->delete('table', 'a = :a and b = :b', array(':a' => 'a1', ':b' => 'b1'));
      * $adapter->delete('table', 'a = :a and b = :b', 'a1', 'b1');
      *
-     * @param string $table_name
+     * @param string $table
      * @param mixed $where
      * @param mixed $bind
      * @access public
      * @return integer
      */
-    public function delete($table_name, $where, $bind = null) {
+    public function delete($table, $where, $bind = null) {
         $this->connect();
 
         $bind = array();
 
-        $sql = 'DELETE FROM '. $this->qtab($table_name);
+        $sql = 'DELETE FROM '. $this->qtab($table);
         if (is_array($where)) {
             list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
         } else {
@@ -393,7 +404,10 @@ abstract class Adapter implements IAdapter {
 
         if ($where) $sql .= ' WHERE '. $where;
 
-        return $this->execute($sql, $bind)->rowCount();
+        if ($affected = $this->execute($sql, $bind)->rowCount())
+            fire_event($this, DELETE_EVENT, $this, $table, $affected);
+
+        return $affected;
     }
 
     /**
