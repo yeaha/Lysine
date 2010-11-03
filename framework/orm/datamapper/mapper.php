@@ -184,8 +184,9 @@ abstract class Mapper {
 
         $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
+        $props = $data->toArray();
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
-            if (!$prop_meta['allow_empty'] && empty($data->$prop))
+            if (!$prop_meta['allow_empty'] && empty($props[$prop]))
                 throw OrmError::not_allow_empty($data, $prop);
         }
 
