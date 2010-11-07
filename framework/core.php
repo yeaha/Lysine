@@ -60,6 +60,7 @@ class Error extends \Exception {
     }
 
     static public function undefined_property($class, $property) {
+        if (is_object($class)) $class = get_class($class);
         return new static("Undefined property {$property} of {$class}");
     }
 
