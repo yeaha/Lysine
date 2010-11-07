@@ -71,13 +71,9 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      */
     static protected $props_config = array(
         /*
-        'orders' => array(
-            'getter' => 'getOrders',
-            'setter' => 'setOrders',
-        ),
-        'books' => array(
-            'getter' => array('getBooks', true),  // 把第一次获取的结果缓存起来，不重复调用
-        ),
+        '属性名' => 'getter 方法名字',
+        'orders' => 'getOrders',
+        'books' => array('getBooks', true),  // 把第一次获取的结果缓存起来，不重复调用
         */
     );
 
@@ -194,15 +190,7 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return void
      */
     public function __set($key, $val) {
-        if (static::$is_readonly) throw OrmError::readonly($this);
-
-        if (isset(static::$props_config[$key]['setter'])) {
-            $setter = static::$props_config[$key]['setter'];
-            $this->$setter($val);
-            unset($this->props[$key]);
-        } else {
-            $this->set($key, $val);
-        }
+        $this->set($key, $val);
     }
 
     /**
@@ -213,25 +201,23 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      * @return mixed
      */
     public function __get($key) {
-        if (isset(static::$props_config[$key]['getter'])) {
-            if (isset($this->props[$key])) return $this->props[$key];
+        if (!isset(static::$props_config[$key])) return $this->get($key);
 
-            $getter_config = static::$props_config[$key]['getter'];
+        if (isset($this->props[$key])) return $this->props[$key];
 
-            if (is_array($getter_config)) {
-                $getter = array_shift($getter_config);
-                $cache = array_shift($getter_config);
-            } else {
-                $getter = $getter_config;
-                $cache = false;
-            }
+        $getter_config = static::$props_config[$key];
 
-            $prop = $this->$getter();
-            if ($cache) $this->props[$key] = $prop;
-            return $prop;
+        if (is_array($getter_config)) {
+            $getter = array_shift($getter_config);
+            $cache = array_shift($getter_config);
+        } else {
+            $getter = $getter_config;
+            $cache = false;
         }
 
-        return $this->get($key);
+        $prop = $this->$getter();
+        if ($cache) $this->props[$key] = $prop;
+        return $prop;
     }
 
     /**
@@ -247,25 +233,23 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
         if (static::$is_readonly) throw OrmError::readonly($this);
 
         if (is_array($field)) {
-            $values = $field;
             $direct = (bool)$val;
-        } else {
-            $values = array($field => $val);
+            foreach ($field as $f => $v) $this->set($f, $v, $direct);
+            return $this;
         }
 
         if (!$this->is_fresh) {
-            $primary_key = static::getPrimaryKey();
-            if (isset($values[$primary_key]))
+            if ($field == static::getPrimaryKey())
                 throw OrmError::refuse_update($this, $primary_key);
 
-            if ($fields = array_diff(array_keys($values), array_keys($this->record)))
-                throw OrmError::undefined_property($this, implode(',', $fields));
+            if (!array_key_exists($field, $this->record))
+                throw OrmError::undefined_property($this, $fields);
         }
 
-        foreach ($values as $field => $val) $this->record[$field] = $val;
+        $this->record[$field] = $val;
 
-        if (!$direct)
-            $this->dirty_record = array_unique(array_merge($this->dirty_record, array_keys($values)));
+        if (!$direct && !in_array($field, $this->dirty_record))
+            $this->dirty_record[] = $field;
 
         return $this;
     }
