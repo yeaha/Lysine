@@ -3,6 +3,7 @@ namespace Lysine\ORM;
 
 use Lysine\ORM;
 use Lysine\ORM\Registry;
+use Lysine\OrmError;
 use Lysine\IStorage;
 use Lysine\Storage\Pool;
 
@@ -221,11 +222,11 @@ abstract class ActiveRecord extends ORM implements IActiveRecord {
      */
     public function __set($key, $val) {
         if (static::$readonly)
-            throw new \LogicException(get_class($this) .' is readonly!');
+            throw OrmError::readonly($this);
 
         if (isset(static::$props_config[$key]['setter'])) {
-            $fn = static::$props_config[$key]['setter'];
-            $this->$fn($val);
+            $setter = static::$props_config[$key]['setter'];
+            $this->$setter($val);
 
             unset($this->props[$key]);  // 清除掉getter的结果
         } else {
