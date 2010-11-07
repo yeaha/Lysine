@@ -25,7 +25,7 @@ interface IActiveRecord {
  *
  * 这个ActiveRecord实现没有包括数据关系映射功能（一对一，一对多）
  * 主要是考虑到不同存储服务的ActiveRecord之间无法实现常见的映射方式
- * 所以只实现了setter getter机制，通过定义虚拟属性自行实现关系映射
+ * 所以只实现了getter机制，通过定义虚拟属性自行实现关系映射
  *
  * @uses ORM
  * @uses IActiveRecord
