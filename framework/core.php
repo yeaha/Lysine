@@ -77,70 +77,6 @@ class Error extends \Exception {
     }
 }
 
-class StorageError extends Error {
-    static public function undefined_storage($storage_name) {
-        return new static('Undefined storage service:'. $storage_name);
-    }
-
-    static public function connect_failed($storage_name) {
-        return new static("Connect failed! Storage service: {$storage_name}");
-    }
-}
-
-class OrmError extends StorageError {
-    static public function readonly($class) {
-        if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class} is readonly");
-    }
-
-    static public function not_allow_empty($class, $prop) {
-        if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class}: Property {$prop} not allow empty");
-    }
-
-    static public function refuse_update($class, $prop) {
-        if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class}: Property {$prop} refuse update");
-    }
-
-    static public function undefined_collection($class) {
-        if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class}: Undefined collection");
-    }
-
-    static public function undefined_primarykey($class) {
-        if ($class instanceof ORM) $class = get_class($class);
-        return new static("{$class}: Undefined primary key");
-    }
-
-    static public function insert_failed(ORM $obj, $previous = null, array $more = array()) {
-        $class = get_class($obj);
-        $more['class'] = $class;
-        $more['record'] = $obj->toArray();
-        $more['method'] = 'insert';
-
-        return new static("{$class} insert failed", 0, $previous, $more);
-    }
-
-    static public function update_failed(ORM $obj, $previous = null, array $more = array()) {
-        $class = get_class($obj);
-        $more['class'] = $class;
-        $more['record'] = $obj->toArray();
-        $more['method'] = 'update';
-
-        return new static("{$class} update failed", 0, $previous, $more);
-    }
-
-    static public function delete_failed(ORM $obj, $previous = null, array $more = array()) {
-        $class = get_class($obj);
-        $more['class'] = $class;
-        $more['primary_key'] = $obj->id();
-        $more['method'] = 'delete';
-
-        return new static("{$class} delete failed", 0, $previous, $more);
-    }
-}
-
 class HttpError extends Error {
     public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
         if (isset($more['message'])) {
@@ -220,6 +156,74 @@ class HttpError extends Error {
 
     static public function gateway_timeout(array $more) {
         return new static('Gateway Time-out', 504, null, $more);
+    }
+}
+
+class StorageError extends HttpError {
+    static public function undefined_storage($storage_name) {
+        return new static('Undefined storage service:'. $storage_name, 500);
+    }
+
+    static public function connect_failed($storage_name) {
+        return new static("Connect failed! Storage service: {$storage_name}", 503);
+    }
+}
+
+class OrmError extends StorageError {
+    public function __construct($message, $code, \Exception $previous = null, array $more = array()) {
+        parent::__construct($message, 500, $previous, $more);
+    }
+
+    static public function readonly($class) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class} is readonly");
+    }
+
+    static public function not_allow_empty($class, $prop) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class}: Property {$prop} not allow empty");
+    }
+
+    static public function refuse_update($class, $prop) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class}: Property {$prop} refuse update");
+    }
+
+    static public function undefined_collection($class) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class}: Undefined collection");
+    }
+
+    static public function undefined_primarykey($class) {
+        if ($class instanceof ORM) $class = get_class($class);
+        return new static("{$class}: Undefined primary key");
+    }
+
+    static public function insert_failed(ORM $obj, $previous = null, array $more = array()) {
+        $class = get_class($obj);
+        $more['class'] = $class;
+        $more['record'] = $obj->toArray();
+        $more['method'] = 'insert';
+
+        return new static("{$class} insert failed", 500, $previous, $more);
+    }
+
+    static public function update_failed(ORM $obj, $previous = null, array $more = array()) {
+        $class = get_class($obj);
+        $more['class'] = $class;
+        $more['record'] = $obj->toArray();
+        $more['method'] = 'update';
+
+        return new static("{$class} update failed", 500, $previous, $more);
+    }
+
+    static public function delete_failed(ORM $obj, $previous = null, array $more = array()) {
+        $class = get_class($obj);
+        $more['class'] = $class;
+        $more['primary_key'] = $obj->id();
+        $more['method'] = 'delete';
+
+        return new static("{$class} delete failed", 500, $previous, $more);
     }
 }
 
