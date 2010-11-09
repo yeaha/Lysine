@@ -225,7 +225,7 @@ class Router extends Router_Abstract {
         } elseif ($request->isFlash()) {
             if (method_exists($controller, 'flash_'. $method)) {
                 $method = 'flash_'. $method;
-            } elseif (method_exists($controller, 'ajax')) {
+            } elseif (method_exists($controller, 'flash')) {
                 $method = 'flash';
             }
         }
@@ -234,9 +234,8 @@ class Router extends Router_Abstract {
         // 不检查method是否存在，用is_callable()
         // 保留__call()重载方法的方式
         if (!is_callable(array($controller, $method)))
-            throw HttpError::method_not_allowed(array(
+            throw HttpError::method_not_allowed($method, array(
                 'url' => $url,
-                'method' => $method,
                 'controller' => $class,
             ));
         $resp = call_user_func_array(array($controller, $method), $args);

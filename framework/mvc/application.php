@@ -175,9 +175,7 @@ class Application extends Singleton {
     public function run() {
         $req = req();
         if (!in_array($req->method(), array('get', 'post', 'put', 'delete')))
-            throw HttpError::bad_request(array(
-                'method' => $req->method(),
-            ));
+            throw HttpError::not_implemented($req->method());
 
         $url = parse_url($req->requestUri());
         return $this->dispatch($url['path']);

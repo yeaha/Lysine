@@ -79,11 +79,11 @@ class Error extends \Exception {
 
 class StorageError extends Error {
     static public function undefined_storage($storage_name) {
-        return new self('Undefined storage service:'. $storage_name);
+        return new static('Undefined storage service:'. $storage_name);
     }
 
     static public function connect_failed($storage_name) {
-        return new self("Connect failed! Storage service: {$storage_name}");
+        return new static("Connect failed! Storage service: {$storage_name}");
     }
 }
 
@@ -156,40 +156,70 @@ class HttpError extends Error {
     }
 
     static public function bad_request(array $more) {
-        return new self('Bad Request', 400, null, $more);
+        return new static('Bad Request', 400, null, $more);
     }
 
     static public function unauthorized(array $more) {
-        return new self('Unauthorized', 401, null, $more);
+        return new static('Unauthorized', 401, null, $more);
     }
 
     static public function forbidden(array $more) {
-        return new self('Forbidden', 403, null, $more);
+        return new static('Forbidden', 403, null, $more);
     }
 
     static public function page_not_found($url, $more = array()) {
         $more['url'] = $url;
-        return new self('Page Not Found', 404, null, $more);
+        return new static('Page Not Found', 404, null, $more);
     }
 
-    static public function method_not_allowed(array $more = array()) {
-        return new self('Method Not Allowed', 405, null, $more);
+    static public function method_not_allowed($method, array $more = array()) {
+        $more['method'] = $method;
+        return new static('Method Not Allowed', 405, null, $more);
     }
 
     static public function not_acceptable(array $more) {
-        return new self('Not Acceptable', 406, null, $more);
+        return new static('Not Acceptable', 406, null, $more);
+    }
+
+    static public function request_timeout(array $more) {
+        return new static('Request Time-out', 408, null, $more);
     }
 
     static public function conflict(array $more) {
-        return new self('Conflict', 409, null, $more);
+        return new static('Conflict', 409, null, $more);
     }
 
-    static public function precondition_failed($more) {
-        return new self('Precondition Failed', 412, null, $more);
+    static public function gone(array $more) {
+        return new static('Gone', 410, null, $more);
+    }
+
+    static public function precondition_failed(array $more) {
+        return new static('Precondition Failed', 412, null, $more);
+    }
+
+    static public function request_entity_too_large(array $more) {
+        return new static('Request Entity Too Large', 413, null, $more);
     }
 
     static public function internal_server_error(array $more) {
-        return new self('Internal Server Error', 500, null, $more);
+        return new static('Internal Server Error', 500, null, $more);
+    }
+
+    static public function not_implemented($method, array $more = array()) {
+        $more['method'] = $method;
+        return new static('Not Implemented', 501, null, $more);
+    }
+
+    static public function bad_gateway(array $more) {
+        return new static('Bad Gateway', 502, null, $more);
+    }
+
+    static public function service_unavailable(array $more) {
+        return new static('Service Unavailable', 503, null, $more);
+    }
+
+    static public function gateway_timeout(array $more) {
+        return new static('Gateway Time-out', 504, null, $more);
     }
 }
 
