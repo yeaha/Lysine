@@ -96,7 +96,7 @@ class Sqlite extends Adapter {
      * @return string
      */
     public function qcol($col_name) {
-        if ($col_name instanceof Expr) return $col_name->__toString();
+        if ($col_name instanceof Expr) return $col_name;
         return '"'. trim($col_name, '"') .'"';
     }
 

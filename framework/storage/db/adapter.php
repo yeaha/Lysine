@@ -423,7 +423,7 @@ abstract class Adapter implements IAdapter {
             return $val;
         }
 
-        if ($val instanceof Expr) return $val->__toString();
+        if ($val instanceof Expr) return $val;
         if (is_numeric($val)) return $val;
         if (is_null($val)) return 'NULL';
 

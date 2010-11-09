@@ -72,7 +72,7 @@ class Mysql extends Adapter {
      * @return string
      */
     public function qcol($col_name) {
-        if ($col_name instanceof Expr) return $col_name->__toString();
+        if ($col_name instanceof Expr) return $col_name;
 
         $col_name = explode('.', $col_name);
         foreach ($col_name as $key => $col)
