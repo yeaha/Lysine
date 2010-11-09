@@ -62,15 +62,6 @@ class View {
      */
     protected $block_config = array();
 
-    /**
-     * 类似于php.ini openbase_dir的作用
-     * 控制视图文件必须存在于这些目录下
-     *
-     * @var array
-     * @access protected
-     */
-    protected $base_dir = array();
-
     public function __construct(array $config) {
         foreach ($config as $key => $val)
             $this->$key = $val;
@@ -149,22 +140,6 @@ class View {
     }
 
     /**
-     * 检查视图文件路径是否合法
-     *
-     * @param string $file
-     * @access protected
-     * @return boolean
-     */
-    protected function base_check($file) {
-        if (strpos($file, $this->view_dir) === 0) return true;
-
-        foreach ($this->base_dir as $base)
-            if (strpos($file, $base) === 0) return true;
-
-        return false;
-    }
-
-    /**
      * 获得真正的视图文件名
      *
      * @param string $file
@@ -178,9 +153,6 @@ class View {
         $file = realpath($file);
         if (!$file || !is_readable($file))
             throw Error::file_not_found($file);
-
-        if (!$this->base_check($file))
-            throw new Error("{$file} is not within the allowed directory.", 0, null, array('file' => $file));
 
         return $file;
     }
