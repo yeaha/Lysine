@@ -92,18 +92,15 @@ class Pgsql extends Adapter {
      * @return integer
      */
     public function lastId($table_name = null, $column = null) {
-        if (!$table_name) {
-            try {
-                return $this->execute('SELECT LASTVAL()')->fetchCol();
-            } catch (Exception $ex) {
-                return false;
-            }
+        if ($table_name && $column) {
+            $sql = sprintf("SELECT CURRVAL('%s')", $this->seqName($table_name, $column);
+        } else {
+            $sql = 'SELECT LASTVAL()';
         }
 
-        $seq_name = $this->seqName($table_name, $column);
         try {
-            return $this->execute("SELECT CURRVAL('{$seq_name}')")->getCol();
-        } catch (Exception $ex) {
+            return $this->execute($sql)->getCol();
+        } catch (\Exception $ex) {
             return false;
         }
     }
@@ -119,8 +116,8 @@ class Pgsql extends Adapter {
     public function nextId($table_name, $column) {
         $seq_name = $this->seqName($table_name, $column);
         try {
-            return $this->execute("SELECT NEXTVAL('{$seq_name}')")->fetchCol();
-        } catch (Exception $ex) {
+            return $this->execute("SELECT NEXTVAL('{$seq_name}')")->getCol();
+        } catch (\Exception $ex) {
             return false;
         }
     }
