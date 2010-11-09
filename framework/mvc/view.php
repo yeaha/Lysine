@@ -18,7 +18,7 @@ class View {
      * @var string
      * @access protected
      */
-    protected $file_ext = 'php';
+    protected $file_ext = '.php';
 
     /**
      * 本视图继承的上层视图
@@ -61,6 +61,15 @@ class View {
      * @access protected
      */
     protected $block_config = array();
+
+    /**
+     * 类似于php.ini openbase_dir的作用
+     * 控制视图文件必须存在于这些目录下
+     *
+     * @var array
+     * @access protected
+     */
+    protected $base_dir = array();
 
     public function __construct(array $config) {
         foreach ($config as $key => $val)
@@ -140,6 +149,22 @@ class View {
     }
 
     /**
+     * 检查视图文件路径是否合法
+     *
+     * @param string $file
+     * @access protected
+     * @return boolean
+     */
+    protected function base_check($file) {
+        if (strpos($file, $this->view_dir) === 0) return true;
+
+        foreach ($this->base_dir as $base)
+            if (strpos($file, $base) === 0) return true;
+
+        return false;
+    }
+
+    /**
      * 获得真正的视图文件名
      *
      * @param string $file
@@ -147,9 +172,15 @@ class View {
      * @return string
      */
     protected function findFile($file) {
-        if (!$file) throw Error::invalid_argument('findFile()', __CLASS__);
-        $file = sprintf('%s/%s.%s', $this->view_dir, $file, $this->file_ext);
-        if (!is_readable($file)) throw Error::file_not_found($file);
+        if (substr($file, 0, 1) !== '/')  // 不是绝对路径
+            $file = sprintf('%s/%s%s', $this->view_dir, $file, $this->file_ext);
+
+        $file = realpath($file);
+        if (!$file || !is_readable($file))
+            throw Error::file_not_found($file);
+
+        if (!$this->base_check($file))
+            throw new Error("{$file} is not within the allowed directory.", 0, null, array('file' => $file));
 
         return $file;
     }
