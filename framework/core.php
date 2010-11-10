@@ -45,6 +45,23 @@ class Error extends \Exception {
         return array_key_exists($key, $this->more);
     }
 
+    public function toArray() {
+        $result = $this->more;
+        $result['message'] = $this->getMessage();
+        $result['code'] = $this->getCode();
+
+        if ($previous = $this->getPrevious()) {
+            if ($previous instanceof Error) {
+                $result['previous'] = $previous->toArray();
+            } else {
+                $result['previous']['message'] = $previous->getMessage();
+                $result['previous']['code'] = $previous->getCode();
+            }
+        }
+
+        return $result;
+    }
+
     public function getMore() {
         return $this->more;
     }
