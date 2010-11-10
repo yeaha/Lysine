@@ -93,7 +93,7 @@ class Pgsql extends Adapter {
      */
     public function lastId($table_name = null, $column = null) {
         if ($table_name && $column) {
-            $sql = sprintf("SELECT CURRVAL('%s')", $this->seqName($table_name, $column);
+            $sql = sprintf("SELECT CURRVAL('%s')", $this->seqName($table_name, $column));
         } else {
             $sql = 'SELECT LASTVAL()';
         }
