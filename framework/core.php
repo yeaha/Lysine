@@ -170,7 +170,7 @@ class StorageError extends HttpError {
 }
 
 class OrmError extends StorageError {
-    public function __construct($message, $code, \Exception $previous = null, array $more = array()) {
+    public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
         parent::__construct($message, 500, $previous, $more);
     }
 
