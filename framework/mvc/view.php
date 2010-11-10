@@ -170,7 +170,7 @@ class View {
      * @access public
      * @return string
      */
-    public function fetch($file, array $vars = null) {
+    public function render($file, array $vars = null) {
         $file = $this->findFile($file);
 
         if ($vars) {
@@ -191,7 +191,7 @@ class View {
         if (!$extend_file = $this->extend_file) return $output;
 
         $this->extend_file = null;
-        return $this->fetch($extend_file);
+        return $this->render($extend_file);
     }
 
     /**
