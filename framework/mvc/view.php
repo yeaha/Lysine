@@ -18,7 +18,7 @@ class View {
      * @var string
      * @access protected
      */
-    protected $file_ext = '.php';
+    protected $file_ext = 'php';
 
     /**
      * 本视图继承的上层视图
@@ -147,8 +147,14 @@ class View {
      * @return string
      */
     protected function findFile($file) {
+        $ext = $this->file_ext ? $this->file_ext : 'php';
+
         if (substr($file, 0, 1) !== '/')  // 不是绝对路径
-            $file = sprintf('%s/%s%s', $this->view_dir, $file, $this->file_ext);
+            $file = $this->view_dir .'/'. $file;
+
+        $pathinfo = pathinfo($file);
+        if (!isset($pathinfo['extension']) || $pathinfo['extension'] != $ext)
+            $file .= '.'. $ext;
 
         $file = realpath($file);
         if (!$file || !is_readable($file))
