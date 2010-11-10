@@ -1,9 +1,9 @@
 <?php
 function render_view($view_name, array $vars = null) {
-    static $render;
-    if (!$render) $render = new Lysine\MVC\View(cfg('app', 'view'));
+    static $view;
+    if (!$view) $view = new Lysine\MVC\View(cfg('app', 'view'));
 
-    return $render->reset()->fetch($view_name, $vars);
+    return $view->reset()->render($view_name, $vars);
 }
 
 function __on_exception($exception) {

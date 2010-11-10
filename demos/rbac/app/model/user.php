@@ -20,7 +20,7 @@ class User extends DBData {
      *
      * @var mixed
      * @access protected
-     * @primary_key
+     * @primary_key true
      */
     protected $id;
 
@@ -61,9 +61,9 @@ class User extends DBData {
      *
      * @var array
      * @access protected
-     * @internal
+     * @internal true
      * @getter getRoles
-     * @readonly
+     * @readonly true
      */
     protected $roles;
 

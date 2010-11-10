@@ -1,9 +1,9 @@
 <?php
 function render_view($view_name, array $vars = null) {
-    static $render;
-    if (!$render) $render = new Lysine\MVC\View(cfg('app', 'view'));
+    static $view;
+    if (!$view) $view = new Lysine\MVC\View(cfg('app', 'view'));
 
-    return $render->reset()->fetch($view_name, $vars);
+    return $view->reset()->render($view_name, $vars);
 }
 
 function __on_exception($exception) {
@@ -12,6 +12,14 @@ function __on_exception($exception) {
           : 500;
     header(\Lysine\MVC\Response::httpStatus($code));
 
-    echo render_view('_error/500', array('exception' => $exception));
+    require_once ROOT_DIR .'/public/_error/500.php';
     die($code);
+}
+
+function __on_error($errno, $errstr, $errfile, $errline, $errcontext) {
+    throw new Error($errstr, $errno, null, array(
+        'file' => $errfile,
+        'line' => $errline,
+        'context' => $errcontext,
+    ));
 }
