@@ -149,6 +149,17 @@ class Select {
     }
 
     /**
+     * 魔法方法
+     *
+     * @param string $prop
+     * @access public
+     * @return mixed
+     */
+    public function __get($prop) {
+        return $this->$prop;
+    }
+
+    /**
      * 直接调用查询结果对象
      *
      * <code>
