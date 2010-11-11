@@ -469,7 +469,14 @@ class Select {
      * @return Lysine\Storage\DB\Select
      */
     public function union($relation, $all = true) {
-        $this->union = array($relation, $all);
+        $relation_bind = array();
+        if ($relation instanceof Select) {
+            list($relation, $relation_bind) = $relation->compile();
+        } elseif (is_array($relation)) {
+            list($relation, $relation_bind) = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $relation);
+        }
+
+        $this->union = array(array($relation, $relation_bind), $all);
         return $this;
     }
 
@@ -588,13 +595,9 @@ class Select {
             // 某些数据库可能不支持union all语法
             $sql .= $all ? ' UNION ALL ' : ' UNION ';
 
-            if ($relation instanceof Select) {
-                list($relation, $relation_bind) = $relation->compile();
-
-                if ($relation_bind)
-                    array_splice($bind, count($bind), 0, $relation_bind);
-            }
+            list($relation, $relation_bind) = $relation;
             $sql .= $relation;
+            if ($relation_bind) $bind = array_merge($bind, $relation_bind);
         }
 
         return array($sql, $bind);
