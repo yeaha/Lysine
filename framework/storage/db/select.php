@@ -546,7 +546,7 @@ class Select {
         foreach ($this->where as $w) {
             list($where_sql, $where_bind) = $w;
             $where[] = $where_sql;
-            $bind = array_merge($bind, $where_bind);
+            if ($where_bind) $bind = array_merge($bind, $where_bind);
         }
 
         $where = $where ? '('. implode(') '. $this->where_relation .' (', $where) .')' : '';
