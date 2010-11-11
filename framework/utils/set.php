@@ -355,7 +355,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @access public
      * @return Lysine\Utils\Set
      */
-    public function orderBy($cmp_function) {
+    public function sortBy($cmp_function) {
         uasort($this->set, $cmp_function);
         return $this;
     }
