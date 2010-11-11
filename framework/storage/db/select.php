@@ -505,15 +505,14 @@ class Select {
     /**
      * 分页查询结果
      *
-     * @param integer $page_size
      * @param integer $page
+     * @param integer $size
      * @access public
      * @return mixed
      */
-    public function getPage($page_size, $page) {
+    public function getPage($page, $size = 10) {
         $old_offset = $this->offset;
-        $this->offset( ($page - 1) * $page_size );
-        $result = $this->offset($offset)->get($page_size);
+        $result = $this->offset( ($page - 1) * $size )->get($size);
 
         $this->offset = $old_offset;
         return $result;
@@ -522,13 +521,13 @@ class Select {
     /**
      * 获得分页信息
      *
-     * @param integer $page_size
+     * @param integer $size
      * @param integer $current_page
      * @param integer $total
      * @access public
      * @return array
      */
-    public function getPageInfo($page_size, $current_page, $total = null) {
+    public function getPageInfo($size, $current_page, $total = null) {
         if (!$total) {
             $old_offset = $this->offset;
             $old_limit = $this->limit;
@@ -539,7 +538,7 @@ class Select {
             $this->offset = $old_offset;
             $this->limit = $old_limit;
         }
-        return cal_page($total, $page_size, $current_page);
+        return cal_page($total, $size, $current_page);
     }
 
     /**
