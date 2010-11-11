@@ -202,6 +202,12 @@ function in_namespace($class, $namespace) {
 function cal_page($total, $page_size, $current_page = 1) {
     $page_count = ceil($total / $page_size) ?: 1;
 
+    if ($current_page > $page_count) {
+        $current_page = $page_count;
+    } elseif ($current_page < 1) {
+        $current_page = 1;
+    }
+
     $page = array(
         'total' => $total,
         'size' => $page_size,
