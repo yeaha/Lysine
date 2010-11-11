@@ -1,3 +1,16 @@
-website: http://github.com/yeaha/lysine
-git repository: git://github.com/yeaha/lysine.git
+功能特点：
+
+    * MVC架构
+      webpy风格的controller(可替换)
+    * 支持存储数据分区，水平切分或者垂直切分
+      example: https://gist.github.com/672178
+    * 提供ActiveRecord和DataMapper ORM
+      内置垂直切分支持，水平切分需自行扩展
+    * 对象事件机制
+      example: rbac demo
+
+Lysine基于php5.3开发，严重依赖5.3新特性，不支持php5.3之前版本
+设计时没有考虑过Windows服务器，在Windows环境下运行，可能会有某些路径判断方面的问题
+数据库需要PDO扩展
+
 author email: yangyi.cn.gz@gmail.com
