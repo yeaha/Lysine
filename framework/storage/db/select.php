@@ -180,6 +180,31 @@ class Select {
     }
 
     /**
+     * 魔法方法
+     *
+     * @access public
+     * @return void
+     */
+    public function __clone() {
+        $this->reset();
+    }
+
+    /**
+     * 复位到初始状态
+     * 只保留from和adapter
+     *
+     * @access public
+     * @return void
+     */
+    public function reset() {
+        $this->cols = $this->where = array();
+        $this->group = $this->having = $this->order = null;
+        $this->limit = $this->offset = $this->union = null;
+        $this->key_column = $this->processor = null;
+        $this->where_relation = 'AND';
+    }
+
+    /**
      * sql FROM
      *
      * @param string $table
@@ -376,8 +401,9 @@ class Select {
      * @access public
      * @return Lysine\Storage\DB\Select
      */
-    public function having($having) {
-        $this->having = $having;
+    public function having($having, $bind = null) {
+        $args = func_get_args();
+        $this->having = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
         return $this;
     }
 
@@ -547,7 +573,11 @@ class Select {
 
         if ($this->group) {
             $sql .= ' GROUP BY '. $this->group;
-            if ($this->having) $sql .= ' HAVING '. $this->having;
+            if ($this->having) {
+                list($having, $having_bind) = $this->having;
+                $sql .= ' HAVING '. $having;
+                if ($having_bind) $bind = array_merge($bind, $having_bind);
+            }
         }
 
         if ($this->order) $sql .= ' ORDER BY '. $this->order;
