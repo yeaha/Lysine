@@ -563,8 +563,7 @@ class Select {
     public function compile() {
         $adapter = $this->adapter;
 
-        $cols = implode(',', $adapter->qcol($this->cols));
-        if (empty($cols)) $cols = '*';
+        $cols = empty($this->cols) ? '*' : implode(',', $adapter->qcol($this->cols));
 
         $sql = sprintf('SELECT %s FROM %s', $cols, $adapter->qtab($this->from));
 
