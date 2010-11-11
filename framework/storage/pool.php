@@ -91,9 +91,7 @@ class Pool extends Singleton {
 
         $class = $config['class'];
         unset($config['class']);
-        $this->storages[$name] = new $class($config);
-
-        return $this->storages[$name];
+        return $this->storages[$name] = new $class($config);
     }
 
     /**

@@ -182,8 +182,7 @@ class Router extends Router_Abstract {
         // controller: \Controller\User\Login
         list($namespace, $url) = $this->getNamespace($url);
 
-        $class = str_replace('/', '\\', trim($url, '/'));
-        if (!$class) $class = 'index';
+        $class = str_replace('/', '\\', trim($url, '/')) ?: 'index';
         $class = $namespace .'\\'. $class;
         return array($class, array());
     }

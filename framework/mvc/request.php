@@ -118,7 +118,7 @@ class Request extends Singleton {
     // copy from qeephp
     public function isFlash() {
         $agent = strtolower($this->header('USER_AGENT'));
-        return strpos($agent, 'shockwave flash') !== false || strpos($agent, 'adobeair') !== false;
+        return (strpos($agent, 'shockwave flash') !== false) || (strpos($agent, 'adobeair') !== false);
     }
 
     protected function _getAccept($key) {

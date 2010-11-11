@@ -147,7 +147,7 @@ class View {
      * @return string
      */
     protected function findFile($file) {
-        $ext = $this->file_ext ? $this->file_ext : 'php';
+        $ext = $this->file_ext ?: 'php';
 
         if (substr($file, 0, 1) !== '/')  // 不是绝对路径
             $file = $this->view_dir .'/'. $file;

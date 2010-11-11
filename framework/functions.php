@@ -200,12 +200,11 @@ function in_namespace($class, $namespace) {
 
 // 计算分页 calculate page
 function cal_page($total, $page_size, $current_page = 1) {
-    $page_count = ceil($total / $page_size);
-    if (!$page_count) $page_count = 1;
+    $page_count = ceil($total / $page_size) ?: 1;
 
     $page = array(
         'total' => $total,
-        'page_size' => $page_size,
+        'size' => $page_size,
         'first' => 1,
         'last' => $page_count,
         'current' => $current_page,
