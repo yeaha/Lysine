@@ -9,6 +9,8 @@ class Request extends Singleton {
 
     protected $requestUri;
 
+    protected $accept = array();
+
     public function __get($key) {
         return $this->request($key);
     }
@@ -133,19 +135,23 @@ class Request extends Singleton {
     }
 
     public function acceptTypes() {
-        return $this->_getAccept('http_accept');
+        if (isset($this->accept['types'])) return $this->accept['types'];
+        return $this->accept['types'] = $this->_getAccept('http_accept');
     }
 
     public function acceptLang() {
-        return $this->_getAccept('http_accept_language');
+        if (isset($this->accept['lang'])) return $this->accept['lang'];
+        return $this->accept['lang'] = $this->_getAccept('http_accept_language');
     }
 
     public function acceptCharset() {
-        return $this->_getAccept('http_accept_charset');
+        if (isset($this->accept['charset'])) return $this->accept['charset'];
+        return $this->accept['charset'] = $this->_getAccept('http_accept_charset');
     }
 
     public function acceptEncoding() {
-        return $this->_getAccept('http_accept_encoding');
+        if (isset($this->accept['encoding'])) return $this->accept['encoding'];
+        return $this->accept['encoding'] = $this->_getAccept('http_accept_encoding');
     }
 
     public function referer() {
