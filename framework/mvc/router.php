@@ -24,10 +24,6 @@
  */
 namespace Lysine\MVC;
 
-// 路由事件
-const BEFORE_DISPATCH_EVENT = 'before dispatch';
-const AFTER_DISPATCH_EVENT = 'after dispatch';
-
 use Lysine\HttpError;
 
 /**

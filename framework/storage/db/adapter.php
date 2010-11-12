@@ -6,13 +6,6 @@ use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\DB\Expr;
 use Lysine\Storage\DB\Select;
 
-const CONNECT_EVENT = 'connect event';
-const INSERT_EVENT = 'insert event';
-const UPDATE_EVENT = 'update event';
-const DELETE_EVENT = 'delete event';
-const EXECUTE_EVENT = 'execute event';
-const EXECUTE_EXCEPTION_EVENT = 'execute exception event';
-
 /**
  * PDO数据库连接
  * 对pdo连接对象加了一些装饰方法
