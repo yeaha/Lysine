@@ -65,7 +65,7 @@ class Request extends Singleton {
             if ($method) unset($_POST['_method']);
         }
 
-        $this->method = strtolower( $method ? $method : $this->server('request_method') );
+        $this->method = strtolower( $method ?: $this->server('request_method') );
         return $this->method;
     }
 
@@ -163,6 +163,9 @@ class Request extends Singleton {
     }
 
     public function ip() {
-        return $this->server('remote_addr', '0.0.0.0');
+        $ip = $this->server('http_x_forwarded_for') ?: $this->server('remote_addr');
+        if (!function_exists('filter_var')) return $ip;
+
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) ?: '0.0.0.0';
     }
 }
