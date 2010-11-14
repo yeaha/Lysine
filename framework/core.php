@@ -153,6 +153,10 @@ namespace Lysine {
             return new static('Request Entity Too Large', 413, null, $more);
         }
 
+        static public function unsupported_media_type(array $more) {
+            return new static('Unsupported Media Type', 415, null, $more);
+        }
+
         static public function internal_server_error(array $more) {
             return new static('Internal Server Error', 500, null, $more);
         }
