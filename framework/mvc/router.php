@@ -211,6 +211,7 @@ class Router extends Router_Abstract {
 
         $request = req();
         $method = $request->method();
+        // head方法除了不输出数据之外，和get方法没有区别
         if ($method == 'head') $method = 'get';
 
         if ($request->isAJAX()) {
