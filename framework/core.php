@@ -175,19 +175,19 @@ namespace Lysine {
         }
     }
 
-    class StorageError extends HttpError {
+    class StorageError extends Error {
         static public function undefined_storage($storage_name) {
-            return new static('Undefined storage service:'. $storage_name, 500);
+            return new static('Undefined storage service:'. $storage_name);
         }
 
         static public function connect_failed($storage_name) {
-            return new static("Connect failed! Storage service: {$storage_name}", 503);
+            return new static("Connect failed! Storage service: {$storage_name}");
         }
     }
 
     class OrmError extends StorageError {
         public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
-            parent::__construct($message, 500, $previous, $more);
+            parent::__construct($message, $code, $previous, $more);
         }
 
         static public function readonly($class) {
@@ -221,7 +221,7 @@ namespace Lysine {
             $more['record'] = $obj->toArray();
             $more['method'] = 'insert';
 
-            return new static("{$class} insert failed", 500, $previous, $more);
+            return new static("{$class} insert failed", 0, $previous, $more);
         }
 
         static public function update_failed(ORM $obj, $previous = null, array $more = array()) {
@@ -230,7 +230,7 @@ namespace Lysine {
             $more['record'] = $obj->toArray();
             $more['method'] = 'update';
 
-            return new static("{$class} update failed", 500, $previous, $more);
+            return new static("{$class} update failed", 0, $previous, $more);
         }
 
         static public function delete_failed(ORM $obj, $previous = null, array $more = array()) {
@@ -239,7 +239,7 @@ namespace Lysine {
             $more['primary_key'] = $obj->id();
             $more['method'] = 'delete';
 
-            return new static("{$class} delete failed", 500, $previous, $more);
+            return new static("{$class} delete failed", 0, $previous, $more);
         }
     }
 
