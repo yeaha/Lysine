@@ -211,6 +211,8 @@ class Router extends Router_Abstract {
 
         $request = req();
         $method = $request->method();
+        if ($method == 'head') $method = 'get';
+
         if ($request->isAJAX()) {
             if (method_exists($controller, 'ajax_'. $method)) {
                 $method = 'ajax_'. $method;
@@ -235,11 +237,12 @@ class Router extends Router_Abstract {
             ));
         $resp = call_user_func_array(array($controller, $method), $args);
 
-        // 这里有机会对输出结果进行进一步处理
-        if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
+        if (!$request->isHEAD()) // head方法不需要向客户端返回结果
+            // 这里有机会对输出结果进行进一步处理
+            if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
 
         fire_event($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
 
-        return $resp;
+        return $request->isHEAD() ? null : $resp;
     }
 }

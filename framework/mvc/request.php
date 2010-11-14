@@ -96,7 +96,7 @@ class Request extends Singleton {
     }
 
     public function isGET() {
-        return $this->method() === 'get';
+        return ($this->method() === 'get') ?: $this->isHEAD();
     }
 
     public function isPOST() {
@@ -109,6 +109,10 @@ class Request extends Singleton {
 
     public function isDELETE() {
         return $this->method() === 'delete';
+    }
+
+    public function isHEAD() {
+        return $this->method() === 'head';
     }
 
     public function isAJAX() {
