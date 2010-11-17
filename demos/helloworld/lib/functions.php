@@ -20,5 +20,6 @@ function __on_error($errno, $errstr, $errfile, $errline, $errcontext) {
     throw new Error($errstr, $errno, null, array(
         'file' => $errfile,
         'line' => $errline,
+        'context' => $errcontext,
     ));
 }
