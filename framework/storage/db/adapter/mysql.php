@@ -15,6 +15,7 @@ class Mysql extends Adapter {
     public function begin() {
         $this->exec('SET AUTOCOMMIT = 0');
         $this->exec('START TRANSACTION');
+        $this->in_transaction = true;
     }
 
     /**
@@ -26,6 +27,7 @@ class Mysql extends Adapter {
     public function rollback() {
         $this->exec('ROLLBACK');
         $this->exec('SET AUTOCOMMIT = 1');
+        $this->in_transaction = false;
     }
 
     /**
@@ -37,6 +39,7 @@ class Mysql extends Adapter {
     public function commit() {
         $this->exec('COMMIT');
         $this->exec('SET AUTOCOMMIT = 1');
+        $this->in_transaction = false;
     }
 
     /**

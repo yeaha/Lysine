@@ -67,7 +67,7 @@ abstract class Adapter implements IAdapter {
      * @return void
      */
     public function __destruct() {
-        if ($this->in_transaction) $this->rollback();
+        while ($this->in_transaction) $this->rollback();
     }
 
     /**
