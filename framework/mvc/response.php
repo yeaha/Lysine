@@ -1,13 +1,15 @@
 <?php
 namespace Lysine\MVC;
 
+use Lysine\Utils\Singleton;
+
 /**
  * http返回数据封装
  *
  * @package MVC
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Response {
+class Response extends Singleton {
     static protected $status = array(
         100 => 'HTTP/1.1 100 Continue',
         101 => 'HTTP/1.1 101 Switching Protocols',
@@ -50,6 +52,24 @@ class Response {
         504 => 'HTTP/1.1 504 Gateway Time-out',
     );
 
+    protected $code = 200;
+
+    protected $header = array();
+
+    protected $body;
+
+    public function reset() {
+    }
+
+    public function setCode($code) {
+    }
+
+    public function setHeader($header) {
+    }
+
+    public function addHeader($header) {
+    }
+
     static public function httpStatus($code) {
         return isset(self::$status[$code]) ? self::$status[$code] : false;
     }
@@ -74,6 +94,6 @@ class Response_Redirect {
     public function __toString() {
         header(Response::httpStatus($this->code));
         header('Location: '. $this->url);
-        return null;
+        return '';
     }
 }
