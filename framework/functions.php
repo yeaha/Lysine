@@ -60,28 +60,31 @@ function storage($name = null) {
     return call_user_func_array($pool, $args);
 }
 
+use Lysine\Storage\DB\Expr;
 function dbexpr($expr) {
-    return new \Lysine\Storage\DB\Expr($expr);
+    if ($expr instanceof Expr) return $expr;
+    return new Expr($expr);
 }
 
+use Lysine\Storage\DB\Adapter\Pgsql;
 // 把postgresql数组转换为php数组
 function pg_decode_array($pg_array) {
-    return \Lysine\Storage\DB\Adapter\Pgsql::decodeArray($pg_array);
+    return Pgsql::decodeArray($pg_array);
 }
 
 // 把php数组转换为postgresql数组
 function pg_encode_array($php_array) {
-    return \Lysine\Storage\DB\Adapter\Pgsql::encodeArray($php_array);
+    return Pgsql::encodeArray($php_array);
 }
 
 // 把postgresql hstore数据转换为php数组
 function pg_decode_hstore($hstore) {
-    return \Lysine\Storage\DB\Adapter\Pgsql::decodeHstore($hstore);
+    return Pgsql::decodeHstore($hstore);
 }
 
 // 把转换php数组为postgresql hstore数据
 function pg_encode_hstore($php_array, $new_style = false) {
-    return \Lysine\Storage\DB\Adapter\Pgsql::encodeHstore($php_array, $new_style);
+    return Pgsql::encodeHstore($php_array, $new_style);
 }
 
 function url() {
