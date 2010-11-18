@@ -12,6 +12,11 @@ use Lysine\Utils\Singleton;
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 class Pool extends Singleton {
+    // 生成存储服务实例之前
+    const BEFORE_CREATE_INSTANCE_EVENT = 'before create instance event';
+    // 生成存储服务实例之后
+    const AFTER_CREATE_INSTANCE_EVENT = 'after create instance event';
+
     /**
      * 存储服务配置路径
      */
@@ -89,9 +94,16 @@ class Pool extends Singleton {
         if (!$config)
             throw StorageError::undefined_storage($name);
 
+        fire_event($this, self::BEFORE_CREATE_INSTANCE_EVENT, array($name, $config));
+
         $class = $config['class'];
         unset($config['class']);
-        return $this->storages[$name] = new $class($config);
+
+        $instance = new $class($config);
+
+        fire_event($this, self::AFTER_CREATE_INSTANCE_EVENT, array($instance, $name, $config));
+
+        return $this->storages[$name] = $instance;
     }
 
     /**
