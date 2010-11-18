@@ -1,40 +1,66 @@
 <?php
-/**
- * 这个redis类使用了Predis库实现
- * 这里仅仅重新包装构造函数，以适应Storage\Pool的构造要求
- *
- * Predis源代码在 https://github.com/nrk/predis/
- * 使用这个类之前需要先自行载入Predis
- *
- * storage pool配置样例：
- *
- * array(
- *     'storage' => array(
- *         'pool' => array(
- *             'redis' => array(
- *                 'class' => 'Lysine\Storage\Redis',
- *                 'parameters' => array(
- *                     'host' => '127.0.0.1',
- *                     'port' => 6379,
- *                     'database' => 12
- *                 ),
- *                 'clientOptions' => array(
- *                     // 参考Predis
- *                 ),
- *             ),
- *         ),
- *     ),
- * );
- */
 namespace Lysine\Storage;
 
 use Lysine\IStorage;
+use Lysine\StorageError;
 
-class Redis extends \Predis\Client implements IStorage {
+/**
+ * Redis数据库封装
+ * 使用redis extension (https://github.com/owlient/phpredis)
+ * 用装饰模式封装，使用方法参考redis extension网站
+ *
+ * @uses IStorage
+ * @package Storage
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
+class Redis implements IStorage {
+    private $handler;
+
+    private $config = array(
+        'host' => '127.0.0.1',
+        'port' => 6379,
+        'timeout' => 0,
+     // 'password' => 'your password',
+     // 'database' => 0,    // dbindex, the database number to switch to
+    );
+
     public function __construct(array $config) {
-        $parameters = isset($config['parameters']) ? $config['parameters'] : null;
-        $clientOptions = isset($config['clientOptions']) ? $config['clientOptions'] : null;
+        if (!extension_loaded('redis'))
+            throw StorageError::require_extension('redis');
 
-        parent::__construct($parameters, $clientOptions);
+        if ($config) $this->config = array_merge($this->config, $config);
+    }
+
+    public function __call($fn, $args) {
+        if (!$this->isConnected()) $this->connect();
+        return call_user_func_array(array($this->handler, $fn), $args);
+    }
+
+    public function isConnected() {
+        return $this->handler && $this->handler instanceof \Redis;
+    }
+
+    public function connect() {
+        if ($this->isConnected()) return $this;
+
+        $config = $this->config;
+        $handler = new \Redis;
+
+        if (!$handler->connect($config['host'], $config['port'], $config['timeout']))
+            throw new StorageError('Connect redis server failed');
+
+        if (isset($config['password']) && !$handler->auth($config['password']))
+            throw new StorageError('Invalid password');
+
+        if (isset($config['database']) && !$handler->select($config['database']))
+            throw new StorageError('Select database['. $config['database'] .'] failed');
+
+        $this->handler = $handler;
+        return $this;
+    }
+
+    public function disconnect() {
+        $this->handler = null;
+        return $this;
     }
 }
