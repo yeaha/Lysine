@@ -39,7 +39,7 @@ class Application extends Singleton {
      * @return void
      */
     protected function __construct() {
-        spl_autoload_register(array($this, 'autoload'));
+        spl_autoload_register(array($this, 'loadClass'));
     }
 
     /**
@@ -98,7 +98,7 @@ class Application extends Singleton {
         if (!is_callable($loader))
             throw Error::not_callable('Application loader');
 
-        spl_autoload_unregister(array($this, 'autoload'));
+        spl_autoload_unregister(array($this, 'loadClass'));
         spl_autoload_register($loader, $throw, $prepend);
         return $this;
     }
@@ -111,10 +111,10 @@ class Application extends Singleton {
      * \Controller\User_Login => controller/user.php
      *
      * @param string $class
-     * @access protected
+     * @access public
      * @return boolean
      */
-    protected function autoload($class) {
+    public function loadClass($class) {
         $pos = strpos($class, '_', strrpos($class, '\\'));
         $find = ($pos === false) ? $class : substr($class, 0, $pos);
         $find = str_replace('\\', '/', strtolower($find)) .'.php';
