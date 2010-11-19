@@ -9,7 +9,7 @@ class Memcached extends Cache {
 
     protected $default_server = array('127.0.0.1', 11211);
 
-    protected $life_time = 0;
+    protected $life_time = 300;
 
     public function __construct(array $config) {
         if (!extension_loaded('memcached'))

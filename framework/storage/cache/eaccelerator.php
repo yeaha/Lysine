@@ -5,7 +5,7 @@ use Lysine\Error;
 use Lysine\Storage\Cache;
 
 class Eaccelerator extends Cache {
-    protected $life_time = 60;
+    protected $life_time = 300;
 
     public function __construct(array $config) {
         if (!extension_loaded('eaccelerator'))
