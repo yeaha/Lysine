@@ -118,6 +118,8 @@ class Response extends Singleton {
             list($value, $expire, $path, $domain, $secure, $httponly) = $config;
             setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
         }
+
+        return $this;
     }
 
     public function setBody($body) {
@@ -126,8 +128,6 @@ class Response extends Singleton {
     }
 
     public function __toString() {
-        $this->sendHeader();
-
         // head方法不需要向客户端返回结果
         if (req()->isHEAD()) return '';
 
