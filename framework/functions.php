@@ -1,26 +1,31 @@
 <?php
+use Lysine\MVC;
+use Lysine\Storage\DB\Adapter\Pgsql;
+use Lysine\Storage\DB\Expr;
+use Lysine\Utils\Events;
+
 if (!function_exists('app')) {
     function app() {
-        return \Lysine\MVC\Application::instance();
+        return MVC\Application::instance();
     }
 }
 
 if (!function_exists('req')) {
     function req() {
-        return \Lysine\MVC\Request::instance();
+        return MVC\Request::instance();
     }
 }
 
 if (!function_exists('resp')) {
     function resp() {
-        return \Lysine\MVC\Response::instance();
+        return MVC\Response::instance();
     }
 }
 
 if (!function_exists('render_view')) {
     function render_view($file, $vars = null) {
         static $view;
-        if (!$view) $view = new \Lysine\MVC\View;
+        if (!$view) $view = new MVC\View;
         return $view->reset()->render($file, $vars);
     }
 }
@@ -85,13 +90,11 @@ function storage($name = null) {
     return call_user_func_array($pool, $args);
 }
 
-use Lysine\Storage\DB\Expr;
 function dbexpr($expr) {
     if ($expr instanceof Expr) return $expr;
     return new Expr($expr);
 }
 
-use Lysine\Storage\DB\Adapter\Pgsql;
 // 把postgresql数组转换为php数组
 function pg_decode_array($pg_array) {
     return Pgsql::decodeArray($pg_array);
@@ -192,22 +195,22 @@ function array_set(&$target, $path, $val) {
 // 触发对象事件
 function fire_event($obj, $event, $args = null) {
     $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
-    return \Lysine\Utils\Events::instance()->fire($obj, $event, $args);
+    return Events::instance()->fire($obj, $event, $args);
 }
 
 // 监听对象事件
 function listen_event($obj, $event, $callback) {
-    return \Lysine\Utils\Events::instance()->listen($obj, $event, $callback);
+    return Events::instance()->listen($obj, $event, $callback);
 }
 
 // 订阅类事件
 function subscribe_event($class, $callback) {
-    return \Lysine\Utils\Events::instance()->subscribe($class, $callback);
+    return Events::instance()->subscribe($class, $callback);
 }
 
 // 取消监听事件
 function clear_event($obj, $event = null) {
-    return \Lysine\Utils\Events::instance()->clear($obj, $event);
+    return Events::instance()->clear($obj, $event);
 }
 
 function start_with($haystack, $needle, $case_insensitive = false) {
