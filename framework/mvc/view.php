@@ -62,7 +62,10 @@ class View {
      */
     protected $block_config = array();
 
-    public function __construct(array $config) {
+    public function __construct(array $config = null) {
+        if ( !$config = ($config ?: cfg('app', 'view')) )
+            throw new Error('Invalid View config');
+
         foreach ($config as $key => $val)
             $this->$key = $val;
     }

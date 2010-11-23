@@ -104,15 +104,15 @@ class Router extends Router_Abstract {
     /**
      * 构造函数
      *
+     * @param array $config
      * @access public
      * @return void
      */
-    public function __construct() {
-        $cfg = cfg('app', 'router');
-        $cfg = is_array($cfg) ? $cfg : array();
+    public function __construct(array $config = null) {
+        $config = ($config ?: cfg('app', 'router')) ?: array();
 
-        if (isset($cfg['rewrite'])) $this->dispatch_rewrite = $cfg['rewrite'];
-        if (isset($cfg['namespace'])) $this->namespace = $cfg['namespace'];
+        if (isset($config['rewrite'])) $this->dispatch_rewrite = $config['rewrite'];
+        if (isset($config['namespace'])) $this->namespace = $config['namespace'];
     }
 
     /**
