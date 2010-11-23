@@ -25,6 +25,7 @@
 namespace Lysine\MVC;
 
 use Lysine\HttpError;
+use Lysine\MVC\Response;
 
 /**
  * http路由基类
@@ -243,7 +244,7 @@ class Router extends Router_Abstract {
 
         fire_event($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
 
-        // head方法不需要向客户端返回结果
-        return $request->isHEAD() ? null : $resp;
+        if ($resp instanceof Response) return $resp;
+        return resp()->setBody($resp);
     }
 }

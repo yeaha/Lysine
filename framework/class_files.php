@@ -7,7 +7,6 @@ return array(
     'Lysine\MVC\Application' => './mvc/application.php',
     'Lysine\MVC\Request' => './mvc/request.php',
     'Lysine\MVC\Response' => './mvc/response.php',
-    'Lysine\MVC\Response_Redirect' => './mvc/response.php',
     'Lysine\MVC\Router' => './mvc/router.php',
     'Lysine\MVC\Router_Abstract' => './mvc/router.php',
     'Lysine\MVC\View' => './mvc/view.php',

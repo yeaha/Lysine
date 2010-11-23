@@ -56,44 +56,85 @@ class Response extends Singleton {
 
     protected $header = array();
 
+    protected $session = array();
+
+    protected $cookie = array();
+
     protected $body;
 
     public function reset() {
+        $this->code = 200;
+        $this->header = $this->cookie = $this->session = array();
+        $this->body = null;
+        return $this;
     }
 
     public function setCode($code) {
+        $this->code = $code;
+        return $this;
     }
 
-    public function setHeader($header) {
+    public function setCookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false) {
+        $this->cookie[$name] = array($value, $expire, $path, $domain, $secure, $httponly);
+        return $this;
     }
 
-    public function addHeader($header) {
+    public function setSession($name, $val) {
+        $this->session[$name] = $val;
+        return $this;
+    }
+
+    public function setHeader($name, $val = null) {
+        $this->header[$name] = $val;
+        return $this;
+    }
+
+    public function setContentType($type) {
+        if (is_array($type)) $type = implode(',', $type);
+        $this->setHeader('Content-Type', $type);
+        return $this;
+    }
+
+    public function sendHeader() {
+        if (is_integer($this->code) && $this->code != 200) {
+            if ($status = self::httpStatus($this->code))
+                header($status);
+        }
+
+        foreach ($this->header as $name => $value) {
+            $header = ($value === null)
+                    ? $name
+                    : $name .': '. $value;
+            header($header);
+        }
+
+        if ($this->session) {
+            if (!isset($_SESSION)) session_start();
+            foreach ($this->session as $name => $val)
+                $_SESSION[$name] = $val;
+        }
+
+        foreach ($this->cookie as $name => $config) {
+            list($value, $expire, $path, $domain, $secure, $httponly) = $config;
+            setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+        }
+    }
+
+    public function setBody($body) {
+        $this->body = $body;
+        return $this;
+    }
+
+    public function __toString() {
+        $this->sendHeader();
+
+        // head方法不需要向客户端返回结果
+        if (req()->isHEAD()) return '';
+
+        return $this->body ?: '';
     }
 
     static public function httpStatus($code) {
         return isset(self::$status[$code]) ? self::$status[$code] : false;
-    }
-}
-
-/**
- * Http重定向对象
- * 返回此对象实例给app
- *
- * @package MVC
- * @author yangyi <yangyi.cn.gz@gmail.com>
- */
-class Response_Redirect {
-    protected $url;
-    protected $code;
-
-    public function __construct($url, $code = 303/* See other */) {
-        $this->url = $url;
-        $this->code = $code;
-    }
-
-    public function __toString() {
-        header(Response::httpStatus($this->code));
-        header('Location: '. $this->url);
-        return '';
     }
 }

@@ -8,13 +8,28 @@ function cfg($path = null) {
     return \Lysine\Config::get($path);
 }
 
-function req() {
-    static $instance;
-    if (!$instance) {
-        $class = cfg('app', 'request_class');
-        $instance = $class ? new $class() : \Lysine\MVC\Request::instance();
+if (!function_exists('req')) {
+    function req() {
+        return \Lysine\MVC\Request::instance();
     }
-    return $instance;
+}
+
+if (!function_exists('resp')) {
+    function resp() {
+        return \Lysine\MVC\Response::instance();
+    }
+}
+
+function set_header($name, $val = null) {
+    return resp()->setHeader($name, $val);
+}
+
+function set_session($name, $val) {
+    return resp()->setSession($name, $val);
+}
+
+function set_cookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false) {
+    return resp()->setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
 }
 
 function get($key = null, $default = false) {
@@ -45,7 +60,7 @@ function server($key = null, $default = false) {
 }
 
 function session() {
-    if (!isset($_SESSION)) return false;
+    if (!isset($_SESSION)) session_start();
     return array_get($_SESSION, func_get_args());
 }
 

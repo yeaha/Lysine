@@ -3,7 +3,6 @@ namespace Lysine\MVC;
 
 use Lysine\Error;
 use Lysine\HttpError;
-use Lysine\MVC\Response_Redirect;
 use Lysine\MVC\Router;
 use Lysine\MVC\Router_Abstract;
 use Lysine\Utils\Singleton;
@@ -148,10 +147,10 @@ class Application extends Singleton {
      * @param string $url
      * @param int $code
      * @access public
-     * @return Lysine\MVC\Response_Redirect
+     * @return Lysine\MVC\Response
      */
     public function redirect($url, $code = 303) {
-        return new Response_Redirect($url, $code);
+        return resp()->reset()->setCode($code)->setHeader('Location', $url);
     }
 
     /**
