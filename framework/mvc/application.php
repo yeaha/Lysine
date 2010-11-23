@@ -150,7 +150,7 @@ class Application extends Singleton {
      * @return Lysine\MVC\Response
      */
     public function redirect($url, $code = 303) {
-        return resp()->reset()->setCode($code)->setHeader('Location', $url);
+        return resp()->setCode($code)->setHeader('Location', $url)->setBody(null);
     }
 
     /**
