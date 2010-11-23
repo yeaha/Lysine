@@ -1,11 +1,4 @@
 <?php
-function render_view($view_name, array $vars = null) {
-    static $view;
-    if (!$view) $view = new Lysine\MVC\View(cfg('app', 'view'));
-
-    return $view->reset()->render($view_name, $vars);
-}
-
 function __on_exception($exception) {
     $code = $exception instanceof \Lysine\HttpError
           ? $exception->getCode()
