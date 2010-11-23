@@ -69,6 +69,14 @@ function cookie() {
     return array_get($_COOKIE, func_get_args());
 }
 
+if (!function_exists('render_view')) {
+    function render_view($file, $vars = null) {
+        static $view;
+        if (!$view) $view = new \Lysine\MVC\View;
+        return $view->reset()->render($file, $vars);
+    }
+}
+
 function storage($name = null) {
     $pool = \Lysine\Storage\Pool::instance();
     $args = func_get_args();
