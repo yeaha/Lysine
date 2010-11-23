@@ -232,16 +232,22 @@ class View {
      *
      * @param string $name
      * @param string $config
+     * @param boolean $empty
      * @access protected
      * @return void
      */
-    protected function block($name, $config = 'replace') {
+    protected function block($name, $config = null, $empty = false) {
         // 如果上一个block忘记关闭，这里先关闭掉
         if ($this->current_block) $this->endblock();
+
+        $config = $config ?: 'replace';
 
         $this->block_config[$name] = $config;
         $this->current_block = $name;
         ob_start();
+
+        // 生成一个空区域
+        if ($empty) $this->endblock();
     }
 
     /**
