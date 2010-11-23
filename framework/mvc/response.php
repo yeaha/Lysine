@@ -95,7 +95,7 @@ class Response extends Singleton {
         return $this;
     }
 
-    public function sendHeader() {
+    public function sendHeader($only_header = false) {
         if (is_integer($this->code) && $this->code != 200) {
             if ($status = self::httpStatus($this->code))
                 header($status);
@@ -107,17 +107,22 @@ class Response extends Singleton {
                     : $name .': '. $value;
             header($header);
         }
+        $this->header = array();
+
+        if ($only_header) return $this;
 
         if ($this->session) {
             if (!isset($_SESSION)) session_start();
             foreach ($this->session as $name => $val)
                 $_SESSION[$name] = $val;
+            $this->session = array();
         }
 
         foreach ($this->cookie as $name => $config) {
             list($value, $expire, $path, $domain, $secure, $httponly) = $config;
             setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
         }
+        $this->cookie = array();
 
         return $this;
     }
@@ -131,7 +136,7 @@ class Response extends Singleton {
         // head方法不需要向客户端返回结果
         if (req()->isHEAD()) return '';
 
-        return $this->body ?: '';
+        return (string)$this->body;
     }
 
     static public function httpStatus($code) {
