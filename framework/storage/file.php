@@ -26,6 +26,7 @@ class File implements IStorage {
 
     public function __construct(array $config) {
         $this->filename = strftime($config['filename'], time());
+        if (isset($config['buffer_size'])) $this->buffer_size = (int)$config['buffer_size'];
     }
 
     public function __destruct() {
