@@ -2,6 +2,7 @@
 namespace Lysine {
     use Lysine\ORM;
     use Lysine\MVC\Response;
+    use Lysine\HttpError;
 
     const DIR = __DIR__;
 
@@ -265,6 +266,17 @@ namespace Lysine {
 
     spl_autoload_register('Lysine\autoload');
     require DIR .'/functions.php';
+
+    set_exception_handler(function($exception) {
+        $code = $exception instanceof HttpError
+              ? $exception->getCode()
+              : 500;
+
+        if ($status = Response::httpStatus($code)) header($status);
+        header('X-Exception-Message: '. $exception->getMessage());
+        header('X-Exception-Code: '. $exception->getCode());
+        die(1);
+    });
 }
 
 namespace Lysine\MVC {
