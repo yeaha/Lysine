@@ -264,7 +264,7 @@ namespace Lysine {
     spl_autoload_register('Lysine\autoload');
     require __DIR__ .'/functions.php';
 
-    set_exception_handler(function($exception) {
+    function __on_exception($exception) {
         $code = $exception instanceof HttpError
               ? $exception->getCode()
               : 500;
@@ -272,8 +272,11 @@ namespace Lysine {
         header( Response::httpStatus($code) ?: Response::httpStatus(500) );
         header('X-Exception-Message: '. $exception->getMessage());
         header('X-Exception-Code: '. $exception->getCode());
-        die(1);
-    });
+
+        return $code;
+    }
+
+    set_exception_handler('\Lysine\__on_exception');
 }
 
 namespace Lysine\MVC {
