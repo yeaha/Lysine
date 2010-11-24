@@ -15,7 +15,7 @@ set_exception_handler(function($exception) {
 });
 
 set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) {
-    throw new Error($errstr, $errno, null, array(
+    throw new \Lysine\Error($errstr, $errno, null, array(
         'file' => $errfile,
         'line' => $errline,
     ));
