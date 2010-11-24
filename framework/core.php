@@ -1,5 +1,7 @@
 <?php
 namespace Lysine {
+    defined('DEBUG') or define('DEBUG', true);
+
     use Lysine\ORM;
     use Lysine\MVC\Response;
     use Lysine\HttpError;
@@ -270,8 +272,13 @@ namespace Lysine {
               : 500;
 
         header( Response::httpStatus($code) ?: Response::httpStatus(500) );
-        header('X-Exception-Message: '. $exception->getMessage());
-        header('X-Exception-Code: '. $exception->getCode());
+
+        if (DEBUG) {
+            header('X-Exception-Message: '. $exception->getMessage());
+            header('X-Exception-Code: '. $exception->getCode());
+            header('X-Exception-File: '. $exception->getFile());
+            header('X-Exception-Line: '. $exception->getLine());
+        }
 
         return $code;
     }
