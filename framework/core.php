@@ -4,8 +4,6 @@ namespace Lysine {
     use Lysine\MVC\Response;
     use Lysine\HttpError;
 
-    const DIR = __DIR__;
-
     class Config {
         static protected $config = array();
 
@@ -251,12 +249,12 @@ namespace Lysine {
     function autoload($class) {
         static $files = null;
         if ($files === null)
-            $files = array_change_key_case(require \Lysine\DIR . '/class_files.php');
+            $files = array_change_key_case(require __DIR__ . '/class_files.php');
 
         $class = strtolower(ltrim($class, '\\'));
 
         if (!array_key_exists($class, $files)) return false;
-        $file = \Lysine\DIR .'/'. $files[$class];
+        $file = __DIR__ .'/'. $files[$class];
         if (!is_readable($file)) return false;
 
         include $file;
@@ -264,7 +262,7 @@ namespace Lysine {
     }
 
     spl_autoload_register('Lysine\autoload');
-    require DIR .'/functions.php';
+    require __DIR__ .'/functions.php';
 
     set_exception_handler(function($exception) {
         $code = $exception instanceof HttpError
