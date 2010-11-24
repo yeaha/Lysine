@@ -12,10 +12,16 @@ class Profiler extends Singleton {
         $this->stack[] = array($name, microtime(true));
     }
 
-    public function end() {
-        if (!$this->stack) return;
+    public function end($all = false) {
+        if (!$this->stack) return false;
+
+        while ($all) {
+            if (!$this->end(false)) return true;
+        }
+
         list($name, $start_time) = array_pop($this->stack);
         $this->time[$name] = microtime(true) - $start_time;
+        return true;
     }
 
     public function getUseTime($name = null) {
