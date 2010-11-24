@@ -194,7 +194,9 @@ function array_set(&$target, $path, $val) {
 
 // 触发对象事件
 function fire_event($obj, $event, $args = null) {
-    $args = is_array($args) ? $args : array_slice(func_get_args(), 2);
+    $args = ($args === null)
+          ? array()
+          : (is_array($args) ? $args : array_slice(func_get_args(), 2));
     return Events::instance()->fire($obj, $event, $args);
 }
 
