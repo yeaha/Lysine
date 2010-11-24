@@ -253,8 +253,7 @@ namespace Lysine {
         if ($files === null)
             $files = array_change_key_case(require \Lysine\DIR . '/class_files.php');
 
-        $class = strtolower($class);
-        if (substr($class, 0, 1) == '\\') $class = ltrim($class, '\\');
+        $class = strtolower(ltrim($class, '\\'));
 
         if (!array_key_exists($class, $files)) return false;
         $file = \Lysine\DIR .'/'. $files[$class];
