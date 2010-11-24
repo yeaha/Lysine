@@ -272,7 +272,7 @@ namespace Lysine {
               ? $exception->getCode()
               : 500;
 
-        if ($status = Response::httpStatus($code)) header($status);
+        header( Response::httpStatus($code) ?: Response::httpStatus(500) );
         header('X-Exception-Message: '. $exception->getMessage());
         header('X-Exception-Code: '. $exception->getCode());
         die(1);
