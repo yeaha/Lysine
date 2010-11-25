@@ -1,15 +1,25 @@
 <?php
-require_once __DIR__ .'/../../../framework/core.php';
-
 define('ROOT_DIR', realpath(__DIR__ .'/../'));
 
-Lysine\Config::import(require_once ROOT_DIR .'/config/_config.php');
+require_once __DIR__ .'/../../../framework/core.php';
 
-require_once ROOT_DIR .'/lib/functions.php';
-set_exception_handler('__on_exception');
-set_error_handler('__on_error');
+Lysine\Utils\Profiler::instance()->start('__MAIN__');
+Lysine\Config::import(require_once ROOT_DIR .'/config/_config.php');
 
 app()->includePath(ROOT_DIR .'/app');
 
 use Lysine\MVC;
 listen_event(app()->getRouter(), MVC\BEFORE_DISPATCH_EVENT, array(Model\Rbac::instance(), 'check'));
+
+set_exception_handler(function($exception) {
+    $code = \Lysine\__on_exception($exception);
+    require_once ROOT_DIR .'/public/_error/500.php';
+    die(1);
+});
+
+set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) {
+    throw new \Lysine\Error($errstr, $errno, null, array(
+        'file' => $errfile,
+        'line' => $errline,
+    ));
+});
