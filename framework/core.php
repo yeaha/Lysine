@@ -276,8 +276,9 @@ namespace Lysine {
         if (DEBUG) {
             header('X-Exception-Message: '. $exception->getMessage());
             header('X-Exception-Code: '. $exception->getCode());
-            header('X-Exception-File: '. $exception->getFile());
-            header('X-Exception-Line: '. $exception->getLine());
+
+            foreach (explode("\n", $exception->getTraceAsString()) as $index => $line)
+                header(sprintf('X-Exception-Trace-%d: %s', $index, $line));
         }
 
         return $code;
