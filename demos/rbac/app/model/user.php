@@ -177,7 +177,7 @@ class User_Role extends DBData {
      *
      * @var integer
      * @access protected
-     * @primary_key
+     * @primary_key true
      */
     protected $id;
 
