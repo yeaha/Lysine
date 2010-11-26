@@ -104,8 +104,8 @@ class Tag {
         return array($tag, $attributes);
     }
 
-    static public function factory($tag) {
-        list($tag, $attributes) = self::parse($tag);
+    static public function factory($tag, array $attributes = array()) {
+        if (!$attributes) list($tag, $attributes) = self::parse($tag);
         return new static($tag, $attributes);
     }
 }
