@@ -279,6 +279,8 @@ class View {
             unset($this->blocks[$block_name]);
             echo $output;
         }
+
+        return true;
     }
 
     protected function tag($tag, array $attributes = array()) {
