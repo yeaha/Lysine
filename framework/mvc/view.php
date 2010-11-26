@@ -185,7 +185,7 @@ class View {
         if ($this->vars) extract($this->vars);
         include $file;
         // 安全措施，关闭掉忘记关闭的block
-        $this->endblock($all = true);
+        $this->endBlock($all = true);
 
         $output = ob_get_clean();
 
@@ -231,19 +231,13 @@ class View {
      *
      * @param string $name
      * @param string $config
-     * @param boolean $empty
      * @access protected
      * @return void
      */
-    protected function block($name, $config = null, $empty = false) {
-        $config = $config ?: 'replace';
-
+    protected function block($name, $config = 'replace') {
         $this->block_config[$name] = $config;
         $this->block_stack[] = $name;
         ob_start();
-
-        // 生成一个空区域
-        if ($empty) $this->endblock();
     }
 
     /**
@@ -253,11 +247,11 @@ class View {
      * @access protected
      * @return void
      */
-    protected function endblock($all = false) {
+    protected function endBlock($all = false) {
         if (!$this->block_stack) return false;
 
         while ($all) {
-            if (!$this->endblock(false)) return true;
+            if (!$this->endBlock(false)) return true;
         }
 
         $block_name = array_pop($this->block_stack);
@@ -281,6 +275,19 @@ class View {
         }
 
         return true;
+    }
+
+    /**
+     * 直接显示block内容
+     *
+     * @param string $name
+     * @access protected
+     * @return void
+     */
+    protected function showBlock($name) {
+        if (!isset($this->blocks[$name])) return false;
+        echo $this->blocks[$name];
+        unset($this->blocks[$name]);
     }
 
     protected function tag($tag, array $attributes = array()) {
