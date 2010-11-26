@@ -202,11 +202,11 @@ class Router extends Router_Abstract {
         fire_event($this, BEFORE_DISPATCH_EVENT, array($url, $class, $args));
 
         $controller = new $class();
-        if (method_exists($controller, 'beforeRun')) {
-            // 如果beforeRun返回了内容，就直接完成动作
+        if (method_exists($controller, '__before_run')) {
+            // 如果__before_run返回了内容，就直接完成动作
             // 可以在这里进行某些阻断操作
             // 正常的内容不应该通过这里输出
-            $resp = call_user_func_array(array($controller, 'beforeRun'), $args);
+            $resp = call_user_func_array(array($controller, '__before_run'), $args);
             if ($resp) return $resp;
         }
 
@@ -240,7 +240,7 @@ class Router extends Router_Abstract {
         $resp = call_user_func_array(array($controller, $method), $args);
 
         // 这里有机会对输出结果进行进一步处理
-        if (method_exists($controller, 'afterRun')) $controller->afterRun($resp);
+        if (method_exists($controller, '__after_run')) $controller->__after_run($resp);
 
         fire_event($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
 
