@@ -7,6 +7,6 @@
 </head>
 
 <body>
-<?php $this->block('main'); ?><?php $this->endblock(); ?>
+<?php $this->showBlock('main'); ?>
 </body>
 </html>

@@ -9,6 +9,6 @@
 <body>
 <?php $this->includes('_elements/menu'); ?>
 
-<?php $this->block('main'); ?><?php $this->endblock(); ?>
+<?php $this->showBlock('main'); ?>
 </body>
 </html>
