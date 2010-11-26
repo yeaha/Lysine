@@ -115,6 +115,10 @@ function pg_encode_hstore($php_array, $new_style = false) {
     return Pgsql::encodeHstore($php_array, $new_style);
 }
 
+function html_tag($tag) {
+    return \Lysine\Utils\Html\Tag::factory($tag);
+}
+
 function url() {
     static $router_class;
     if (!$router_class) $router_class = get_class(app()->getRouter());
