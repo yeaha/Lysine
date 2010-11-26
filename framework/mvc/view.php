@@ -2,6 +2,7 @@
 namespace Lysine\MVC;
 
 use Lysine\Error;
+use Lysine\Utils\Html\Tag;
 
 class View {
     /**
@@ -281,5 +282,23 @@ class View {
             unset($this->blocks[$block_name]);
             echo $output;
         }
+    }
+
+    protected function tag($tag, array $attributes = array()) {
+        return Tag::factory($tag, $attributes);
+    }
+
+    protected function js($src, $life_time = null) {
+        if ($life_time)
+            $src .= '?'. floor(time() / $life_time);
+
+        return $this->tag('script', array('type' => 'text/javascript', 'src' => $src));
+    }
+
+    protected function css($href, $life_time = null) {
+        if ($life_time)
+            $href .= '?'. floor(time() / $life_time);
+
+        return $this->tag('link', array('type' => 'text/css', 'media' => 'screen', 'href' => $href));
     }
 }
