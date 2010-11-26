@@ -38,12 +38,12 @@ class View {
     protected $vars = array();
 
     /**
-     * 当前区域名
+     * block堆栈
      *
-     * @var string
+     * @var array
      * @access protected
      */
-    protected $current_block;
+    protected $block_stack = array();
 
     /**
      * 保存每个区域生成的数据
@@ -81,9 +81,7 @@ class View {
         $this->extend_file = null;
         $this->vars = array();
 
-        $this->current_block = null;
-        $this->blocks = array();
-        $this->block_config = array();
+        $this->blocks = $this->block_config = $this->block_stack = array();
 
         return $this;
     }
@@ -187,7 +185,7 @@ class View {
         if ($this->vars) extract($this->vars);
         include $file;
         // 安全措施，关闭掉忘记关闭的block
-        if ($this->current_block) $this->endblock();
+        $this->endblock($all = true);
 
         $output = ob_get_clean();
 
@@ -238,13 +236,10 @@ class View {
      * @return void
      */
     protected function block($name, $config = null, $empty = false) {
-        // 如果上一个block忘记关闭，这里先关闭掉
-        if ($this->current_block) $this->endblock();
-
         $config = $config ?: 'replace';
 
         $this->block_config[$name] = $config;
-        $this->current_block = $name;
+        $this->block_stack[] = $name;
         ob_start();
 
         // 生成一个空区域
@@ -258,12 +253,14 @@ class View {
      * @access protected
      * @return void
      */
-    protected function endblock() {
-        if (!$this->current_block) return false;
+    protected function endblock($all = false) {
+        if (!$this->block_stack) return false;
 
-        $block_name = $this->current_block;
-        $this->current_block = null;
+        while ($all) {
+            if (!$this->endblock(false)) return true;
+        }
 
+        $block_name = array_pop($this->block_stack);
         $output = ob_get_clean();
 
         // 是否有继承上来的block
@@ -275,8 +272,8 @@ class View {
             }
         }
 
-        // 如果继承了其它视图，把输出内容放到$this->blocks内
-        if ($this->extend_file) {
+        // 如果继承了其它视图并且没有嵌套block，把输出内容放到$this->blocks内
+        if ($this->extend_file && !$this->block_stack) {
             $this->blocks[$block_name] = $output;
         } else {
             unset($this->blocks[$block_name]);
