@@ -158,11 +158,10 @@ class View {
         if (!isset($pathinfo['extension']) || $pathinfo['extension'] != $ext)
             $file .= '.'. $ext;
 
-        $file = realpath($file);
-        if (!$file || !is_readable($file))
+        if (!$fullname = realpath($file))
             throw Error::file_not_found($file);
 
-        return $file;
+        return $fullname;
     }
 
     /**
