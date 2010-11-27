@@ -24,9 +24,6 @@ class Memcached extends Cache {
             $memcached->addServer($host, $port);
         }
 
-        if (!$memcached->getStats())
-            throw new Error('Memcached connect failed!', 0, null, array('config' => $config));
-
         if (isset($config['life_time'])) $this->life_time = $config['life_time'];
         if (isset($config['prefix'])) $this->setPrefix($config['prefix']);
 
