@@ -120,7 +120,7 @@ class Application extends Singleton {
 
         foreach ($this->include_path as $path) {
             $file = $path .'/'. $find;
-            if (!is_readable($file)) continue;
+            if (!is_file($file)) continue;
 
             include $file;
             return class_exists($class, false) || interface_exists($class, false);

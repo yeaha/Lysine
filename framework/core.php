@@ -249,6 +249,8 @@ namespace Lysine {
     }
 
     function autoload($class) {
+        if (!in_namespace($class, 'Lysine')) return false;
+
         static $files = null;
         if ($files === null)
             $files = array_change_key_case(require __DIR__ . '/class_files.php');
@@ -257,7 +259,6 @@ namespace Lysine {
 
         if (!array_key_exists($class, $files)) return false;
         $file = __DIR__ .'/'. $files[$class];
-        if (!is_readable($file)) return false;
 
         include $file;
         return class_exists($class, false) || interface_exists($class, false);
