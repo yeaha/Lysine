@@ -260,7 +260,7 @@ namespace Lysine {
         if (!array_key_exists($class, $files)) return false;
         $file = __DIR__ .'/'. $files[$class];
 
-        include $file;
+        require $file;
         return class_exists($class, false) || interface_exists($class, false);
     }
 

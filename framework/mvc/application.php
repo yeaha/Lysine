@@ -122,7 +122,7 @@ class Application extends Singleton {
             $file = $path .'/'. $find;
             if (!is_file($file)) continue;
 
-            include $file;
+            require $file;
             return class_exists($class, false) || interface_exists($class, false);
         }
 

@@ -1,5 +1,5 @@
 <?php
-require_once '../config/boot.php';
+require '../config/boot.php';
 
 $resp = app()->run();
 

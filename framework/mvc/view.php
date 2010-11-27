@@ -182,7 +182,7 @@ class View {
         ob_start();
 
         if ($this->vars) extract($this->vars);
-        include $file;
+        require $file;
         // 安全措施，关闭掉忘记关闭的block
         $this->endBlock($all = true);
 
@@ -210,7 +210,7 @@ class View {
         $vars = $vars ? array_merge($this->vars, $vars) : $this->vars;
         if ($vars) extract($vars);
 
-        return $once ? include_once($file) : include($file);
+        return $once ? require_once($file) : require($file);
     }
 
     /**
