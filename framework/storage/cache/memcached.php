@@ -17,20 +17,21 @@ class Memcached extends Cache {
 
         $memcached = new \Memcached();
 
-        if ($server = array_get($config, 'server')) {
-            call_user_func_array(array($memcached, 'addServer'), $server);
-        } elseif ($servers = array_get($config, 'servers')) {
-            $memcached->addServers($servers);
+        if (isset($config['servers'])) {
+            $memcached->addServers($config['servers']);
         } else {
-            call_user_func_array(array($memcached, 'addServer'), $this->default_server);
+            list($host, $port) = (array_get($config, 'server') ?: $this->default_server);
+            $memcached->addServer($host, $port);
         }
 
-        if (isset($config['life_time'])) $this->life_time = $config['life_time'];
+        if (!$memcached->getStats())
+            throw new Error('Memcached connect failed!', 0, null, array('config' => $config));
 
+        if (isset($config['life_time'])) $this->life_time = $config['life_time'];
         if (isset($config['prefix'])) $this->setPrefix($config['prefix']);
 
-        if ($options = array_get($config, 'options')) {
-            foreach ($options as $key => $val)
+        if (isset($config['options'])) {
+            foreach ($config['options'] as $key => $val)
                 $memcache->setOption($key, $val);
         }
 
