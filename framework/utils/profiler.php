@@ -24,7 +24,7 @@ class Profiler extends Singleton {
         return true;
     }
 
-    public function getUseTime($name = null) {
+    public function getRuntime($name = null) {
         if ($name === null) return $this->time;
         return isset($this->time[$name]) ? $this->time[$name] : false;
     }
