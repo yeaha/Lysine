@@ -277,7 +277,13 @@ namespace Lysine {
         header( Response::httpStatus($code) ?: Response::httpStatus(500) );
 
         if (DEBUG) {
-            header('X-Exception-Message: '. $exception->getMessage());
+            $message = $exception->getMessage();
+            if (strpos($message, "\n") !== false) {
+                $lines = explode("\n", $message);
+                $message = $lines[0];
+            }
+
+            header('X-Exception-Message: '. $message);
             header('X-Exception-Code: '. $exception->getCode());
 
             foreach (explode("\n", $exception->getTraceAsString()) as $index => $line)
