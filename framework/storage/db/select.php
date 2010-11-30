@@ -194,7 +194,7 @@ class Select {
      * 只保留from和adapter
      *
      * @access public
-     * @return void
+     * @return Lysine\Storage\DB\Select
      */
     public function reset() {
         $this->cols = $this->where = array();
@@ -202,6 +202,8 @@ class Select {
         $this->limit = $this->offset = $this->union = null;
         $this->key_column = $this->processor = null;
         $this->where_relation = 'AND';
+
+        return $this;
     }
 
     /**
