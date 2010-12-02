@@ -268,7 +268,7 @@ namespace Lysine {
     require __DIR__ .'/functions.php';
 
     function __on_exception($exception) {
-        for ($i = 0, $ii = count(ob_list_handlers()); $i < $ii; $i++) ob_end_clean;
+        for ($i = 0, $ii = count(ob_list_handlers()); $i < $ii; $i++) ob_end_clean();
 
         $code = $exception instanceof HttpError
               ? $exception->getCode()
