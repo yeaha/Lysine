@@ -161,7 +161,7 @@ class Application extends Singleton {
      * @access public
      * @return mixed
      */
-    public function forward($url, array $options = null) {
+    public function forward($url, array $options = array()) {
         return $this->dispatch($url, $options);
     }
 
