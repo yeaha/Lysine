@@ -61,11 +61,19 @@ function put($key = null, $default = false) {
     static $_PUT = null;
 
     if ($_PUT === null) {
-        $length = req()->header('content-length') ?: 2048;
-        $fp = fopen('php://input', 'r');
-        $put = fread($fp, $length);
-        fclose($fp);
-        parse_str($put, $_PUT);
+        if (req()->isPUT()) {
+            if (strtoupper(server('request_method')) == 'PUT') {
+                $length = req()->header('content-length') ?: 2048;
+                $fp = fopen('php://input', 'r');
+                $input = fread($fp, $length);
+                fclose($fp);
+                parse_str($input, $_PUT);
+            } else {
+                $_PUT =& $_POST;
+            }
+        } else {
+            $_PUT = array();
+        }
     }
 
     if ($key === null) return $_PUT;
