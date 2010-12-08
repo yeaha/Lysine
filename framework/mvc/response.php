@@ -70,7 +70,7 @@ class Response extends Singleton {
     }
 
     public function setCode($code) {
-        $this->code = $code;
+        $this->code = (int)$code;
         return $this;
     }
 
