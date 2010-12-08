@@ -60,12 +60,13 @@ class Request extends Singleton {
     public function method() {
         if ($this->method) return $this->method;
 
-        if (!$method = $this->header('x-http-method-override')) {
-            // 某些js库的ajax封装使用这种方式
-            if ($method = $this->post('_method')) unset($_POST['_method']);
-        }
+        $method = strtolower($this->header('x-http-method-override') ?: server('request_method'));
+        if ($method != 'post') return $this->method = $method;
 
-        return $this->method = strtolower( $method ?: $this->server('request_method') );
+        // 某些js库的ajax封装使用这种方式
+        $method = post('_method', $method);
+        unset($_POST['_method']);
+        return $this->method = strtolower($method);
     }
 
     public function requestUri() {
