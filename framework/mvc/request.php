@@ -23,6 +23,10 @@ class Request extends Singleton {
         return post($key, $default);
     }
 
+    public function put($key = null, $default = false) {
+        return put($key, $default);
+    }
+
     public function request($key = null, $default = false) {
         return request($key, $default);
     }

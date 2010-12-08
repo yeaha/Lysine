@@ -57,6 +57,21 @@ function post($key = null, $default = false) {
     return isset($_POST[$key]) ? $_POST[$key] : $default;
 }
 
+function put($key = null, $default = false) {
+    static $_PUT = null;
+
+    if ($_PUT === null) {
+        $length = req()->header('content-length') ?: 2048;
+        $fp = fopen('php://input', 'r');
+        $put = fread($fp, $length);
+        fclose($fp);
+        parse_str($put, $_PUT);
+    }
+
+    if ($key === null) return $_PUT;
+    return isset($_PUT[$key]) ? $_PUT[$key] : $default;
+}
+
 function request($key = null, $default = false) {
     if ($key === null) return $_REQUEST;
     return isset($_REQUEST[$key]) ? $_REQUEST[$key] : $default;
