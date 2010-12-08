@@ -81,8 +81,11 @@ function put($key = null, $default = false) {
 }
 
 function request($key = null, $default = false) {
-    if ($key === null) return $_REQUEST;
-    return isset($_REQUEST[$key]) ? $_REQUEST[$key] : $default;
+    static $request = null;
+    if ($request === null) $request = array_merge(put(), $_REQUEST);
+
+    if ($key === null) return $request;
+    return isset($request[$key]) ? $request[$key] : $default;
 }
 
 function env($key = null, $default = false) {
