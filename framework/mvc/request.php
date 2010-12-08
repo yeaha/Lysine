@@ -52,8 +52,7 @@ class Request extends Singleton {
 
     public function header($key) {
         $skey = 'http_'. str_replace('-', '_', $key);
-        $sval = $this->server($skey);
-        if ($sval) return $sval;
+        if ($sval = $this->server($skey)) return $sval;
 
         return false;
     }
@@ -61,29 +60,22 @@ class Request extends Singleton {
     public function method() {
         if ($this->method) return $this->method;
 
-        $method = $this->header('x-http-method-override');
-        // 某些js库的ajax封装使用这种方式
-        if (!$method) {
-            $method = $this->post('_method');
-            // 不知道去掉这个参数是否画蛇添足，应该问题不大
-            if ($method) unset($_POST['_method']);
+        if (!$method = $this->header('x-http-method-override')) {
+            // 某些js库的ajax封装使用这种方式
+            if ($method = $this->post('_method')) unset($_POST['_method']);
         }
 
-        $this->method = strtolower( $method ?: $this->server('request_method') );
-        return $this->method;
+        return $this->method = strtolower( $method ?: $this->server('request_method') );
     }
 
     public function requestUri() {
         if ($this->requestUri !== null) return $this->requestUri;
 
-        $uri = $this->server('http_x_rewrite_url');
-        if ($uri) return $this->requestUri = $uri;
+        if ($uri = $this->server('http_x_rewrite_url')) return $this->requestUri = $uri;
 
-        $uri = $this->server('request_uri');
-        if ($uri) return $this->requestUri = $uri;
+        if ($uri = $this->server('request_uri')) return $this->requestUri = $uri;
 
-        $uri = $this->server('orig_path_info');
-        if ($uri) {
+        if ($uri = $this->server('orig_path_info')) {
             $query = $this->server('query_string');
             if (!empty($query)) $uri .= '?'. $query;
             return $this->requestUri = $uri;
