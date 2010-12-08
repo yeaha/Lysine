@@ -135,6 +135,8 @@ class Response extends Singleton {
     public function __toString() {
         // head方法不需要向客户端返回结果
         if (req()->isHEAD()) return '';
+        // HTTP/1.1 204 No Content
+        if ($this->code == 204) return '';
 
         return (string)$this->body;
     }
