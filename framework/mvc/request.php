@@ -12,7 +12,7 @@ class Request extends Singleton {
     protected $accept = array();
 
     public function __get($key) {
-        return $this->request($key);
+        return request($key);
     }
 
     public function get($key = null, $default = false) {
@@ -52,7 +52,7 @@ class Request extends Singleton {
 
     public function header($key) {
         $skey = 'http_'. str_replace('-', '_', $key);
-        if ($sval = $this->server($skey)) return $sval;
+        if ($sval = server($skey)) return $sval;
 
         return false;
     }
@@ -72,12 +72,12 @@ class Request extends Singleton {
     public function requestUri() {
         if ($this->requestUri !== null) return $this->requestUri;
 
-        if ($uri = $this->server('http_x_rewrite_url')) return $this->requestUri = $uri;
+        if ($uri = server('http_x_rewrite_url')) return $this->requestUri = $uri;
 
-        if ($uri = $this->server('request_uri')) return $this->requestUri = $uri;
+        if ($uri = server('request_uri')) return $this->requestUri = $uri;
 
-        if ($uri = $this->server('orig_path_info')) {
-            $query = $this->server('query_string');
+        if ($uri = server('orig_path_info')) {
+            $query = server('query_string');
             if (!empty($query)) $uri .= '?'. $query;
             return $this->requestUri = $uri;
         }
@@ -124,7 +124,7 @@ class Request extends Singleton {
 
     protected function _getAccept($key) {
         $result = array();
-        if (!$accept = $this->server($key)) return $result;
+        if (!$accept = server($key)) return $result;
 
         foreach (explode(',', $accept) as $accept) {
             $pos = strpos($accept, ';');
@@ -156,11 +156,11 @@ class Request extends Singleton {
     }
 
     public function referer() {
-        return $this->server('http_referer');
+        return server('http_referer');
     }
 
     public function ip() {
-        $ip = $this->server('http_x_forwarded_for') ?: $this->server('remote_addr');
+        $ip = server('remote_addr');
         if (!function_exists('filter_var')) return $ip;
 
         return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) ?: '0.0.0.0';
