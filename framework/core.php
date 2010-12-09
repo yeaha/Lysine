@@ -1,10 +1,10 @@
 <?php
 namespace Lysine {
-    defined('DEBUG') or define('DEBUG', true);
-
     use Lysine\ORM;
     use Lysine\MVC\Response;
     use Lysine\HttpError;
+
+    defined('DEBUG') or define('DEBUG', true);
 
     class Config {
         static protected $config = array();
