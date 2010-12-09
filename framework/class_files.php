@@ -47,6 +47,7 @@ return array(
     'Lysine\Storage\Mongo' => './storage/mongo.php',
     'Lysine\Storage\Pool' => './storage/pool.php',
     'Lysine\Storage\Redis' => './storage/redis.php',
+    'Lysine\Utils\Curl' => './utils/curl.php',
     'Lysine\Utils\Events' => './utils/events.php',
     'Lysine\Utils\Html\Tag' => './utils/html.php',
     'Lysine\Utils\Injection' => './utils/injection.php',
