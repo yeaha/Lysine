@@ -108,6 +108,14 @@ namespace Lysine\Utils\Curl {
         // 使用post方法模拟put delete
         static public $method_emulate = false;
 
+        public function setAuth($user, $passwd, $type = CURLAUTH_ANY) {
+            $this->setOption(array(
+                CURLOPT_USERPWD => $user .':'. $passwd,
+                CURLOPT_HTTPAUTH => $type,
+            ));
+            return $this;
+        }
+
         protected function isSuccess() {
             $code = $this->getResponseCode();
             return ($code >= 200 && $code < 400);
