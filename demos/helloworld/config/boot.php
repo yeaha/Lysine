@@ -9,8 +9,14 @@ Lysine\Config::import(require ROOT_DIR .'/config/_config.php');
 app()->includePath(ROOT_DIR .'/app');
 
 set_exception_handler(function($exception) {
-    $code = \Lysine\__on_exception($exception);
-    require ROOT_DIR .'/public/_error/500.php';
+    global $argc;
+
+    if (isset($argc)) {  // run in shell
+        echo $exception;
+    } else {
+        $code = \Lysine\__on_exception($exception);
+        require ROOT_DIR .'/public/_error/500.php';
+    }
     die(1);
 });
 
