@@ -96,8 +96,10 @@ class Events extends Singleton {
      * @return integer 事件回调次数
      */
     public function fire($obj, $event, array $args = array()) {
-        $key = $this->keyOf($obj);
         $fire = 0;  // 回调次数
+        if (!$this->listen && !$this->subscribe) return $fire;
+
+        $key = $this->keyOf($obj);
 
         if (isset($this->listen[$key][$event])) {
             foreach ($this->listen[$key][$event] as $callback)
@@ -105,20 +107,25 @@ class Events extends Singleton {
             $fire += count($this->listen[$key][$event]);
         }
 
+        if (!$this->subscribe) return $fire;
+
         // 订阅回调参数
         // 第一个参数是事件发起对象
         // 第二个参数是事件类型
         // 第三个参数是事件参数
         $args = array($obj, $event, $args);
-
         $class = get_class($obj);
-        if (isset($this->subscribe[$class][$event]) || isset($this->subscribe[$class]['*'])) {
-            foreach ($this->subscribe[$class] as $sevent => $callback_set) {
-                if ($sevent != '*' && $sevent != $event) continue;
-                foreach ($callback_set as $callback)
-                    call_user_func_array($callback, $args);
-                $fire += count($callback_set);
-            }
+
+        if (isset($this->subscribe[$class][$event])) {
+            foreach ($this->subscribe[$class][$event] as $callback)
+                call_user_func_array($callback, $args);
+            $fire += count($this->subscribe[$class][$event]);
+        }
+
+        if (isset($this->subscribe[$class]['*'])) {
+            foreach ($this->subscribe[$class]['*'] as $callback)
+                call_user_func_array($callback, $args);
+            $fire += count($this->subscribe[$class][$event]);
         }
 
         return $fire;
