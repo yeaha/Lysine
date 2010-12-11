@@ -25,6 +25,21 @@ class Mongo extends \Mongo implements IStorage {
         parent::__construct($dsn, $options);
     }
 
+    // $this->getCollection('test.user');
+    // eq:
+    // $this->getCollection(array('test', 'user'));
+    // eq:
+    // $this->selectCollection('test', 'user');
+    // eq:
+    // $this->selectDB('test')->selectCollection('user');
+    private function getCollection($collection) {
+        if ($collection instanceof \MongoCollection) return $collection;
+
+        if (!is_array($collection)) $collection = explode('.', $collection);
+        list ($db, $collection) = $collection;
+        return $this->selectCollection($db, $collection);
+    }
+
     /**
      * 查询collection
      *
@@ -38,14 +53,7 @@ class Mongo extends \Mongo implements IStorage {
      * @return MongoCursor
      */
     public function find($collection, array $query = array(), array $fields = array()) {
-        if (!is_array($collection)) $collection = explode('.', $collection);
-        list($db, $collection) = $collection;
-
-        return $this->selectCollection($db, $collection)->find($query, $fields);
-    }
-
-    private function parseCollection($collection) {
-        return is_array($collection) ? $collection : explode('.', $collection);
+        return $this->getCollection($collection)->find($query, $fields);
     }
 
     /**
@@ -62,8 +70,7 @@ class Mongo extends \Mongo implements IStorage {
      * @return array
      */
     public function findOne($collection, array $query = array(), array $fields = array()) {
-        list($db, $collection) = $this->parseCollection($collection);
-        return $this->selectCollection($db, $collection)->findOne($query, $fields);
+        return $this->getCollection($collection)->findOne($query, $fields);
     }
 
     /**
@@ -76,8 +83,7 @@ class Mongo extends \Mongo implements IStorage {
      * @return mixed
      */
     public function insert($collection, array $record, array $options = array()) {
-        list($db, $collection) = $this->parseCollection($collection);
-        return $this->selectCollection($db, $collection)->insert($record, $options);
+        return $this->getCollection($collection)->insert($record, $options);
     }
 
     /**
@@ -91,8 +97,7 @@ class Mongo extends \Mongo implements IStorage {
      * @return mixed
      */
     public function save($collection, array $record, array $options = array()) {
-        list($db, $collection) = $this->parseCollection($collection);
-        return $this->selectCollection($db, $collection)->save($record, $options);
+        return $this->getCollection($collection)->save($record, $options);
     }
 
     /**
@@ -106,8 +111,7 @@ class Mongo extends \Mongo implements IStorage {
      * @return boolean
      */
     public function update($collection, array $criteria, array $new, array $options = array()) {
-        list($db, $collection) = $this->parseCollection($collection);
-        return $this->selectCollection($db, $collection)->update($criteria, $new, $options);
+        return $this->getCollection($collection)->update($criteria, $new, $options);
     }
 
     /**
@@ -120,8 +124,7 @@ class Mongo extends \Mongo implements IStorage {
      * @return mixed
      */
     public function remove($collection, array $criteria, array $options = array()) {
-        list($db, $collection) = $this->parseCollection($collection);
-        return $this->selectCollection($db, $collection)->remove($criteria, $options);
+        return $this->getCollection($collection)->remove($criteria, $options);
     }
 
     /**
