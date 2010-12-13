@@ -59,30 +59,19 @@ class Events extends Singleton {
     }
 
     /**
-     * 订阅类的某个或者所有事件
-     *
-     * [code]
-     * // 订阅Topic类的所有事件
-     * $event->subscribe('Topic', $callback);
-     * // 订阅Topic类的delete事件
-     * $event->subscribe(array('Topic', 'delete'), $callback);
-     * [/code]
+     * 订阅类的事件
      *
      * @param mixed $class
+     * @param string $event
      * @param callback $callback
      * @access public
      * @return void
      */
-    public function subscribe($class, $callback) {
+    public function subscribe($class, $event, $callback) {
         if (!is_callable($callback))
-            throw Error::not_callable('Events::subscribe() parameter 2');
+            throw Error::not_callable('Events::subscribe() parameter 3');
 
-        $event = '*';
-        if (is_array($class))
-            list($class, $event) = $class;
-
-        $class = ltrim($class, '\\');
-
+        $class = strtolower(ltrim($class, '\\'));
         $this->subscribe[$class][$event][] = $callback;
     }
 
@@ -102,30 +91,25 @@ class Events extends Singleton {
         $key = $this->keyOf($obj);
 
         if (isset($this->listen[$key][$event])) {
-            foreach ($this->listen[$key][$event] as $callback)
+            foreach ($this->listen[$key][$event] as $callback) {
                 call_user_func_array($callback, $args);
-            $fire += count($this->listen[$key][$event]);
+                $fire++;
+            }
         }
 
         if (!$this->subscribe) return $fire;
 
         // 订阅回调参数
         // 第一个参数是事件发起对象
-        // 第二个参数是事件类型
-        // 第三个参数是事件参数
-        $args = array($obj, $event, $args);
-        $class = get_class($obj);
+        // 第二个参数是事件参数
+        $args = array($obj, $args);
+        $class = strtolower(get_class($obj));
 
         if (isset($this->subscribe[$class][$event])) {
-            foreach ($this->subscribe[$class][$event] as $callback)
+            foreach ($this->subscribe[$class][$event] as $callback) {
                 call_user_func_array($callback, $args);
-            $fire += count($this->subscribe[$class][$event]);
-        }
-
-        if (isset($this->subscribe[$class]['*'])) {
-            foreach ($this->subscribe[$class]['*'] as $callback)
-                call_user_func_array($callback, $args);
-            $fire += count($this->subscribe[$class][$event]);
+                $fire++;
+            }
         }
 
         return $fire;

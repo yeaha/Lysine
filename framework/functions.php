@@ -225,8 +225,8 @@ function listen_event($obj, $event, $callback) {
 }
 
 // 订阅类事件
-function subscribe_event($class, $callback) {
-    return Events::instance()->subscribe($class, $callback);
+function subscribe_event($class, $event, $callback) {
+    return Events::instance()->subscribe($class, $event, $callback);
 }
 
 // 取消监听事件
