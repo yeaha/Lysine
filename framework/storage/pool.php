@@ -20,7 +20,7 @@ class Pool extends Singleton {
     /**
      * 存储服务配置路径
      */
-    static public $config_path = array('storage', 'pool');
+    static public $config_path = array('storages');
 
     /**
      * 默认存储器名字
