@@ -206,11 +206,8 @@ class Router extends Router_Abstract {
             // 如果__before_run返回了内容，就直接完成动作
             // 可以在这里进行某些阻断操作
             // 正常的内容不应该通过这里输出
-            $resp = call_user_func_array(array($controller, '__before_run'), $args);
-            if ($resp) {
-                if ($resp instanceof Response) return $resp;
-                return resp()->setBody($resp);
-            }
+            if ($resp = call_user_func_array(array($controller, '__before_run'), $args))
+                return ($resp instanceof Response) ? $resp : resp()->setBody($resp);
         }
 
         $request = req();
@@ -247,7 +244,6 @@ class Router extends Router_Abstract {
 
         fire_event($this, AFTER_DISPATCH_EVENT, array($url, $class, $args, $resp));
 
-        if ($resp instanceof Response) return $resp;
-        return resp()->setBody($resp);
+        return ($resp instanceof Response) ? $resp : resp()->setBody($resp);
     }
 }
