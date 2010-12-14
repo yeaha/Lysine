@@ -2,7 +2,9 @@
 namespace Lysine\Storage;
 
 abstract class Cache {
-    protected $prefix;
+    static public $default_prefix = '';
+
+    protected $prefix = '';
 
     /**
      * 保存缓存
@@ -72,7 +74,8 @@ abstract class Cache {
 
     protected function makeKey($key) {
         if (is_array($key)) $key = implode('.', $key);
+        $prefix = $this->prefix ?: static::$default_prefix;
 
-        return md5("{$this->prefix}.{$key}");
+        return md5("{$prefix}.{$key}");
     }
 }
