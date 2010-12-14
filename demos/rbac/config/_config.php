@@ -6,5 +6,5 @@ return array(
         ),
         'rbac' => require ROOT_DIR .'/config/_rbac.php',
     ),
-    'storage' => require ROOT_DIR .'/config/_storage.php',
+    'storages' => require ROOT_DIR .'/config/_storage.php',
 );
