@@ -207,7 +207,10 @@ class Router extends Router_Abstract {
             // 可以在这里进行某些阻断操作
             // 正常的内容不应该通过这里输出
             $resp = call_user_func_array(array($controller, '__before_run'), $args);
-            if ($resp) return $resp;
+            if ($resp) {
+                if ($resp instanceof Response) return $resp;
+                return resp()->setBody($resp);
+            }
         }
 
         $request = req();
