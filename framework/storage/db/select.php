@@ -94,14 +94,6 @@ class Select {
     protected $offset;
 
     /**
-     * sql UNION
-     *
-     * @var mixed
-     * @access protected
-     */
-    protected $union;
-
-    /**
      * 返回数组中作为key的字段
      *
      * @var string
@@ -199,7 +191,7 @@ class Select {
     public function reset() {
         $this->cols = $this->where = array();
         $this->group = $this->having = $this->order = null;
-        $this->limit = $this->offset = $this->union = null;
+        $this->limit = $this->offset = null;
         $this->key_column = $this->processor = null;
         $this->where_relation = 'AND';
 
@@ -452,37 +444,6 @@ class Select {
     }
 
     /**
-     * sql UNION
-     *
-     * <code>
-     * // select * from table1 where id = 1
-     * $select1 = $adapter->select('table1')->where('id = ?', 1);
-     * $select2 = $adapter->select('table1')->where('id = ?', 2);
-     *
-     * // select * from table1 where id = 1
-     * // union all
-     * // select * from table1 where id = 2
-     * $select1->union($select2);
-     * </code>
-     *
-     * @param mixed $relation
-     * @param boolean $all
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function union($relation, $all = true) {
-        $relation_bind = array();
-        if ($relation instanceof Select) {
-            list($relation, $relation_bind) = $relation->compile();
-        } elseif (is_array($relation)) {
-            list($relation, $relation_bind) = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $relation);
-        }
-
-        $this->union = array(array($relation, $relation_bind), $all);
-        return $this;
-    }
-
-    /**
      * count()查询
      *
      * @access public
@@ -590,16 +551,6 @@ class Select {
         if ($this->order) $sql .= ' ORDER BY '. $this->order;
         if ($this->limit) $sql .= ' LIMIT '. $this->limit;
         if ($this->offset) $sql .= ' OFFSET '. $this->offset;
-
-        if ($this->union) {
-            list($relation, $all) = $this->union;
-            // 某些数据库可能不支持union all语法
-            $sql .= $all ? ' UNION ALL ' : ' UNION ';
-
-            list($relation, $relation_bind) = $relation;
-            $sql .= $relation;
-            if ($relation_bind) $bind = array_merge($bind, $relation_bind);
-        }
 
         return array($sql, $bind);
     }

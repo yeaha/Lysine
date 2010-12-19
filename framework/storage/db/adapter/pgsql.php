@@ -4,6 +4,7 @@ namespace Lysine\Storage\DB\Adapter;
 use Lysine\Storage\DB;
 use Lysine\Storage\DB\Adapter;
 use Lysine\Storage\DB\Expr;
+use Lysine\Storage\DB\Select\Pgsql as Select;
 
 class Pgsql extends Adapter {
     /**
@@ -48,6 +49,18 @@ class Pgsql extends Adapter {
             $this->in_transaction = false;
         }
         return true;
+    }
+
+    /**
+     * 生成Lysine\Storage\DB\Select\Pgsql实例
+     *
+     * @param string $table_name
+     * @access public
+     * @return Lysine\Storage\DB\Select\Pgsql
+     */
+    public function select($table_name) {
+        $select = new Select($this);
+        return $select->from($table_name);
     }
 
     /**
