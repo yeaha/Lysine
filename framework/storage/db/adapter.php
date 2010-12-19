@@ -441,7 +441,7 @@ abstract class Adapter implements IAdapter {
 
         $bind = is_array($bind) ? $bind : array_slice(func_get_args(), 1);
 
-        if (!preg_match_all('/:[a-z0-9_\-]+/i', $sql, $match))
+        if (!preg_match_all('/[^:]+:[a-z0-9_\-]+/i', $sql, $match))
             return array($sql, array_values($bind));
         $place = $match[0];
 
