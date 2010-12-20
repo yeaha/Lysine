@@ -210,7 +210,11 @@ class View {
         $vars = $vars ? array_merge($this->vars, $vars) : $this->vars;
         if ($vars) extract($vars);
 
-        return $once ? require_once($file) : require($file);
+        if ($once) {
+            require_once($file);
+        } else {
+            require($file);
+        }
     }
 
     /**

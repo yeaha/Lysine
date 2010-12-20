@@ -494,12 +494,14 @@ class Select {
         if (!$total) {
             $old_offset = $this->offset;
             $old_limit = $this->limit;
-            $this->offset = $this->limit = null;
+            $old_order = $this->order;
+            $this->offset = $this->limit = $this->order = null;
 
             $total = $this->count();
 
             $this->offset = $old_offset;
             $this->limit = $old_limit;
+            $this->order = $old_order;
         }
         return cal_page($total, $size, $current_page);
     }
