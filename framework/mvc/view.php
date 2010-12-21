@@ -200,21 +200,16 @@ class View {
      *
      * @param string $file
      * @param array $vars
-     * @param boolean $once 只包含一次
      * @access protected
      * @return void
      */
-    protected function includes($file, array $vars = null, $once = false) {
+    protected function includes($file, array $vars = null) {
         $file = $this->findFile($file);
 
         $vars = $vars ? array_merge($this->vars, $vars) : $this->vars;
         if ($vars) extract($vars);
 
-        if ($once) {
-            require_once($file);
-        } else {
-            require($file);
-        }
+        require $file;
     }
 
     /**
