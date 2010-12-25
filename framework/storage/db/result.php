@@ -5,6 +5,16 @@ use Lysine\Storage\DB\IResult;
 
 class Result extends \PDOStatement implements IResult {
     /**
+     * __toString魔法方法
+     *
+     * @access public
+     * @return string
+     */
+    public function __toString() {
+        return $this->queryString;
+    }
+
+    /**
      * 一行
      *
      * @access public
