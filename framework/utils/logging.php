@@ -105,13 +105,15 @@ class Logging {
 
 namespace Lysine\Utils\Logging;
 
+use Lysine\Error;
 use Lysine\Storage\File;
+use Lysine\Utils\Logging;
 
 class FileHandler implements IHandler {
     private $storage;
 
     public function __construct($storage) {
-        if (is_object($storage) && !($storage instanceof Lysine\Storage\File) )
+        if (is_object($storage) && !($storage instanceof File) )
             throw new Error('Invalid File Logger Handler, need Lysine\Storage\File');
 
         if (is_string($storage)) $storage = storage($storage);
@@ -120,7 +122,79 @@ class FileHandler implements IHandler {
     }
 
     public function emit(array $record) {
-        $line = sprintf('%s %s %s', $record['time'], $record['level_name'], $record['message']);
-        $this->storage->write($line);
+        $this->storage->write($record['time'] .' '. $record['message']);
+    }
+}
+
+// http://www.firephp.org/
+class FirePHPHandler implements IHandler {
+    private $handler;
+
+    public function __construct() {
+        if (!class_exists('FirePHP'))
+            throw new Error('Require FirePHP class');
+        $this->handler = \FirePHP::getInstance(true);
+    }
+
+    public function __call($method, $args) {
+        return call_user_func_array(array($this->handler, $method), $args);
+    }
+
+    public function emit(array $record) {
+        switch ($record['level']) {
+            case Logging::INFO: return $this->handler->info($record['message']);
+            case Logging::WARNING: return $this->handler->warn($record['message']);
+            case Logging::ERROR: return $this->handler->error($record['message']);
+            case Logging::CRITICAL: return $this->handler->error($record['message']);
+            default: return $this->handler->log($record['message']);
+        }
+    }
+}
+
+// http://firelogger.binaryage.com/
+class FireLoggerHandler implements IHandler {
+    private $handler;
+
+    public function __construct() {
+        if (!class_exists('FireLogger'))
+            throw new Error('Require FireLogger class');
+
+        defined('FIRELOGGER_NO_CONFLICT') or define('FIRELOGGER_NO_CONFLICT', true);
+        defined('FIRELOGGER_NO_DEFAULT_LOGGER') or define('FIRELOGGER_NO_DEFAULT_LOGGER', true);
+        defined('FIRELOGGER_NO_EXCEPTION_HANDLER') or define('FIRELOGGER_NO_EXCEPTION_HANDLER', true);
+        defined('FIRELOGGER_NO_ERROR_HANDLER') or define('FIRELOGGER_NO_ERROR_HANDLER', true);
+        $this->handler = new \FireLogger('php', 'background-color: #767ab6');
+    }
+
+    public function __call($method, $args) {
+        return call_user_func_array(array($this->handler, $method), $args);
+    }
+
+    public function emit(array $record) {
+        switch ($record['level']) {
+            case Logging::INFO: return $this->handler->log('info', $record['message']);
+            case Logging::WARNING: return $this->handler->log('warning', $record['message']);
+            case Logging::ERROR: return $this->handler->log('error', $record['message']);
+            case Logging::CRITICAL: return $this->handler->log('critical', $record['message']);
+            default: return $this->handler->log($record['message']);
+        }
+    }
+}
+
+// http://www.chromephp.com/
+class ChromePHPHandler implements IHandler {
+    public function __construct() {
+        if (!class_exists('ChromePHP'))
+            throw new Error('Require ChromePHP class');
+    }
+
+    public function emit(array $record) {
+        if (in_array($record['level'], array(Logging::ERROR, Logging::CRITICAL))) {
+            return \ChromePHP::error($record['message']);
+        } elseif ($record['level'] == Logging::WARNING) {
+            return \ChromePHP::warn($record['message']);
+        } else {
+            return \ChromePHP::log($record['message']);
+        }
     }
 }
