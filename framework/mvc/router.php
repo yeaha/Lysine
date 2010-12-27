@@ -171,8 +171,10 @@ class Router extends Router_Abstract {
      */
     protected function match($url) {
         foreach ($this->dispatch_rewrite as $re => $class) {
-            if (preg_match($re, $url, $match))
+            if (preg_match($re, $url, $match)) {
+                \Lysine\logger()->debug('Found url rewrite rule: '. $re);
                 return array($class, array_slice($match, 1));
+            }
         }
 
         // url: /user/login
@@ -195,7 +197,11 @@ class Router extends Router_Abstract {
      */
     public function dispatch($url, array $params = array()) {
         $url = strtolower(rtrim($url, '/'));
+        \Lysine\logger()->debug('Dispatch url:'. $url);
+
         list($class, $args) = $this->match($url);
+        \Lysine\logger()->debug('Match url controller as '. $class);
+
         if (!$class || !class_exists($class)) throw HttpError::page_not_found($url, array('controller' => $class));
 
         if ($params) $args = array_merge($args, $params);
@@ -228,6 +234,7 @@ class Router extends Router_Abstract {
                 $method = 'flash';
             }
         }
+        \Lysine\logger()->info('Call controller ['. $class .'] method ['. $method .']');
 
         // 执行controller动作并返回结果
         // 不检查method是否存在，用is_callable()

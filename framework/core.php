@@ -264,6 +264,10 @@ namespace Lysine {
         return class_exists($class, false) || interface_exists($class, false);
     }
 
+    function logger() {
+        return \Lysine\Utils\Logging::getLogger('__LYSINE__');
+    }
+
     spl_autoload_register('Lysine\autoload');
     require __DIR__ .'/functions.php';
 
