@@ -16,7 +16,7 @@ class Logging {
 
     private $datefmt = '%Y-%m-%d %H:%M:%S';
     private $level = 30;
-    private $handler = array();
+    private $handler;
 
     public function setLevel($level) {
         $this->level = (int)$level;
@@ -37,11 +37,14 @@ class Logging {
     }
 
     public function addHandler(IHandler $handler) {
+        if (!is_array($this->handler)) $this->handler = array();
         $this->handler[] = $handler;
         return $this;
     }
 
     public function log($message, $level = null) {
+        if (!$this->handler) return;
+
         $level = ($level === null) ? $this->level : $level;
         if ($level < $this->level) return;
 
@@ -49,8 +52,6 @@ class Logging {
             foreach ($message as $msg) $this->log($msg, $level);
             return;
         }
-
-        if (!$this->handler) return;
 
         $record = array(
             'time' => strftime($this->datefmt, time()),
