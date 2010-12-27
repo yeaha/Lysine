@@ -200,3 +200,9 @@ namespace Lysine\Storage\DB {
         public function getAll($col = null);
     }
 }
+
+namespace Lysine\Utils\Logging {
+    interface IHandler {
+        public function emit(array $record);
+    }
+}
