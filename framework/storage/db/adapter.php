@@ -249,6 +249,9 @@ abstract class Adapter implements IAdapter {
         }
 
         fire_event($this, EXECUTE_EVENT, array($sql, $bind));
+        $log = 'Execute SQL: '. $sql;
+        if ($bind) $log .= ' with '. json_encode($bind);
+        \Lysine\logger->debug($log);
 
         $sth->setFetchMode(\PDO::FETCH_ASSOC);
         return $sth;

@@ -14,26 +14,12 @@ class Logging {
 
     static private $logger = array();
 
-    private $datefmt = '%Y-%m-%d %H:%M:%S';
     private $level = 30;
     private $handler;
 
     public function setLevel($level) {
         $this->level = (int)$level;
         return $this;
-    }
-
-    public function getLevelName($level) {
-        $all = array(
-            50 => 'CRITICAl',
-            40 => 'ERROR',
-            30 => 'WARNING',
-            20 => 'INFO',
-            10 => 'DEBUG',
-            0 => 'NOTEST',
-        );
-
-        return isset($all[$level]) ? $all[$level] : $level;
     }
 
     public function addHandler(IHandler $handler) {
@@ -54,10 +40,8 @@ class Logging {
         }
 
         $record = array(
-            'time' => strftime($this->datefmt, time()),
             'message' => $message,
             'level' => $level,
-            'level_name' => $this->getLevelName($level)
         );
 
         foreach ($this->handler as $handler) $handler->emit($record);
@@ -102,6 +86,23 @@ class Logging {
 
         return self::$logger[$name] = $logger;
     }
+
+    static public function getAllLogger() {
+        return self::$logger;
+    }
+
+    static public function getLevelName($level) {
+        $all = array(
+            50 => 'CRITICAL',
+            40 => 'ERROR',
+            30 => 'WARNING',
+            20 => 'INFO',
+            10 => 'DEBUG',
+            0 => 'NOTEST',
+        );
+
+        return isset($all[$level]) ? $all[$level] : $level;
+    }
 }
 
 namespace Lysine\Utils\Logging;
@@ -112,6 +113,7 @@ use Lysine\Utils\Logging;
 
 class FileHandler implements IHandler {
     private $storage;
+    private $datefmt = '%Y-%m-%d %H:%M:%S';
 
     public function __construct($storage) {
         if (is_object($storage) && !($storage instanceof File) )
@@ -122,8 +124,15 @@ class FileHandler implements IHandler {
         $this->storage = $storage;
     }
 
+    public function setDateFmt($format) {
+        $this->datefmt = $format;
+        return $this;
+    }
+
     public function emit(array $record) {
-        $this->storage->write($record['time'] .' '. $record['message']);
+        $record['time'] = strftime($this->datefmt, time());
+        $record['level_name'] = Logging::getLevelName($record['level']);
+        $this->storage->write(sprintf('%s %-8s %s', $record['time'], $record['level_name'], $record['message']));
     }
 }
 

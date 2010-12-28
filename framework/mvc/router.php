@@ -196,11 +196,13 @@ class Router extends Router_Abstract {
      * @return mixed
      */
     public function dispatch($url, array $params = array()) {
+        $logger = \Lysine\logger();
+
         $url = strtolower(rtrim($url, '/'));
-        \Lysine\logger()->debug('Dispatch url:'. $url);
+        $logger->debug('Dispatch url:'. $url);
 
         list($class, $args) = $this->match($url);
-        \Lysine\logger()->debug('Match url controller as '. $class);
+        $logger->debug('Match url controller as '. $class);
 
         if (!$class || !class_exists($class)) throw HttpError::page_not_found($url, array('controller' => $class));
 
@@ -234,7 +236,9 @@ class Router extends Router_Abstract {
                 $method = 'flash';
             }
         }
-        \Lysine\logger()->info('Call controller ['. $class .'] method ['. $method .']');
+        $log = 'Call controller ['. $class .'] method ['. $method .']';
+        if ($args) $log .= ' with '. json_encode($args);
+        $logger->info($log);
 
         // 执行controller动作并返回结果
         // 不检查method是否存在，用is_callable()
