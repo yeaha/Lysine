@@ -15,6 +15,8 @@ class File implements IStorage {
     // 文件名
     private $filename;
 
+    private $open_mode = 'a';
+
     // 缓存尺寸，大于缓存后会flush到文件
     private $buffer_size = 2048;
 
@@ -27,6 +29,7 @@ class File implements IStorage {
     public function __construct(array $config) {
         $this->filename = strftime($config['filename'], time());
         if (isset($config['buffer_size'])) $this->buffer_size = (int)$config['buffer_size'];
+        if (isset($config['open_mode'])) $this->open_mode = $config['open_mode'];
     }
 
     public function __destruct() {
@@ -36,7 +39,7 @@ class File implements IStorage {
     public function flush() {
         if (!$this->content_size) return true;
 
-        if (!$fp = fopen($this->filename, 'a')) return false;
+        if (!$fp = fopen($this->filename, $this->open_mode)) return false;
 
         if (flock($fp, LOCK_EX)) {
             fwrite($fp, implode("\n", $this->buffer) ."\n");
