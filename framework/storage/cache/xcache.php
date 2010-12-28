@@ -16,6 +16,8 @@ class Xcache extends Cache {
 
     public function set($key, $val, $life_time = null) {
         if ($life_time === null) $life_time = $this->life_time;
+        \Lysine\logger('cache')->debug('Xcache set key '. is_array($key) ? implode(',', $key) : $key .' with life_time '. $life_time);
+
         $key = $this->makeKey($key);
         return xcache_set($key, $val, $life_time);
     }
@@ -25,6 +27,8 @@ class Xcache extends Cache {
     }
 
     public function get($key) {
+        \Lysine\logger('cache')->debug('Xcache get key '. is_array($key) ? implode(',', $key) : $key);
+
         $key = $this->makeKey($key);
         return xcache_isset($key) ? xcache_get($key) : false;
     }
@@ -36,6 +40,8 @@ class Xcache extends Cache {
     }
 
     public function delete($key) {
+        \Lysine\logger('cache')->debug('Xcache delete key '. is_array($key) ? implode(',', $key) : $key);
+
         $key = $this->makeKey($key);
         return xcache_unset($key);
     }

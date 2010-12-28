@@ -41,12 +41,15 @@ class Memcached extends Cache {
 
     public function set($key, $val, $life_time = null) {
         $life_time = $life_time ? (time() + $life_time) : 0;
+        \Lysine\logger('cache')->debug('Memcached set key '. is_array($key) ? implode(',', $key) : $key .' with life_time '. $life_time);
+
         $key = $this->makeKey($key);
         return $this->memcached->set($key, $val, $life_time);
     }
 
     public function mset(array $data, $life_time = null) {
         $life_time = $life_time ? (time() + $life_time) : 0;
+        \Lysine\logger('cache')->debug('Memcached set multiple keys '. implode(',', array_keys($data)) .' with life_time '. $life_time);
 
         $d = array();
         foreach ($data as $key => $val) {
@@ -58,17 +61,23 @@ class Memcached extends Cache {
     }
 
     public function get($key) {
+        \Lysine\logger('cache')->debug('Memcached get key '. is_array($key) ? implode(',', $key) : $key);
+
         $key = $this->makeKey($key);
         return $this->memcached->get($key);
     }
 
     public function mget(array $keys) {
+        \Lysine\logger('cache')->debug('Memcached get multiple keys '. implode(',', $keys));
+
         foreach ($keys as $idx => $key)
             $keys[$idx] = $this->makeKey($key);
         return $this->memcached->getMulti($keys);
     }
 
     public function delete($key) {
+        \Lysine\logger('cache')->debug('Memcached delete key '. is_array($key) ? implode(',', $key) : $key);
+
         $key = $this->makeKey($key);
         return $this->memcached->delete($key);
     }

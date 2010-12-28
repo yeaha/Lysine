@@ -16,6 +16,8 @@ class Eaccelerator extends Cache {
 
     public function set($key, $val, $life_time = null) {
         if ($life_time === null) $life_time = $this->life_time;
+        \Lysine\logger('cache')->debug('Eaccelerator set key '. is_array($key) ? implode(',', $key) : $key .' with life_time '. $life_time);
+
         $key = $this->makeKey($key);
         return eaccelerator_put($key, $val, $life_time);
     }
@@ -25,6 +27,8 @@ class Eaccelerator extends Cache {
     }
 
     public function get($key) {
+        \Lysine\logger('cache')->debug('Eaccelerator get key '. is_array($key) ? implode(',', $key) : $key);
+
         $key = $this->makeKey($key);
         return eaccelerator_get($key);
     }
@@ -36,6 +40,8 @@ class Eaccelerator extends Cache {
     }
 
     public function delete($key) {
+        \Lysine\logger('cache')->debug('Eaccelerator delete key '. is_array($key) ? implode(',', $key) : $key);
+
         $key = $this->makeKey($key);
         return eaccelerator_rm($key);
     }

@@ -71,15 +71,13 @@ class Logging {
     // $db_log = Logging::getLogger('db');
     // $user_log = Logging::getLogger('db.user');
     // user_log会继承db_log的配置
-    static public function getLogger($name = '__LYSINE__') {
+    static public function getLogger($name) {
         if (isset(self::$logger[$name])) return self::$logger[$name];
 
         $pos = strrpos($name, '.');
         if ($pos !== false) {
             $parent = substr($name, 0, $pos);
-            if (!isset(self::$logger[$parent]))
-                throw new Error('Undefined parent logger ['. $parent .']');
-            $logger = clone self::$logger[$parent];
+            $logger = clone self::getLogger($parent);
         } else {
             $logger = new self();
         }

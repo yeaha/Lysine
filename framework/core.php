@@ -264,8 +264,10 @@ namespace Lysine {
         return class_exists($class, false) || interface_exists($class, false);
     }
 
-    function logger() {
-        return \Lysine\Utils\Logging::getLogger('__LYSINE__');
+    function logger($domain = null) {
+        $name = '__LYSINE__';
+        if ($domain) $name .= '.'. strtoupper($domain);
+        return \Lysine\Utils\Logging::getLogger($name);
     }
 
     spl_autoload_register('Lysine\autoload');

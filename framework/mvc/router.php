@@ -172,7 +172,7 @@ class Router extends Router_Abstract {
     protected function match($url) {
         foreach ($this->dispatch_rewrite as $re => $class) {
             if (preg_match($re, $url, $match)) {
-                \Lysine\logger()->debug('Found url rewrite rule: '. $re);
+                \Lysine\logger('mvc')->debug('Found url rewrite rule: '. $re);
                 return array($class, array_slice($match, 1));
             }
         }
@@ -196,7 +196,7 @@ class Router extends Router_Abstract {
      * @return mixed
      */
     public function dispatch($url, array $params = array()) {
-        $logger = \Lysine\logger();
+        $logger = \Lysine\logger('mvc');
 
         $url = strtolower(rtrim($url, '/'));
         $logger->debug('Dispatch url:'. $url);
