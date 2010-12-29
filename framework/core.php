@@ -273,14 +273,30 @@ namespace Lysine {
     spl_autoload_register('Lysine\autoload');
     require __DIR__ .'/functions.php';
 
-    function __on_exception($exception) {
-        for ($i = 0, $ii = count(ob_list_handlers()); $i < $ii; $i++) ob_end_clean();
+    function __on_exception($exception, $send_header = true) {
+        if (DEBUG) {
+            $trace = $exception->getTrace();
+            $log = array(
+                '>>> Exception '. get_class($exception) .'('. $exception->getCode() .') <<<',
+                'Message: '. $exception->getMessage(),
+                sprintf('From: %s(#%d)', $trace[0]['file'], $trace[0]['line']),
+            );
+            if ($exception instanceof \Lysine\Error && function_exists('json_encode'))
+                if ($more = $exception->getMore())
+                    $log[] = 'More: '. json_encode($more);
+
+            try {
+                \Lysine\logger()->critical($log);
+            } catch (\Exception $ex) {}
+        }
 
         $code = $exception instanceof HttpError
               ? $exception->getCode()
               : 500;
 
-        header( Response::httpStatus($code) ?: Response::httpStatus(500) );
+        $header = array(
+            Response::httpStatus($code) ?: Response::httpStatus(500),
+        );
 
         if (DEBUG) {
             $message = $exception->getMessage();
@@ -288,15 +304,17 @@ namespace Lysine {
                 $lines = explode("\n", $message);
                 $message = $lines[0];
             }
-
-            header('X-Exception-Message: '. $message);
-            header('X-Exception-Code: '. $exception->getCode());
+            $header[] = 'X-Exception-Message: '. $message;
+            $header[] = 'X-Exception-Code: '. $exception->getCode();
 
             foreach (explode("\n", $exception->getTraceAsString()) as $index => $line)
-                header(sprintf('X-Exception-Trace-%d: %s', $index, $line));
+                $header[] = sprintf('X-Exception-Trace-%d: %s', $index, $line);
         }
 
-        return $code;
+        if ($send_header)
+            foreach ($header as $h) header($h);
+
+        return array($code, $header);
     }
 
     set_exception_handler('\Lysine\__on_exception');

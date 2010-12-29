@@ -3,6 +3,7 @@ use Lysine\MVC;
 use Lysine\Storage\DB\Adapter\Pgsql;
 use Lysine\Storage\DB\Expr;
 use Lysine\Utils\Events;
+use Lysine\Utils\Logging;
 
 if (!function_exists('app')) {
     function app() {
@@ -101,6 +102,10 @@ function session() {
 function cookie() {
     if (!isset($_COOKIE)) return false;
     return array_get($_COOKIE, func_get_args());
+}
+
+function logger($name) {
+    return Logging::getLogger($name);
 }
 
 function storage($name = null) {

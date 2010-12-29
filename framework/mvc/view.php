@@ -173,23 +173,24 @@ class View {
      */
     public function render($file, array $vars = null) {
         $file = $this->findFile($file);
+        if (DEBUG) \Lysine\logger('mvc')->info('Render view file '. $file);
 
         if ($vars) {
             foreach ($vars as $key => $val)
                 $this->set($key, $val);
         }
 
+        ob_start();
+        if ($this->vars) extract($this->vars);
         try {
-            ob_start();
-            if ($this->vars) extract($this->vars);
             require $file;
-            // 安全措施，关闭掉忘记关闭的block
-            $this->endBlock($all = true);
-            $output = ob_get_clean();
         } catch (\Exception $ex) {
             for ($i = 0, $ii = count(ob_list_handlers()); $i < $ii; $i++) ob_end_clean();
             throw $ex;
         }
+        // 安全措施，关闭掉忘记关闭的block
+        $this->endBlock($all = true);
+        $output = ob_get_clean();
 
         // 如果没有继承其它视图，就直接输出结果
         if (!$extend_file = $this->extend_file) return $output;

@@ -14,7 +14,7 @@ set_exception_handler(function($exception) {
     if (isset($argc)) {  // run in shell
         echo $exception;
     } else {
-        $code = \Lysine\__on_exception($exception);
+        list($code, $header) = \Lysine\__on_exception($exception);
         require ROOT_DIR .'/public/_error/500.php';
     }
     die(1);
