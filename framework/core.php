@@ -274,21 +274,10 @@ namespace Lysine {
     require __DIR__ .'/functions.php';
 
     function __on_exception($exception, $send_header = true) {
-        if (DEBUG) {
-            $trace = $exception->getTrace();
-            $log = array(
-                '>>> Exception '. get_class($exception) .'('. $exception->getCode() .') <<<',
-                'Message: '. $exception->getMessage(),
-                sprintf('From: %s(#%d)', $trace[0]['file'], $trace[0]['line']),
-            );
-            if ($exception instanceof \Lysine\Error && function_exists('json_encode'))
-                if ($more = $exception->getMore())
-                    $log[] = 'More: '. json_encode($more);
-
+        if (DEBUG)
             try {
-                \Lysine\logger()->critical($log);
+                \Lysine\logger()->exception($exception, 8);
             } catch (\Exception $ex) {}
-        }
 
         $code = $exception instanceof HttpError
               ? $exception->getCode()

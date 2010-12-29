@@ -67,6 +67,24 @@ class Logging {
         $this->log($message, self::DEBUG);
     }
 
+    public function exception(\Exception $exception, $trace_limit = 0) {
+        $message = array(
+            '>>> Exception '. get_class($exception) .'('. $exception->getCode() .') <<<',
+            'Message: '. $exception->getMessage(),
+        );
+
+        if ($exception instanceof \Lysine\Error && function_exists('json_encode'))
+            if ($more = $exception->getMore())
+                $message[] = 'More: '. json_encode($more);
+
+        foreach (explode("\n", $exception->getTraceAsString()) as $idx => $trace) {
+            if ($trace_limit && $idx == $trace_limit) break;
+            $message[] = $trace;
+        }
+
+        $this->critical($message);
+    }
+
     // 获得日志对象实例
     // $db_log = Logging::getLogger('db');
     // $user_log = Logging::getLogger('db.user');
