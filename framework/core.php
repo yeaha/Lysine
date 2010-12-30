@@ -274,9 +274,11 @@ namespace Lysine {
     require __DIR__ .'/functions.php';
 
     function __on_exception($exception, $send_header = true) {
-        try {
-            if (DEBUG) \Lysine\logger()->exception($exception, 8);
-        } catch (\Exception $ex) {
+        if (DEBUG) {
+            try {
+                \Lysine\logger()->exception($exception, 8);
+            } catch (\Exception $ex) {
+            }
         }
 
         $code = $exception instanceof HttpError
