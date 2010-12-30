@@ -274,10 +274,10 @@ namespace Lysine {
     require __DIR__ .'/functions.php';
 
     function __on_exception($exception, $send_header = true) {
-        if (DEBUG)
-            try {
-                \Lysine\logger()->exception($exception, 8);
-            } catch (\Exception $ex) {}
+        try {
+            if (DEBUG) \Lysine\logger()->exception($exception, 8);
+        } catch (\Exception $ex) {
+        }
 
         $code = $exception instanceof HttpError
               ? $exception->getCode()
@@ -288,7 +288,7 @@ namespace Lysine {
         );
 
         if (DEBUG) {
-            $message = $exception->getMessage();
+            $message = strip_tags($exception->getMessage());
             if (strpos($message, "\n") !== false) {
                 $lines = explode("\n", $message);
                 $message = $lines[0];
@@ -300,13 +300,21 @@ namespace Lysine {
                 $header[] = sprintf('X-Exception-Trace-%d: %s', $index, $line);
         }
 
-        if ($send_header)
+        if ($send_header && !headers_sent())
             foreach ($header as $h) header($h);
 
         return array($code, $header);
     }
+    if (!defined('LYSINE_NO_EXCEPTION_HANDLER'))
+        set_exception_handler('\Lysine\__on_exception');
 
-    set_exception_handler('\Lysine\__on_exception');
+    function __on_error($code, $message, $file = null, $line = null) {
+        if (error_reporting() && $code)
+            throw new \ErrorException($message, $code, 0, $file, $line);
+        return true;
+    }
+    if (!defined('LYSINE_NO_ERROR_HANDLER'))
+        set_error_handler('\Lysine\__on_error');
 }
 
 namespace Lysine\MVC {
