@@ -185,7 +185,7 @@ class View {
         try {
             require $file;
         } catch (\Exception $ex) {
-            for ($i = 0, $ii = count(ob_list_handlers()); $i < $ii; $i++) ob_end_clean();
+            ob_get_level() and ob_clean();
             throw $ex;
         }
         // 安全措施，关闭掉忘记关闭的block
