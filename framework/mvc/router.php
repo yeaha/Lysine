@@ -236,9 +236,11 @@ class Router extends Router_Abstract {
                 $method = 'flash';
             }
         }
-        $log = 'Call controller ['. $class .'] method ['. $method .']';
-        if ($args) $log .= ' with '. json_encode($args);
-        if (DEBUG) $logger->info($log);
+        if (DEBUG) {
+            $log = 'Call controller ['. $class .'] method ['. $method .']';
+            if ($args) $log .= ' with '. json_encode($args);
+            $logger->info($log);
+        }
 
         // 执行controller动作并返回结果
         // 不检查method是否存在，用is_callable()
