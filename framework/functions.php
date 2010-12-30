@@ -48,17 +48,17 @@ function set_cookie($name, $value, $expire = 0, $path = '/', $domain = null, $se
     return resp()->setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
 }
 
-function get($key = null, $default = false) {
+function get($key = null, $default = null) {
     if ($key === null) return $_GET;
     return isset($_GET[$key]) ? $_GET[$key] : $default;
 }
 
-function post($key = null, $default = false) {
+function post($key = null, $default = null) {
     if ($key === null) return $_POST;
     return isset($_POST[$key]) ? $_POST[$key] : $default;
 }
 
-function put($key = null, $default = false) {
+function put($key = null, $default = null) {
     static $_PUT = null;
 
     if ($_PUT === null) {
@@ -77,7 +77,7 @@ function put($key = null, $default = false) {
     return isset($_PUT[$key]) ? $_PUT[$key] : $default;
 }
 
-function request($key = null, $default = false) {
+function request($key = null, $default = null) {
     if ($key === null) return array_merge(put(), $_REQUEST);
     return isset($_REQUEST[$key]) ? $_REQUEST[$key] : put($key, $default);
 }

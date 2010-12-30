@@ -15,19 +15,19 @@ class Request extends Singleton {
         return request($key);
     }
 
-    public function get($key = null, $default = false) {
+    public function get($key = null, $default = null) {
         return get($key, $default);
     }
 
-    public function post($key = null, $default = false) {
+    public function post($key = null, $default = null) {
         return post($key, $default);
     }
 
-    public function put($key = null, $default = false) {
+    public function put($key = null, $default = null) {
         return put($key, $default);
     }
 
-    public function request($key = null, $default = false) {
+    public function request($key = null, $default = null) {
         return request($key, $default);
     }
 
