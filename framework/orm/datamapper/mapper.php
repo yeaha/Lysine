@@ -254,7 +254,7 @@ abstract class Mapper {
         if ($data->isReadonly())
             throw OrmError::readonly($data);
 
-        if ($data->isFresh()) return false;
+        if ($data->isFresh()) return true;
 
         $data->fireEvent(ORM::BEFORE_DELETE_EVENT);
         try {

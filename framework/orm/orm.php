@@ -97,7 +97,7 @@ use Lysine\Utils;
  */
 class Registry {
     /**
-     * 是否使用调查表
+     * 是否使用注册表
      */
     static public $enabled = true;
 
