@@ -132,16 +132,15 @@ abstract class Adapter implements IAdapter {
 
         list($dsn, $user, $pass, $options) = $this->config;
 
+        if (!isset($options[\PDO::ATTR_ERRMODE]))
+            // 出错时抛出异常
+            $options[\PDO::ATTR_ERRMODE] = \PDO::ERRMODE_EXCEPTION;
+
+        if (!isset($options[\PDO::ATTR_STATEMENT_CLASS]))
+            // 可以定义自己的result class
+            $options[\PDO::ATTR_STATEMENT_CLASS] = array('\Lysine\Storage\DB\Result');
+
         $dbh = new \PDO($dsn, $user, $pass, $options);
-
-        // 出错时抛出异常
-        $dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-        // 这里允许通过构造时传递的options定义自己的result class
-        list($result_class) = $dbh->getAttribute(\PDO::ATTR_STATEMENT_CLASS);
-        if ($result_class == 'PDOStatement') {
-            $dbh->setAttribute(\PDO::ATTR_STATEMENT_CLASS, array('\Lysine\Storage\DB\Result'));
-        }
 
         fire_event($this, CONNECT_EVENT, $this);
 
@@ -230,14 +229,17 @@ abstract class Adapter implements IAdapter {
      * @return Lysine\Storage\DB\IResult
      */
     public function execute($sql, $bind = null) {
-        $this->connect();
+        if ($bind === null) $bind = array();
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
         try {
+            $this->connect();
             $sth = ($sql instanceof \PDOStatement)
                  ? $sql
                  : $this->dbh->prepare($sql);
-            $sth->execute($bind);
+            if ($sth === false) return false;
+
+            if (!$sth->execute($bind)) return false;
         } catch (\PDOException $ex) {
             $error = new StorageError($ex->getMessage(), $ex->errorInfo[1], $ex, array(
                 'sql' => $sql,
@@ -249,9 +251,11 @@ abstract class Adapter implements IAdapter {
         }
 
         fire_event($this, EXECUTE_EVENT, array($sql, $bind));
-        $log = 'Execute SQL: '. $sql;
-        if ($bind) $log .= ' with '. json_encode($bind);
-        if (DEBUG) \Lysine\logger('storage')->debug($log);
+        if (DEBUG) {
+            $log = 'Execute SQL: '. $sql;
+            if ($bind) $log .= ' with '. json_encode($bind);
+            \Lysine\logger('storage')->debug($log);
+        }
 
         $sth->setFetchMode(\PDO::FETCH_ASSOC);
         return $sth;
@@ -295,9 +299,7 @@ abstract class Adapter implements IAdapter {
             implode(',', $this->qcol($cols)),
             implode(',', $vals));
 
-        $this->connect();
-        $sth = $this->dbh->prepare($sql);
-
+        if (!$sth = $this->prepare($sql)) return false;
         if ($return_prepare) return $sth;
 
         if ($affected = $this->execute($sth, $bind)->rowCount())
@@ -359,9 +361,7 @@ abstract class Adapter implements IAdapter {
         $sql = sprintf('UPDATE %s SET %s', $this->qtab($table), implode(',', $set));
         if ($where) $sql .= ' WHERE '. $where;
 
-        $this->connect();
-        $sth = $this->dbh->prepare($sql);
-
+        if (!$sth = $this->prepare($sql)) return false;
         if ($return_prepare) return $sth;
 
         if ($affected = $this->execute($sth, $bind)->rowCount())
@@ -386,10 +386,6 @@ abstract class Adapter implements IAdapter {
      * @return integer
      */
     public function delete($table, $where, $bind = null) {
-        $this->connect();
-
-        $bind = array();
-
         $sql = 'DELETE FROM '. $this->qtab($table);
         if (is_array($where)) {
             list($where, $bind) = call_user_func_array(array($this, 'parsePlaceHolder'), $where);
@@ -400,7 +396,9 @@ abstract class Adapter implements IAdapter {
 
         if ($where) $sql .= ' WHERE '. $where;
 
-        if ($affected = $this->execute($sql, $bind)->rowCount())
+        if (!$sth = $this->execute($sql, $bind)) return false;
+
+        if ($affected = $sth->rowCount())
             fire_event($this, DELETE_EVENT, $this, $table, $affected);
 
         return $affected;
@@ -421,7 +419,7 @@ abstract class Adapter implements IAdapter {
 
         if ($val instanceof Expr) return $val;
         if (is_numeric($val)) return $val;
-        if (is_null($val)) return 'NULL';
+        if ($val === null) return 'NULL';
 
         $this->connect();
         return $this->dbh->quote($val);
@@ -440,14 +438,14 @@ abstract class Adapter implements IAdapter {
      * @return array
      */
     public function parsePlaceHolder($sql, $bind = null) {
-        if (is_null($bind)) return array($sql, array());
+        if ($bind === null) return array($sql, array());
 
         $bind = is_array($bind) ? $bind : array_slice(func_get_args(), 1);
 
         if (!preg_match_all('/[^:]+(:[a-z0-9_\-]+)/i', $sql, $match))
             return array($sql, array_values($bind));
-        $place = $match[1];
 
+        $place = $match[1];
         if (count($place) != count($bind))
             throw new \UnexpectedValueException('Missing sql statement parameter');
 
@@ -464,7 +462,7 @@ abstract class Adapter implements IAdapter {
      */
     static public function parseConfig(array $config) {
         if (!isset($config['dsn']))
-            throw new \InvalidArgumentException('Invalid database config');
+            throw new \InvalidArgumentException('Invalid database config, need "dsn" key');
 
         $dsn = $config['dsn'];
 
