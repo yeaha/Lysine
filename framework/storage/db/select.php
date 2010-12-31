@@ -131,13 +131,12 @@ class Select {
      * 构造函数
      *
      * @param IAdapter $adapter
-     * @param boolean $return_set
      * @access public
      * @return void
      */
-    public function __construct(IAdapter $adapter, $return_set = true) {
+    public function __construct(IAdapter $adapter) {
         $this->adapter = $adapter;
-        $this->return_set = $return_set;
+        $this->return_set = self::$returnSet;
     }
 
     /**
@@ -594,6 +593,28 @@ class Select {
     }
 
     /**
+     * 以原生数组返回数据
+     *
+     * @access public
+     * @return Select
+     */
+    public function asArray() {
+        $this->return_set = false;
+        return $this;
+    }
+
+    /**
+     * 以Lysine\Utils\Set类型返回数据
+     *
+     * @access public
+     * @return Select
+     */
+    public function asSet() {
+        $this->return_set = true;
+        return $this;
+    }
+
+    /**
      * 返回查询数据
      *
      * @param integer $limit
@@ -613,7 +634,7 @@ class Select {
         } else {
             $result = $sth->getAll($this->key_column);
             if ($processor) $result = array_map($processor, $result);
-            if (self::$returnSet && $this->return_set) $result = new Set($result);
+            if ($this->return_set) $result = new Set($result);
             return $result;
         }
     }
