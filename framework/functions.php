@@ -255,6 +255,12 @@ function in_namespace($class, $namespace) {
     return start_with($class, $namespace, true);
 }
 
+// 是关联数组还是普通数组
+function is_assoc_array($array) {
+    $keys = array_keys($array);
+    return array_keys($keys) !== $keys;
+}
+
 // 计算分页 calculate page
 function cal_page($total, $page_size, $current_page = 1) {
     $page_count = ceil($total / $page_size) ?: 1;
