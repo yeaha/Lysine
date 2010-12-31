@@ -79,9 +79,7 @@ class Pool extends Singleton {
             throw StorageError::not_callable("Storage dispatcher ${name}");
 
         // 检查是否已经有这个名字的storage
-        $path = self::$config_path;
-        $path[] = $name;
-        if ($config = Config::get($path))
+        if ($config = $this->getConfig($name))
             throw new StorageError('Storage ['. $name .'] is exist, can not replace with dispatcher');
 
         $this->dispatcher[$name] = $fn;
