@@ -242,7 +242,7 @@ abstract class Adapter implements IAdapter {
             if (!$sth->execute($bind)) return false;
         } catch (\PDOException $ex) {
             $error = new StorageError($ex->getMessage(), $ex->errorInfo[1], $ex, array(
-                'sql' => $sql,
+                'sql' => (string)$sql,
                 'bind' => $bind,
                 'native_code' => $ex->errorInfo[0]
             ));
@@ -286,11 +286,14 @@ abstract class Adapter implements IAdapter {
         $bind = $cols = $vals = array();
         foreach ($row as $col => $val) {
             $cols[] = $col;
+            // 避免字符逃逸处理
+            // Expr数据直接放到生成的sql中，不通过占位符方式传递
             if ($val instanceof Expr) {
                 $vals[] = $val;
             } else {
-                $vals[] = '?';
-                $bind[] = $val;
+                $holder = ':'. $col;
+                $vals[] = $holder;
+                $bind[$holder] = $val;
             }
         }
 
@@ -301,8 +304,9 @@ abstract class Adapter implements IAdapter {
 
         if (!$sth = $this->prepare($sql)) return false;
         if ($return_prepare) return $sth;
+        if (!$this->execute($sth, $bind)) return false;
 
-        if ($affected = $this->execute($sth, $bind)->rowCount())
+        if ($affected = $sth->rowCount())
             fire_event($this, INSERT_EVENT, $this, $table, $affected);
 
         return $affected;
@@ -338,7 +342,7 @@ abstract class Adapter implements IAdapter {
 
         //检查place holder类型
         $holder = null;
-        if ($where_bind AND is_int(key($where_bind))) $holder = '?';
+        if ($where_bind AND !is_assoc_array($where_bind)) $holder = '?';
 
         $set = $bind = array();
         foreach ($row as $col => $val) {
@@ -347,7 +351,7 @@ abstract class Adapter implements IAdapter {
                 continue;
             }
 
-            $holder_here = $holder ? $holder : ':'. $col;
+            $holder_here = $holder ?: ':'. $col;
             $set[] = $this->qcol($col) .' = '. $holder_here;
 
             if ($holder_here == '?') {
@@ -363,8 +367,9 @@ abstract class Adapter implements IAdapter {
 
         if (!$sth = $this->prepare($sql)) return false;
         if ($return_prepare) return $sth;
+        if (!$this->execute($sth, $bind)) return false;
 
-        if ($affected = $this->execute($sth, $bind)->rowCount())
+        if ($affected = $sth->rowCount())
             fire_event($this, UPDATE_EVENT, $this, $table, $affected);
 
         return $affected;
