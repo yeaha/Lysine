@@ -16,7 +16,7 @@ class Apc extends Cache {
 
     public function set($key, $val, $life_time = null) {
         if ($life_time === null) $life_time = $this->life_time;
-        if (DEBUG) \Lysine\logger('cache')->debug('Apc set key '. is_array($key) ? implode(',', $key) : $key .' with life_time '. $life_time);
+        if (DEBUG) \Lysine\logger('cache')->debug('Apc set key '. (is_array($key) ? implode(',', $key) : $key) .' with life_time '. $life_time);
 
         $key = $this->makeKey($key);
         return apc_store($key, $val, $life_time);
@@ -27,7 +27,7 @@ class Apc extends Cache {
     }
 
     public function get($key) {
-        if (DEBUG) \Lysine\logger('cache')->debug('Apc get key '. is_array($key) ? implode(',', $key) : $key);
+        if (DEBUG) \Lysine\logger('cache')->debug('Apc get key '. (is_array($key) ? implode(',', $key) : $key));
 
         $key = $this->makeKey($key);
         return apc_fetch($key);
@@ -40,7 +40,7 @@ class Apc extends Cache {
     }
 
     public function delete($key) {
-        if (DEBUG) \Lysine\logger('cache')->debug('Apc delete key '. is_array($key) ? implode(',', $key) : $key);
+        if (DEBUG) \Lysine\logger('cache')->debug('Apc delete key '. (is_array($key) ? implode(',', $key) : $key));
 
         $key = $this->makeKey($key);
         return apc_delete($key);
