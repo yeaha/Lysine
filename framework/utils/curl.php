@@ -94,7 +94,10 @@ namespace Lysine\Utils {
         }
 
         public function close() {
-            if ($this->handler) curl_close($this->handler);
+            if ($this->handler) {
+                curl_close($this->handler);
+                $this->handler = null;
+            }
             return $this;
         }
     }
