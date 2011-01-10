@@ -4,7 +4,7 @@ namespace Lysine {
     use Lysine\MVC\Response;
     use Lysine\HttpError;
 
-    defined('DEBUG') or define('DEBUG', true);
+    defined('DEBUG') or define('DEBUG', false);
 
     class Config {
         static protected $config = array();
