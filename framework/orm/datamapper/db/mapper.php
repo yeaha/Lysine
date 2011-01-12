@@ -21,7 +21,7 @@ class DBMapper extends Mapper {
      * @return array
      */
     protected function doFind($id, IStorage $storage = null) {
-        $adapter = $storage ? $storage : $this->getStorage();
+        $adapter = $storage ?: $this->getStorage();
 
         $meta = $this->getMeta();
         $table_name = $adapter->qtab($meta->getCollection());
@@ -40,7 +40,7 @@ class DBMapper extends Mapper {
      */
     protected function doInsert(Data $data, IStorage $storage = null) {
         $record = $this->propsToRecord($data->toArray());
-        $adapter = $storage ? $storage : $this->getStorage();
+        $adapter = $storage ?: $this->getStorage();
 
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
@@ -62,7 +62,7 @@ class DBMapper extends Mapper {
      */
     protected function doUpdate(Data $data, IStorage $storage = null) {
         $record = $this->propsToRecord($data->toArray());
-        $adapter = $storage ? $storage : $this->getStorage();
+        $adapter = $storage ?: $this->getStorage();
 
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
@@ -80,7 +80,7 @@ class DBMapper extends Mapper {
      * @return integer affected row count
      */
     protected function doDelete(Data $data, IStorage $storage = null) {
-        $adapter = $storage ? $storage : $this->getStorage();
+        $adapter = $storage ?: $this->getStorage();
 
         $meta = $this->getMeta();
         $table_name = $meta->getCollection();
@@ -103,7 +103,7 @@ class DBMapper extends Mapper {
         };
 
         $meta = $this->getMeta();
-        $adapter = $storage ? $storage : $this->getStorage();
+        $adapter = $storage ?: $this->getStorage();
         $select = $adapter->select($meta->getCollection())
                           ->setKeyColumn($meta->getPrimaryKey())
                           ->setProcessor($processor);
