@@ -489,7 +489,7 @@ class Select {
      * @access public
      * @return array
      */
-    public function getPageInfo($size, $current_page, $total = null) {
+    public function getPageInfo($current_page, $size, $total = null) {
         if (!$total) {
             $old_offset = $this->offset;
             $old_limit = $this->limit;
