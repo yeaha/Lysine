@@ -581,7 +581,9 @@ EOF;
      * @return array
      */
     public static function decodeArray($array) {
-        return explode(',', trim($array, '{}'));
+        $array = explode(',', trim($array, '{}'));
+        foreach ($array as &$val) $val = trim($val, '"');
+        return $array;
     }
 
     /**
