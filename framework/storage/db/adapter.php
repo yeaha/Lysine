@@ -83,7 +83,8 @@ abstract class Adapter implements IAdapter {
      * @return void
      */
     public function __destruct() {
-        while ($this->in_transaction) $this->rollback();
+        if ($this->isConnected())
+            while ($this->in_transaction) $this->rollback();
     }
 
     /**
@@ -193,9 +194,9 @@ abstract class Adapter implements IAdapter {
      */
     public function begin() {
         $this->connect();
-        if ($result = $this->dbh->beginTransaction())
+        if ($begin = $this->dbh->beginTransaction())
             $this->in_transaction = true;
-        return $result;
+        return $begin;
     }
 
     /**
@@ -205,11 +206,10 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function rollback() {
-        if (!$this->in_transaction) return false;
-
-        if ($result = $this->dbh->rollBack())
+        if (!$this->in_transaction || !$this->isConnected()) return false;
+        if ($rollback = $this->dbh->rollBack())
             $this->in_transaction = false;
-        return $result;
+        return $rollback;
     }
 
     /**
@@ -219,11 +219,10 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function commit() {
-        if (!$this->in_transaction) return false;
-
-        if ($result = $this->dbh->commit())
+        if (!$this->in_transaction || !$this->isConnected()) return false;
+        if ($commit = $this->dbh->commit())
             $this->in_transaction = false;
-        return $result;
+        return $commit;
     }
 
     /**
@@ -279,6 +278,22 @@ abstract class Adapter implements IAdapter {
 
         $sth->setFetchMode(\PDO::FETCH_ASSOC);
         return $sth;
+    }
+
+    /**
+     * 直接执行一条sql并返回affected row count
+     *
+     * @param string $sql
+     * @access public
+     * @return integer
+     */
+    public function exec($sql) {
+        if ($this->recording_mode) {
+            $this->recording_sql[] = array($sql, array());
+            return 0;
+        }
+        $this->connect();
+        return $this->dbh->exec($sql);
     }
 
     /**
