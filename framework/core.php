@@ -302,7 +302,7 @@ namespace Lysine {
                 $header[] = sprintf('X-Exception-Trace-%d: %s', $index, $line);
         }
 
-        if ($send_header && !headers_sent())
+        if (PHP_SAPI != 'cli' && $send_header && !headers_sent())
             foreach ($header as $h) header($h);
 
         return array($code, $header);

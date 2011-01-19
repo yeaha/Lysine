@@ -9,9 +9,7 @@ Lysine\Config::import(require ROOT_DIR .'/config/_config.php');
 app()->includePath(ROOT_DIR .'/app');
 
 set_exception_handler(function($exception) {
-    global $argc;
-
-    if (isset($argc)) {  // run in shell
+    if (PHP_SAPI == 'cli') {  // run in shell
         echo $exception;
     } else {
         list($code, $header) = \Lysine\__on_exception($exception);
