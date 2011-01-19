@@ -468,7 +468,7 @@ abstract class Adapter implements IAdapter {
      * @access public
      * @return array
      */
-    public function endRecording() {
+    public function stopRecording() {
         $sql = $this->recording_sql;
         $this->recording_mode = false;
         $this->recording_sql = array();
