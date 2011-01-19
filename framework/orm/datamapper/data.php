@@ -282,14 +282,16 @@ abstract class Data extends ORM implements IData {
 
     /**
      * 根据主键生成实例
+     * 不使用参数声明，便于具体的Data方法重载此方法
+     * 如果子类的find参数和这里不一致，会抛出E_STRICT错误
      *
-     * @param mixed $key
      * @static
      * @access public
+     * @see \Lysine\ORM\DataMapper\Mapper::find
      * @return void
      */
-    static public function find($key) {
-        return static::getMapper()->find($key);
+    static public function find(/* $id */) {
+        return call_user_func_array(array(static::getMapper(), 'find'), func_get_args());
     }
 
     /**

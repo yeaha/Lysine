@@ -162,11 +162,14 @@ abstract class Mapper {
      *
      * @param mixed $id
      * @access public
+     * @see \Lysine\ORM\DataMapper\Data::find
      * @return Lysine\ORM\DataMapper\Data
      */
-    public function find($id) {
-        if ($id instanceof Data) return $id;
+    public function find(/* $id */) {
+        list($id) = func_get_args();
+
         if ($data = Registry::get($this->class, $id)) return $data;
+
         if (!$record = $this->doFind($id)) return false;
         return $this->package($record);
     }
