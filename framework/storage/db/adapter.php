@@ -41,6 +41,22 @@ abstract class Adapter implements IAdapter {
     protected $in_transaction = false;
 
     /**
+     * 录制模式
+     *
+     * @var boolean
+     * @access protected
+     */
+    protected $recording_mode = false;
+
+    /**
+     * 录制的sql列表
+     *
+     * @var array
+     * @access protected
+     */
+    protected $recording_sql = array();
+
+    /**
      * 构造函数
      *
      * @param string $dsn
@@ -239,7 +255,11 @@ abstract class Adapter implements IAdapter {
                  : $this->dbh->prepare($sql);
             if ($sth === false) return false;
 
-            if (!$sth->execute($bind)) return false;
+            if ($this->recording_mode) {
+                $this->recording_sql[] = array((string)$sth, $bind);
+            } else {
+                if (!$sth->execute($bind)) return false;
+            }
         } catch (\PDOException $ex) {
             $error = new StorageError($ex->getMessage(), $ex->errorInfo[1], $ex, array(
                 'sql' => (string)$sql,
@@ -428,6 +448,31 @@ abstract class Adapter implements IAdapter {
 
         $this->connect();
         return $this->dbh->quote($val);
+    }
+
+    /**
+     * 开始录制模式
+     * 仅仅把sql记录下来但并不真正执行
+     *
+     * @access public
+     * @return \Lysine\Storage\DB\Adapter
+     */
+    public function startRecording() {
+        $this->recording_mode = true;
+        return $this;
+    }
+
+    /**
+     * 结束录制模式，返回录制的列表
+     *
+     * @access public
+     * @return array
+     */
+    public function endRecording() {
+        $sql = $this->recording_sql;
+        $this->recording_mode = false;
+        $this->recording_sql = array();
+        return $sql;
     }
 
     /**
