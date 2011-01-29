@@ -29,6 +29,11 @@ namespace Lysine {
         private $more = array();
 
         public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
+            if (isset($more['message'])) {
+                $message = $more['message'];
+                unset($more['message']);
+            }
+
             $this->more = $more;
             parent::__construct($message, $code, $previous);
         }
@@ -95,15 +100,6 @@ namespace Lysine {
     }
 
     class HttpError extends Error {
-        public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
-            if (isset($more['message'])) {
-                $message = $more['message'];
-                unset($more['message']);
-            }
-
-            parent::__construct($message, $code, $previous, $more);
-        }
-
         public function getHeader() {
             return Response::httpStatus($this->getCode());
         }
@@ -191,10 +187,6 @@ namespace Lysine {
     }
 
     class OrmError extends StorageError {
-        public function __construct($message, $code = 0, \Exception $previous = null, array $more = array()) {
-            parent::__construct($message, $code, $previous, $more);
-        }
-
         static public function readonly($class) {
             if ($class instanceof ORM) $class = get_class($class);
             return new static("{$class} is readonly");

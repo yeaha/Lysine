@@ -23,6 +23,8 @@ return array(
     'Lysine\ORM\DataMapper\MetaInspector' => './orm/datamapper/meta.php',
     'Lysine\ORM\DataMapper\MongoData' => './orm/datamapper/mongo/data.php',
     'Lysine\ORM\DataMapper\MongoMapper' => './orm/datamapper/mongo/mapper.php',
+    'Lysine\ORM\DataMapper\RedisData' => './orm/datamapper/redis/data.php',
+    'Lysine\ORM\DataMapper\RedisMapper' => './orm/datamapper/redis/mapper.php',
     'Lysine\ORM\IActiveRecord' => './orm/activerecord/abstract.php',
     'Lysine\ORM\Registry' => './orm/orm.php',
     'Lysine\OrmError' => './core.php',
