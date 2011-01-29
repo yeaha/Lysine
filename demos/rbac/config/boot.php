@@ -9,13 +9,13 @@ Lysine\Config::import(require ROOT_DIR .'/config/_config.php');
 app()->includePath(ROOT_DIR .'/app');
 
 set_exception_handler(function($exception) {
-    global $argc;
-
-    if (isset($argc)) {  // run in shell
+    if (PHP_SAPI == 'cli') {  // run in shell
         echo $exception;
     } else {
-        list($code, $header) = \Lysine\__on_exception($exception);
+        list($code, $header) = \Lysine\__on_exception($exception, false);
         ob_start();
+        if (!headers_sent())
+            foreach ($header as $h) header($h);
         require ROOT_DIR .'/public/_error/500.php';
         echo ob_get_clean();
     }

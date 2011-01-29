@@ -1,5 +1,5 @@
 <?php
-require '../config/boot.php';
+require __DIR__ .'/../config/boot.php';
 
 $resp = app()->run();
 
