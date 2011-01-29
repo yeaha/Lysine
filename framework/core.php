@@ -265,7 +265,8 @@ namespace Lysine {
     spl_autoload_register('Lysine\autoload');
     require __DIR__ .'/functions.php';
 
-    function __on_exception($exception, $send_header = true) {
+    // $terminate = true 处理完后直接结束
+    function __on_exception($exception, $terminate = true) {
         if (DEBUG) {
             try {
                 \Lysine\logger()->exception($exception, 8);
@@ -276,6 +277,12 @@ namespace Lysine {
         $code = $exception instanceof HttpError
               ? $exception->getCode()
               : 500;
+
+        if (PHP_SAPI == 'cli') {
+            if (!$terminate) return array($code, array());
+            echo $exception;
+            die(1);
+        }
 
         $header = array(
             Response::httpStatus($code) ?: Response::httpStatus(500),
@@ -294,7 +301,7 @@ namespace Lysine {
                 $header[] = sprintf('X-Exception-Trace-%d: %s', $index, $line);
         }
 
-        if (PHP_SAPI != 'cli' && $send_header && !headers_sent())
+        if ($terminate && !headers_sent())
             foreach ($header as $h) header($h);
 
         return array($code, $header);
