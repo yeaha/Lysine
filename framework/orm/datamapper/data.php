@@ -139,25 +139,28 @@ abstract class Data extends ORM implements IData {
             throw OrmError::readonly($this);
 
         if (is_array($prop)) {
-            $direct = (bool)$val;
-            foreach ($prop as $p => $val) $this->setProp($p, $val, $direct);
-            return $this;
+            $props = $prop;
+            $direction = (bool)$val;
+        } else {
+            $props = array($prop => $val);
         }
 
         $meta = static::getMeta();
 
-        if (!$prop_meta = $meta->getPropMeta($prop))
-            throw Error::undefined_property(get_class($this), $prop);
+        foreach ($props as $prop => $val) {
+            if (!$prop_meta = $meta->getPropMeta($prop))
+                throw Error::undefined_property(get_class($this), $prop);
 
-        if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key']))
-            throw OrmError::refuse_update($this, $prop);
+            if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key']))
+                throw OrmError::refuse_update($this, $prop);
 
-        if ($setter = $prop_meta['setter']) {
-            if (!method_exists($this, $setter))
-                throw Error::call_undefined($setter, get_class($this));
-            $this->$setter($val, $direct);
-        } else {
-            $this->changeProp($prop, $val, $direct);
+            if ($setter = $prop_meta['setter']) {
+                if (!method_exists($this, $setter))
+                    throw Error::call_undefined($setter, get_class($this));
+                $this->$setter($val, $direct);
+            } else {
+                $this->changeProp($prop, $val, $direct);
+            }
         }
 
         return $this;
