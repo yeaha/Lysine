@@ -61,6 +61,17 @@ abstract class Data extends ORM implements IData {
     private $dirty_props = array();
 
     /**
+     * 构造函数
+     * 
+     * @param array $props 
+     * @access public
+     * @return void
+     */
+    public function __construct(array $props = null) {
+        if ($props) $this->setProp($props);
+    }
+
+    /**
      * 析构函数
      *
      * @access public
