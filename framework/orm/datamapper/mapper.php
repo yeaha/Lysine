@@ -48,7 +48,7 @@ abstract class Mapper {
      * @access protected
      * @return array
      */
-    abstract protected function doFind($id, IStorage $storage = null);
+    abstract protected function doFind($id, IStorage $storage = null, $collection = null);
 
     /**
      * 保存数据到存储服务
@@ -59,7 +59,7 @@ abstract class Mapper {
      * @access protected
      * @return mixed 新数据的主键值
      */
-    abstract protected function doInsert(Data $data, IStorage $storage = null);
+    abstract protected function doInsert(Data $data, IStorage $storage = null, $collection = null);
 
     /**
      * 保存更新数据到存储服务
@@ -70,7 +70,7 @@ abstract class Mapper {
      * @access protected
      * @return boolean
      */
-    abstract protected function doUpdate(Data $data, IStorage $storage = null);
+    abstract protected function doUpdate(Data $data, IStorage $storage = null, $collection = null);
 
     /**
      * 删除指定主键的数据
@@ -81,7 +81,7 @@ abstract class Mapper {
      * @access protected
      * @return boolean
      */
-    abstract protected function doDelete(Data $data, IStorage $storage = null);
+    abstract protected function doDelete(Data $data, IStorage $storage = null, $collection = null);
 
     /**
      * 构造函数
@@ -103,22 +103,6 @@ abstract class Mapper {
     public function getMeta() {
         if (!$this->meta) $this->meta = Meta::factory($this->class);
         return $this->meta;
-    }
-
-    /**
-     * 获得存储服务连接实例
-     *
-     * @access public
-     * @return Lysine\IStorage
-     */
-    public function getStorage($args = null) {
-        if ($args === null) {
-            $args = array();
-        } else {
-            $args = is_array($args) ? $args : func_get_args();
-        }
-        array_unshift($args, $this->getMeta()->getStorage());
-        return call_user_func_array(array(Pool::instance(), 'get'), $args);
     }
 
     /**

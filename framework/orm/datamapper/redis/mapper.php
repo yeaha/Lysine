@@ -18,24 +18,26 @@ class RedisMapper extends Mapper {
         return ($id instanceof Data) ? $id->id() : $id;
     }
 
-    protected function doFind($id, IStorage $storage = null) {
-        $redis = $storage ?: $this->getStorage();
-        $primary_key = $this->getMeta()->getPrimaryKey();
+    protected function doFind($id, IStorage $storage = null, $collection = null) {
+        $meta = $this->getMeta();
+        $redis = $storage ?: $meta->getStorage();
+        $primary_key = $meta->getPrimaryKey();
 
         $record = $redis->hGetAll($this->getStorageKey($id));
         $record[$primary_key] = $id;
         return $record;
     }
 
-    protected function doInsert(Data $data, IStorage $storage = null) {
+    protected function doInsert(Data $data, IStorage $storage = null, $collection = null) {
         if ($this->doUpdate($data, $storage))
             return $data->id();
         return false;
     }
 
-    protected function doUpdate(Data $data, IStorage $storage = null) {
-        $redis = $storage ?: $this->getStorage();
-        $primary_key = $this->getMeta()->getPrimaryKey();
+    protected function doUpdate(Data $data, IStorage $storage = null, $collection = null) {
+        $meta = $this->getMeta();
+        $redis = $storage ?: $meta->getStorage();
+        $primary_key = $meta->getPrimaryKey();
 
         $record = $this->propsToRecord($data->toArray());
         $id = $record[$primary_key];
@@ -44,8 +46,8 @@ class RedisMapper extends Mapper {
         return $redis->hMSet($this->getStorageKey($id), $record);
     }
 
-    protected function doDelete(Data $data, IStorage $storage = null) {
-        $redis = $storage ?: $this->getStorage();
+    protected function doDelete(Data $data, IStorage $storage = null, $collection = null) {
+        $redis = $storage ?: $this->getMeta()->getStorage();
         return $redis->hDel($this->getStorageKey($data->id()));
     }
 }

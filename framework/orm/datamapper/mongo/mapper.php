@@ -21,9 +21,9 @@ class MongoMapper extends Mapper {
      * @access protected
      * @return array
      */
-    protected function doFind($id, IStorage $storage = null) {
+    protected function doFind($id, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        return $this->getStorage()->findOne(
+        return $meta->getStorage()->findOne(
             $meta->getCollection(),
             array($meta->getPrimaryKey() => $id)
         );
@@ -38,12 +38,13 @@ class MongoMapper extends Mapper {
      * @access protected
      * @return mixed 新主键
      */
-    protected function doInsert(Data $data, IStorage $storage = null) {
+    protected function doInsert(Data $data, IStorage $storage = null, $collection = null) {
         if (!$id = $data->id())
             throw new \LogicException($this->class .': Must set primary key value before save');
 
-        $this->getStorage()->insert(
-            $this->getMeta()->getCollection(),
+        $meta = $this->getMeta();
+        $meta->getStorage()->insert(
+            $meta->getCollection(),
             $this->propsToRecord($data->toArray()),
             array('safe' => true)
         );
@@ -58,9 +59,9 @@ class MongoMapper extends Mapper {
      * @access protected
      * @return boolean
      */
-    protected function doUpdate(Data $data, IStorage $storage = null) {
+    protected function doUpdate(Data $data, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $this->getStorage()->update(
+        $meta->getStorage()->update(
             $meta->getCollection(),
             array($meta->getPrimaryKey() => $data->id()),
             array('$set' => $this->propsToRecord($data->toArray())),
@@ -77,9 +78,9 @@ class MongoMapper extends Mapper {
      * @access protected
      * @return boolean
      */
-    protected function doDelete(Data $data, IStorage $storage = null) {
+    protected function doDelete(Data $data, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $this->getStorage()->remove(
+        $meta->getStorage()->remove(
             $meta->getCollection(),
             array($meta->getPrimaryKey() => $data->id()),
             array('justOne' => true, 'safe' => true)
@@ -96,7 +97,7 @@ class MongoMapper extends Mapper {
      */
     public function findByQuery(array $query) {
         $meta = $this->getMeta();
-        $cur = $this->getStorage()->find(
+        $cur = $meta->getStorage()->find(
             $meta->getCollection(),
             $query
         );
