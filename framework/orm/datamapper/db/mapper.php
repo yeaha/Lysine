@@ -22,7 +22,7 @@ class DBMapper extends Mapper {
      */
     protected function doFind($id, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $adapter = $storage ?: $meta->getStorage();
+        $adapter = $storage ?: $this->getStorage();
         $table_name = $adapter->qtab($collection ?: $meta->getCollection());
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -41,7 +41,7 @@ class DBMapper extends Mapper {
         $record = $this->propsToRecord($data->toArray());
 
         $meta = $this->getMeta();
-        $adapter = $storage ?: $meta->getStorage();
+        $adapter = $storage ?: $this->getStorage();
         $table_name = $collection ?: $meta->getCollection();
         $primary_key = $meta->getPrimaryKey();
 
@@ -63,7 +63,7 @@ class DBMapper extends Mapper {
         $record = $this->propsToRecord($data->toArray());
 
         $meta = $this->getMeta();
-        $adapter = $storage ?: $meta->getStorage();
+        $adapter = $storage ?: $this->getStorage();
         $table_name = $collection ?: $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -80,7 +80,7 @@ class DBMapper extends Mapper {
      */
     protected function doDelete(Data $data, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $adapter = $storage ?: $meta->getStorage();
+        $adapter = $storage ?: $this->getStorage();
         $table_name = $collection ?: $meta->getCollection();
         $primary_key = $adapter->qcol($meta->getPrimaryKey());
 
@@ -101,7 +101,7 @@ class DBMapper extends Mapper {
         };
 
         $meta = $this->getMeta();
-        $adapter = $storage ?: $meta->getStorage();
+        $adapter = $storage ?: $this->getStorage();
         $select = $adapter->select($collection ?: $meta->getCollection())
                           ->setKeyColumn($meta->getPrimaryKey())
                           ->setProcessor($processor);

@@ -106,6 +106,18 @@ abstract class Mapper {
     }
 
     /**
+     * 获得存储服务连接实例
+     *
+     * @access public
+     * @return Lysine\IStorage
+     */
+    public function getStorage() {
+        return Pool::instance()->get(
+            $this->getMeta()->getStorage()
+        );
+    }
+
+    /**
      * 把从存储中获得的数据转化为属性数组
      *
      * @param array $record

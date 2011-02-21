@@ -20,7 +20,7 @@ class RedisMapper extends Mapper {
 
     protected function doFind($id, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $redis = $storage ?: $meta->getStorage();
+        $redis = $storage ?: $this->getStorage();
         $primary_key = $meta->getPrimaryKey();
 
         $record = $redis->hGetAll($this->getStorageKey($id));
@@ -36,7 +36,7 @@ class RedisMapper extends Mapper {
 
     protected function doUpdate(Data $data, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $redis = $storage ?: $meta->getStorage();
+        $redis = $storage ?: $this->getStorage();
         $primary_key = $meta->getPrimaryKey();
 
         $record = $this->propsToRecord($data->toArray());
@@ -47,7 +47,7 @@ class RedisMapper extends Mapper {
     }
 
     protected function doDelete(Data $data, IStorage $storage = null, $collection = null) {
-        $redis = $storage ?: $this->getMeta()->getStorage();
+        $redis = $storage ?: $this->getStorage();
         return $redis->hDel($this->getStorageKey($data->id()));
     }
 }

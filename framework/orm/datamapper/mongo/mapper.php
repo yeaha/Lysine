@@ -23,7 +23,7 @@ class MongoMapper extends Mapper {
      */
     protected function doFind($id, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        return $meta->getStorage()->findOne(
+        return $this->getStorage()->findOne(
             $meta->getCollection(),
             array($meta->getPrimaryKey() => $id)
         );
@@ -43,7 +43,7 @@ class MongoMapper extends Mapper {
             throw new \LogicException($this->class .': Must set primary key value before save');
 
         $meta = $this->getMeta();
-        $meta->getStorage()->insert(
+        $this->getStorage()->insert(
             $meta->getCollection(),
             $this->propsToRecord($data->toArray()),
             array('safe' => true)
@@ -61,7 +61,7 @@ class MongoMapper extends Mapper {
      */
     protected function doUpdate(Data $data, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $meta->getStorage()->update(
+        $this->getStorage()->update(
             $meta->getCollection(),
             array($meta->getPrimaryKey() => $data->id()),
             array('$set' => $this->propsToRecord($data->toArray())),
@@ -80,7 +80,7 @@ class MongoMapper extends Mapper {
      */
     protected function doDelete(Data $data, IStorage $storage = null, $collection = null) {
         $meta = $this->getMeta();
-        $meta->getStorage()->remove(
+        $this->getStorage()->remove(
             $meta->getCollection(),
             array($meta->getPrimaryKey() => $data->id()),
             array('justOne' => true, 'safe' => true)
@@ -97,7 +97,7 @@ class MongoMapper extends Mapper {
      */
     public function findByQuery(array $query) {
         $meta = $this->getMeta();
-        $cur = $meta->getStorage()->find(
+        $cur = $this->getStorage()->find(
             $meta->getCollection(),
             $query
         );
