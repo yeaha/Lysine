@@ -39,8 +39,6 @@ class Meta {
         'internal' => FALSE,        // 是否model内部属性 和存储数据没有映射关系
         'allow_null' => FALSE,      // 是否允许为空
         'default' => NULL,          // 默认值
-        'getter' => NULL,           // 自定义getter
-        'setter' => NULL,           // 自定义setter
     );
 
     /**

@@ -115,12 +115,6 @@ abstract class Data extends ORM implements IData {
      */
     public function getProp($prop) {
         if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
-            if ($getter = $prop_meta['getter']) {
-                if (!method_exists($this, $getter))
-                    throw Error::call_undefined($getter, get_class($this));
-                return $this->$getter();
-            }
-
             if ($this->$prop === null && $prop_meta['default'] !== null)
                 return $prop_meta['default'];
         }
@@ -160,13 +154,7 @@ abstract class Data extends ORM implements IData {
                 throw OrmError::refuse_update($this, $prop);
 
             $val = $this->formatProp($prop_meta, $val);
-            if ($setter = $prop_meta['setter']) {
-                if (!method_exists($this, $setter))
-                    throw Error::call_undefined($setter, get_class($this));
-                $this->$setter($val);
-            } else {
-                $this->changeProp($prop, $val);
-            }
+            $this->changeProp($prop, $val);
         }
 
         return $this;
@@ -205,7 +193,7 @@ abstract class Data extends ORM implements IData {
     /**
      * 修改属性值
      * setProp()和changeProp()的区别在于
-     * setProp()会调用setter，检查refuse_update等等
+     * setProp()会检查refuse_update等等
      * changeProp()主要是内部使用
      *
      * @param string $prop
