@@ -36,7 +36,6 @@ class Meta {
         'type' => NULL,             // 数据类型
         'primary_key' => FALSE,     // 是否主键
         'refuse_update' => FALSE,   // 是否允许更新
-        'internal' => FALSE,        // 是否model内部属性 和存储数据没有映射关系
         'allow_null' => FALSE,      // 是否允许为空
         'default' => NULL,          // 默认值
     );
@@ -143,7 +142,6 @@ class Meta {
         foreach ($meta as $key => $val) $this->$key = $val;
 
         foreach ($this->props as $name => $config) {
-            if ($config['internal']) continue;
             $field = $config['field'];
             if ($config['primary_key']) $this->primary_key = $field;
 
@@ -373,6 +371,8 @@ class MetaInspector {
                 self::parseComment($prop_comment),
                 array('name' => $prop->getName())
             );
+
+            if (array_key_exists('internal', $result)) continue;
 
             $prop_meta[] = $result;
         }

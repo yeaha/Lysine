@@ -206,9 +206,10 @@ abstract class Data extends ORM implements IData {
         $this->$prop = $val;
         if ($direct) return $this;
 
-        $prop_meta = static::getMeta()->getPropMeta($prop);
-        if (!$prop_meta['internal'] && !in_array($prop, $this->dirty_props))
-            $this->dirty_props[] = $prop;
+        if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
+            if (!in_array($prop, $this->dirty_props))
+                $this->dirty_props[] = $prop;
+        }
         return $this;
     }
 
@@ -292,10 +293,8 @@ abstract class Data extends ORM implements IData {
             return $props;
         }
 
-        foreach (static::getMeta()->getPropMeta() as $prop => $prop_meta) {
-            if ($prop_meta['internal']) continue;
+        foreach (static::getMeta()->getPropMeta() as $prop => $prop_meta)
             $props[$prop] = $this->$prop;
-        }
 
         return $props;
     }
