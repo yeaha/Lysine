@@ -34,11 +34,6 @@ class Logging {
         $level = ($level === null) ? $this->level : $level;
         if ($level < $this->level) return;
 
-        if (is_array($message)) {
-            foreach ($message as $msg) $this->log($msg, $level);
-            return;
-        }
-
         $record = array(
             'message' => $message,
             'level' => $level,
@@ -148,7 +143,15 @@ class FileHandler implements IHandler {
     public function emit(array $record) {
         $record['time'] = strftime($this->datefmt, time());
         $record['level_name'] = Logging::getLevelName($record['level']);
-        $this->storage->write(sprintf('%s %-8s %s', $record['time'], $record['level_name'], $record['message']));
+
+        if (is_array($record['message'])) {
+            $message = $record['message'];
+        } else {
+            $message = array($record['message']);
+        }
+
+        foreach ($message as $line)
+            $this->storage->write(sprintf('%s %-8s %s', $record['time'], $record['level_name'], $line));
     }
 }
 
