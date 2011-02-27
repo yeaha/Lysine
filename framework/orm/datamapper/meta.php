@@ -36,8 +36,9 @@ class Meta {
         'type' => NULL,             // 数据类型
         'primary_key' => FALSE,     // 是否主键
         'refuse_update' => FALSE,   // 是否允许更新
-        'allow_empty' => TRUE,      // 是否允许为空
-        'internal' => FALSE,        // 是否model自己的属性 和存储数据无直接映射关系
+        'internal' => FALSE,        // 是否model内部属性 和存储数据没有映射关系
+        'allow_null' => FALSE,      // 是否允许为空
+        'default' => NULL,          // 默认值
         'getter' => NULL,           // 自定义getter
         'setter' => NULL,           // 自定义setter
     );
@@ -145,7 +146,6 @@ class Meta {
 
         foreach ($this->props as $name => $config) {
             if ($config['internal']) continue;
-
             $field = $config['field'];
             if ($config['primary_key']) $this->primary_key = $field;
 
@@ -266,7 +266,7 @@ class Meta {
         $default = self::$default_prop_meta;
         $prop_keys = array_keys($default);
         foreach ($meta['props'] as $config) {
-            if (!isset($config['field']) && !isset($config['internal']))
+            if (!isset($config['field']))
                 $config['field'] = $config['name'];
 
             if (isset($config['var'])) {
@@ -369,8 +369,7 @@ class MetaInspector {
             if ($prop->isStatic() || $prop->isPublic() || $prop->getDeclaringClass() != $class) continue;
 
             $prop_comment = $prop->getDocComment();
-            if ($prop_comment === false)
-                throw new \UnexpectedValueException('Undefined class ['. $class->getName() .'] property ['. $prop->getName() .'] meta comment');
+            if ($prop_comment === false) continue;
 
             $result = array_merge(
                 self::parseComment($prop_comment),
@@ -413,15 +412,20 @@ class MetaInspector {
             $line = trim($line, "/* \t");
             if (!$line) continue;
 
-            if (!preg_match('/^@(\w+)\s*(.+)/', $line, $match)) continue;
+            if (!preg_match('/^@(\w+)\s*(.+)?/', $line, $match)) continue;
 
             $key = strtolower($match[1]);
-            $val = $match[2];
-            $lval = strtolower($val);
-            if ($lval == 'true') {
+            if (isset($match[2])) {
+                $lval = strtolower($match[2]);
+                if ($lval == 'true') {
+                    $val = true;
+                } elseif ($lval == 'false') {
+                    $val = false;
+                } else {
+                    $val = $match[2];
+                }
+            } else {
                 $val = true;
-            } elseif ($lval == 'false') {
-                $val = false;
             }
             $result[$key] = $val;
         }

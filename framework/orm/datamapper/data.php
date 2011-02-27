@@ -38,7 +38,7 @@ abstract class Data extends ORM implements IData {
      *
      * @var boolean
      * @access private
-     * @internal true
+     * @internal
      */
     private $is_fresh = true;
 
@@ -47,7 +47,7 @@ abstract class Data extends ORM implements IData {
      *
      * @var boolean
      * @access private
-     * @internal true
+     * @internal
      */
     private $is_readonly;
 
@@ -56,7 +56,7 @@ abstract class Data extends ORM implements IData {
      *
      * @var array
      * @access private
-     * @internal true
+     * @internal
      */
     private $dirty_props = array();
 
@@ -120,6 +120,9 @@ abstract class Data extends ORM implements IData {
                     throw Error::call_undefined($getter, get_class($this));
                 return $this->$getter();
             }
+
+            if ($this->$prop === null && $prop_meta['default'] !== null)
+                return $prop_meta['default'];
         }
 
         return $this->$prop;
@@ -130,17 +133,17 @@ abstract class Data extends ORM implements IData {
      *
      * @param mixed $prop
      * @param mixed $val
-     * @param boolean $direct
+     * @param boolean $strict 严格模式，如果属性不存在则抛出异常，否则忽略
      * @access public
-     * @return void
+     * @return self
      */
-    public function setProp($prop, $val = null, $direct = false) {
+    public function setProp($prop, $val = null, $strict = true) {
         if ($this->isReadonly())
             throw OrmError::readonly($this);
 
         if (is_array($prop)) {
             $props = $prop;
-            $direction = (bool)$val;
+            $strict = ($val === null) ? true : (bool)$val;
         } else {
             $props = array($prop => $val);
         }
@@ -148,22 +151,55 @@ abstract class Data extends ORM implements IData {
         $meta = static::getMeta();
 
         foreach ($props as $prop => $val) {
-            if (!$prop_meta = $meta->getPropMeta($prop))
+            if (!$prop_meta = $meta->getPropMeta($prop)) {
+                if (!$strict) continue;
                 throw Error::undefined_property(get_class($this), $prop);
+            }
 
             if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key']))
                 throw OrmError::refuse_update($this, $prop);
 
+            $val = $this->formatProp($prop_meta, $val);
             if ($setter = $prop_meta['setter']) {
                 if (!method_exists($this, $setter))
                     throw Error::call_undefined($setter, get_class($this));
-                $this->$setter($val, $direct);
+                $this->$setter($val);
             } else {
-                $this->changeProp($prop, $val, $direct);
+                $this->changeProp($prop, $val);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * 根据属性数据类型对属性值进行类型转换
+     *
+     * @param array $prop_meta
+     * @param mixed $val
+     * @access protected
+     * @return mixed
+     */
+    protected function formatProp($prop_meta, $val) {
+        $type = $prop_meta['type'] ?: 'mixed';
+        switch ($type) {
+            case 'integer':
+            case 'int':
+                return (int)$val;
+            case 'boolean':
+            case 'bool':
+                return (bool)$val;
+            case 'float':
+            case 'real':
+            case 'double':
+                return (float)$val;
+            case 'string':
+            case 'text':
+                return (string)$val;
+        }
+
+        if ($prop_meta['allow_null'] && !$val) return null;
+        return $val;
     }
 
     /**
@@ -198,8 +234,10 @@ abstract class Data extends ORM implements IData {
     public function __fill(array $props) {
         $this->is_fresh = false;
 
-        foreach ($props as $prop => $val)
+        foreach ($props as $prop => $val) {
+            if ($val === null) continue;
             $this->$prop = $val;
+        }
 
         $this->dirty_props = array();
     }

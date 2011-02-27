@@ -181,18 +181,21 @@ abstract class Mapper {
         if ($data->isReadonly())
             throw OrmError::readonly($data);
 
+        if (!($is_fresh = $data->isFresh()) && !($is_dirty = $data->isDirty()))
+            return true;
+
         $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
 
         $props = $data->toArray();
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
-            if (!$prop_meta['allow_empty'] && empty($props[$prop]))
-                throw OrmError::not_allow_empty($data, $prop);
+            if (!$prop_meta['allow_null'] && $props[$prop] === null)
+                throw OrmError::not_allow_null($data, $prop);
         }
 
-        if ($data->isFresh()) {
+        if ($is_fresh) {
             $data->fireEvent(ORM::BEFORE_INSERT_EVENT, $data);
             if ($result = $this->insert($data)) $data->fireEvent(ORM::AFTER_INSERT_EVENT);
-        } elseif ($data->isDirty()) {
+        } elseif ($is_dirty) {
             $data->fireEvent(ORM::BEFORE_UPDATE_EVENT, $data);
             if ($result = $this->update($data)) $data->fireEvent(ORM::AFTER_UPDATE_EVENT);
         }
