@@ -185,6 +185,11 @@ abstract class Mapper {
             return true;
 
         $data->fireEvent(ORM::BEFORE_SAVE_EVENT);
+        if ($is_fresh) {
+            $data->fireEvent(ORM::BEFORE_INSERT_EVENT, $data);
+        } elseif ($is_dirty) {
+            $data->fireEvent(ORM::BEFORE_UPDATE_EVENT, $data);
+        }
 
         $props = $data->toArray();
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
@@ -193,14 +198,15 @@ abstract class Mapper {
         }
 
         if ($is_fresh) {
-            $data->fireEvent(ORM::BEFORE_INSERT_EVENT, $data);
-            if ($result = $this->insert($data)) $data->fireEvent(ORM::AFTER_INSERT_EVENT);
+            if ($result = $this->insert($data))
+                $data->fireEvent(ORM::AFTER_INSERT_EVENT);
         } elseif ($is_dirty) {
-            $data->fireEvent(ORM::BEFORE_UPDATE_EVENT, $data);
-            if ($result = $this->update($data)) $data->fireEvent(ORM::AFTER_UPDATE_EVENT);
+            if ($result = $this->update($data))
+                $data->fireEvent(ORM::AFTER_UPDATE_EVENT);
         }
 
-        $data->fireEvent(ORM::AFTER_SAVE_EVENT);
+        if ($result)
+            $data->fireEvent(ORM::AFTER_SAVE_EVENT);
 
         return $result;
     }
