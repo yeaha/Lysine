@@ -217,7 +217,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
 
         array_unshift($args, $this->set);
         $result = call_user_func_array('array_merge', $args);
-        return new self($result);
+        return new static($result);
     }
 
     /**
@@ -229,7 +229,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return Lysine\Utils\Set
      */
     public function map($fn) {
-        return new self(array_map($fn, $this->set));
+        return new static(array_map($fn, $this->set));
     }
 
     /**
@@ -253,11 +253,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return Lysine\Utils\Set
      */
     public function filter($fn) {
-        $set = array();
-        foreach ($this->map($fn) as $idx => $val)
-            if ($val) $set[$idx] = $this->set[$idx];
-
-        return new self($set);
+        return new static(array_filter($this->set, $fn));
     }
 
     /**
@@ -299,7 +295,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return Lysine\Utils\Set
      */
     public function slice($offset, $length = null, $preserve_keys = false) {
-        return new self(array_slice($this->set, $offset, $length, $preserve_keys));
+        return new static(array_slice($this->set, $offset, $length, $preserve_keys));
     }
 
     /**
@@ -319,7 +315,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
             array_splice($this->set, $offset, $length, $replace);
             return $this;
         }
-        return new self(array_splice($this->set, $offset, $length));
+        return new static(array_splice($this->set, $offset, $length));
     }
 
     /**
@@ -344,7 +340,18 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return Lysine\Utils\Set
      */
     public function chunk($size, $preserve_keys = false) {
-        return new self(array_chunk($this->set, $size, $preserve_keys));
+        return new static(array_chunk($this->set, $size, $preserve_keys));
+    }
+
+    /**
+     * array shuffle()
+     *
+     * @access public
+     * @return self
+     */
+    public function shuffle() {
+        shuffle($this->set);
+        return $this;
     }
 
     /**
