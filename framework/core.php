@@ -67,9 +67,9 @@ namespace Lysine {
             return $result;
         }
 
-        public function getMore() {
+        public function getMore($with_previous = false) {
             $more = $this->more;
-            if ($previous = $this->getPrevious() && $previous instanceof Error)
+            if ($with_previous && ($previous = $this->getPrevious()) && $previous instanceof Error)
                 $more['__previous__'] = $previous->getMore();
             return $more;
         }
