@@ -68,7 +68,10 @@ namespace Lysine {
         }
 
         public function getMore() {
-            return $this->more;
+            $more = $this->more;
+            if ($previous = $this->getPrevious() && $previous instanceof Error)
+                $more['__previous__'] = $previous->getMore();
+            return $more;
         }
 
         static public function invalid_argument($function, $class = null) {
