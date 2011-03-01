@@ -15,7 +15,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @var array
      * @access protected
      */
-    protected $set;
+    protected $set = array();
 
     /**
      * 构造函数
@@ -350,7 +350,17 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
      * @return self
      */
     public function shuffle() {
-        shuffle($this->set);
+        $new_set = array();
+
+        // 直接shuffle $this->set会丢失key
+        // 所以对key做shuffle()
+        $keys = $this->getKeys();
+        shuffle($keys);
+
+        foreach ($keys as $key)
+            $new_set[$key] = $this->set[$key];
+        $this->set = $new_set;
+
         return $this;
     }
 
