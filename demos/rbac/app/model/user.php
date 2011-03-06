@@ -74,6 +74,12 @@ class User extends DBData {
         }
     }
 
+    public function __get($prop) {
+        if ($prop == 'roles')
+            return $this->getRoles();
+        return parent::__get($prop);
+    }
+
     public function addRole($role, $expire_time = null) {
         if (!$user_id = $this->id()) throw new \Exception('Cannot add role to unsaved user');
 
@@ -214,6 +220,12 @@ class User_Role extends DBData {
      * @getter getRoleName
      */
     protected $role_name;
+
+    public function __get($prop) {
+        if ($prop == 'role_name')
+            return $this->getRoleName();
+        return parent::__get($prop);
+    }
 
     protected function getRoleName() {
         return Role::find($this->role_id)->name;
