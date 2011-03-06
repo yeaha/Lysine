@@ -29,8 +29,6 @@ interface IData {
  * @abstract
  * @package ORM
  * @author yangyi <yangyi.cn.gz@gmail.com>
- * @storage
- * @collection
  */
 abstract class Data extends ORM implements IData {
     /**
