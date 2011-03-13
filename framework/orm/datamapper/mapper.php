@@ -258,7 +258,7 @@ abstract class Mapper {
      * @access public
      * @return boolean
      */
-    public function delete(Data $data) {
+    public function destroy(Data $data) {
         if ($data->isReadonly())
             throw OrmError::readonly($data);
 
@@ -300,8 +300,6 @@ abstract class Mapper {
      * @return Lysine\ORM\DataMapper\Mapper
      */
     static public function factory($class) {
-        if (is_object($class)) $class = get_class($class);
-
         if (!isset(self::$instance[$class]))
             self::$instance[$class] = new static($class);
         return self::$instance[$class];

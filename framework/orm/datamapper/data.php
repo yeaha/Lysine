@@ -31,107 +31,50 @@ interface IData {
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 abstract class Data extends ORM implements IData {
-    /**
-     * 是否新建数据
-     *
-     * @var boolean
-     * @access private
-     * @internal
-     */
+    static protected $storage;
+    static protected $collection;
+    static protected $readonly = false;
+    static protected $props_meta = array();
+
     private $is_fresh = true;
-
-    /**
-     * 是否只读
-     *
-     * @var boolean
-     * @access private
-     * @internal
-     */
-    private $is_readonly;
-
-    /**
-     * 被修改过的属性名
-     *
-     * @var array
-     * @access private
-     * @internal
-     */
+    private $props = array();
     private $dirty_props = array();
 
-    /**
-     * 构造函数
-     * 
-     * @param array $props 
-     * @access public
-     * @return void
-     */
     public function __construct(array $props = null) {
         if ($props) $this->setProp($props);
     }
 
-    /**
-     * 析构函数
-     *
-     * @access public
-     * @return void
-     */
     public function __destruct() {
         clear_event($this);
     }
 
-    /**
-     * 魔法方法
-     * 读取属性
-     *
-     * @param string $prop
-     * @access public
-     * @return mixed
-     */
+    public function __fill(array $props) {
+        $this->props = array_merge($this->props, $props);
+        $this->is_fresh = false;
+        $this->dirty_props = array();
+        return $this;
+    }
+
     public function __get($prop) {
         return $this->getProp($prop);
     }
 
-    /**
-     * 魔法方法
-     * 设置属性
-     *
-     * @param string $prop
-     * @param mixed $val
-     * @access public
-     * @return void
-     */
     public function __set($prop, $val) {
-        $this->setProp($prop, $val);
+        return $this->setProp($prop, $val);
     }
 
-    /**
-     * 读取属性
-     *
-     * @param string $prop
-     * @access public
-     * @return mixed
-     */
     public function getProp($prop) {
-        if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
-            if ($this->$prop === null && $prop_meta['default'] !== null)
-                return $prop_meta['default'];
-        }
+        if (!$prop_meta = static::getMeta()->getPropMeta($prop))
+            throw Error::undefined_property(get_class($this), $prop);
 
-        return $this->$prop;
+        $val = isset($this->props[$prop]) ? $this->props[$prop] : null;
+        if ($val === null && $prop_meta['default'] !== null)
+            return $prop_meta['default'];
+        return $val;
     }
 
-    /**
-     * 设置属性
-     *
-     * @param mixed $prop
-     * @param mixed $val
-     * @param boolean $strict 严格模式，如果属性不存在则抛出异常，否则忽略
-     * @access public
-     * @return self
-     */
-    public function setProp($prop, $val = null, $strict = true) {
-        if ($this->isReadonly())
-            throw OrmError::readonly($this);
+    public function setProp($prop, $val = null, $static = true) {
+        if (static::$readonly) throw ORM::readonly($this);
 
         if (is_array($prop)) {
             $props = $prop;
@@ -141,7 +84,6 @@ abstract class Data extends ORM implements IData {
         }
 
         $meta = static::getMeta();
-
         foreach ($props as $prop => $val) {
             if (!$prop_meta = $meta->getPropMeta($prop)) {
                 if (!$strict) continue;
@@ -158,16 +100,14 @@ abstract class Data extends ORM implements IData {
         return $this;
     }
 
-    /**
-     * 根据属性数据类型对属性值进行类型转换
-     *
-     * @param array $prop_meta
-     * @param mixed $val
-     * @access protected
-     * @return mixed
-     */
-    protected function formatProp($prop_meta, $val) {
-        $type = $prop_meta['type'] ?: 'mixed';
+    protected function changeProp($prop, $val) {
+        $this->props[$prop] = $val;
+        if (!in_array($prop, $this->dirty_props))
+            $this->dirty_props[] = $prop;
+    }
+
+    protected function formatProp(array $prop_meta, $val) {
+        $type = $prop_meta['type'];
         switch ($type) {
             case 'integer':
             case 'int':
@@ -183,162 +123,70 @@ abstract class Data extends ORM implements IData {
             case 'text':
                 return (string)$val;
         }
-
-        if ($prop_meta['allow_null'] && !$val) return null;
         return $val;
     }
 
-    /**
-     * 修改属性值
-     * setProp()和changeProp()的区别在于
-     * setProp()会检查refuse_update等等
-     * changeProp()主要是内部使用
-     *
-     * @param string $prop
-     * @param mixed $val
-     * @param boolean $direct
-     * @access protected
-     * @return Data
-     */
-    protected function changeProp($prop, $val, $direct = false) {
-        $this->$prop = $val;
-        if ($direct) return $this;
-
-        if ($prop_meta = static::getMeta()->getPropMeta($prop)) {
-            if (!in_array($prop, $this->dirty_props))
-                $this->dirty_props[] = $prop;
-        }
-        return $this;
-    }
-
-    /**
-     * 给领域模型填入数据
-     *
-     * @param array $props
-     * @access public
-     * @return void
-     */
-    public function __fill(array $props) {
-        $this->is_fresh = false;
-
-        foreach ($props as $prop => $val) {
-            if ($val === null) continue;
-            $this->$prop = $val;
-        }
-
-        $this->dirty_props = array();
-    }
-
-    /**
-     * 返回主键值
-     *
-     * @access public
-     * @return mixed
-     */
     public function id() {
         $meta = static::getMeta();
         $prop = $meta->getPropOfField($meta->getPrimaryKey());
-        return $this->$prop;
+        return $this->$props[$prop];
     }
 
-    /**
-     * 是否新建
-     *
-     * @access public
-     * @return boolean
-     */
     public function isFresh() {
         return $this->is_fresh;
     }
 
-    /**
-     * 是否被修改过
-     *
-     * @access public
-     * @return boolean
-     */
     public function isDirty() {
         return (bool)$this->dirty_props;
     }
 
-    /**
-     * 此模型是否只读
-     *
-     * @access public
-     * @return boolean
-     */
     public function isReadonly() {
-        if ($this->is_readonly === null)
-            $this->is_readonly = static::getMeta()->getReadonly();
-
-        return $this->is_readonly;
+        return static::$readonly;
     }
 
-    /**
-     * 以数组方式返回模型属性数据
-     * 只包含字段对应的属性
-     *
-     * @param boolean $only_dirty 只返回修改过的属性
-     * @access public
-     * @return array
-     */
     public function toArray($only_dirty = false) {
+        if (!$only_dirty) return $this->props;
+
         $props = array();
-
-        if ($only_dirty) {
-            foreach ($this->dirty_props as $prop)
-                $props[$prop] = $this->$prop;
-            return $props;
-        }
-
-        foreach (static::getMeta()->getPropMeta() as $prop => $prop_meta)
-            $props[$prop] = $this->$prop;
-
+        foreach ($this->dirty_props as $prop)
+            $props[$prop] = $this->props[$prop];
         return $props;
     }
 
-    /**
-     * 保存当前实例
-     *
-     * @access public
-     * @return mixed
-     */
     public function save() {
+        if (static::$readonly) throw ORM::readonly($this);
         return static::getMapper()->save($this);
     }
 
-    /**
-     * 销毁当前实例
-     *
-     * @access public
-     * @return boolean
-     */
     public function destroy() {
-        return static::getMapper()->delete($this);
+        if (static::$readonly) throw ORM::readonly($this);
+        return static::getMapper()->destroy($this);
     }
 
-    /**
-     * 根据主键生成实例
-     * 不使用参数声明，便于具体的Data方法重载此方法
-     * 如果子类的find参数和这里不一致，会抛出E_STRICT错误
-     *
-     * @static
-     * @access public
-     * @see \Lysine\ORM\DataMapper\Mapper::find
-     * @return void
-     */
-    static public function find(/* $id */) {
-        return call_user_func_array(array(static::getMapper(), 'find'), func_get_args());
+    static public function getMetaDefine() {
+        $meta = array(
+            'storage' => static::$storage,
+            'collection' => static::$collection,
+            'props' => self::$props_meta
+        );
+
+        if (get_called_class() == __CLASS__)
+            return $meta;
+
+        $parent_meta = parent::getMetaDefine();
+        $meta['props'] = array(
+            $parent_meta['props'],
+            $meta['props']
+        );
+
+        return $meta;
     }
 
-    /**
-     * 获得领域模型元数据封装
-     *
-     * @static
-     * @access public
-     * @return Lysine\ORM\DataMapper\Meta
-     */
     static public function getMeta() {
         return static::getMapper()->getMeta();
+    }
+
+    static public function find() {
+        return call_user_func_array(array(static::getMapper(), 'find'), func_get_args());
     }
 }
