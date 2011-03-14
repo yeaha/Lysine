@@ -17,7 +17,6 @@ class Meta {
      * 默认属性元数据定义数组
      */
     static private $default_prop_meta = array(
-        'name' => NULL,             // 属性名
         'field' => NULL,            // 存储字段名
         'type' => NULL,             // 数据类型
         'primary_key' => FALSE,     // 是否主键
@@ -45,9 +44,14 @@ class Meta {
         $default = self::$default_prop_meta;
         foreach ($define['props'] as $prop_name => &$prop_meta) {
             $prop_meta = array_merge($default, $prop_meta);
-            $prop_meta['field'] = $prop_meta['field'] ?: $prop_meta['name'];
+            $prop_meta['field'] = $prop_meta['field'] ?: $prop_name;
+            if ($prop_meta['primary_key']) $this->primary_key = $prop_meta['field'];
             $this->prop_to_field[$prop_name] = $prop_meta['field'];
         }
+
+        if (!$this->primary_key)
+            throw OrmError::undefined_primarykey($this->class);
+
         $this->field_to_prop = array_flip($this->prop_to_field);
         $this->prop_meta = $define['props'];
     }
@@ -62,12 +66,11 @@ class Meta {
         return $collection;
     }
 
-    public function getPrimaryKey($as_field = false) {
+    public function getPrimaryKey($as_prop = false) {
         if (!$primary_key = $this->primary_key)
             throw OrmError::undefined_primarykey($this->class);
 
-        if ($as_field) return $this->getFieldOfProp($primary_key);
-        return $primary_key;
+        return $as_prop ? $this->getPropOfField($primary_key) : $primary_key;
     }
 
     public function getPropMeta($prop = null) {
@@ -81,7 +84,7 @@ class Meta {
     }
 
     public function getPropOfField($field = null) {
-        if ($filed === null) return $this->field_to_prop;
+        if ($field === null) return $this->field_to_prop;
         return isset($this->field_to_prop[$field]) ? $this->field_to_prop[$field] : false;
     }
 

@@ -127,9 +127,8 @@ abstract class Data extends ORM implements IData {
     }
 
     public function id() {
-        $meta = static::getMeta();
-        $prop = $meta->getPropOfField($meta->getPrimaryKey());
-        return $this->$props[$prop];
+        $prop = static::getMeta()->getPrimaryKey($as_prop = true);
+        return $this->props[$prop];
     }
 
     public function isFresh() {
@@ -167,14 +166,16 @@ abstract class Data extends ORM implements IData {
         $meta = array(
             'storage' => static::$storage,
             'collection' => static::$collection,
-            'props' => self::$props_meta
+            'props' => static::$props_meta
         );
 
-        if (get_called_class() == __CLASS__)
+        $called_class = get_called_class();
+        if ($called_class == __CLASS__)
             return $meta;
 
-        $parent_meta = parent::getMetaDefine();
-        $meta['props'] = array(
+        $parent_class = get_parent_class($called_class);
+        $parent_meta = $parent_class::getMetaDefine();
+        $meta['props'] = array_merge(
             $parent_meta['props'],
             $meta['props']
         );
