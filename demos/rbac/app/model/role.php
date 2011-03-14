@@ -9,25 +9,15 @@ use Lysine\ORM\DataMapper\DBData;
  * @uses DBData
  * @package Model
  * @author yangyi <yangyi.cn.gz@gmail.com>
- * @collection public.roles
  */
 class Role extends DBData {
-    /**
-     * 角色编号
-     *
-     * @var integer
-     * @access protected
-     * @primary_key true
-     */
-    protected $id;
-
-    /**
-     * 角色名
-     *
-     * @var string
-     * @access protected
-     */
-    protected $name;
+    static protected $collection = 'public.roles';
+    static protected $props_meta = array(
+        // 角色编号
+        'id' => array('type' => 'int', 'primary_key' => true),
+        // 角色名
+        'name' => array('type' => 'string'),
+    );
 
     static public function findByName($name) {
         return static::select()->where('name = ?', $name)->get(1);

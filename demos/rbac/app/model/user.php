@@ -10,61 +10,19 @@ use Model\Role;
  * @uses DBData
  * @package Model
  * @author yangyi <yangyi.cn.gz@gmail.com>
- * @collection public.users
  */
 class User extends DBData {
+    static protected $collection = 'public.users';
+    static protected $props_meta = array(
+        'id' => array('type' => 'uuid', 'primary_key' => true),
+        'email' => array('type' => 'string'),
+        'passwd' => array('type' => 'string'),
+        'create_time' => array('type' => 'datetime', 'refuse_update' => true),
+        'update_time' => array('type' => 'datetime')
+    );
     static private $instance;
 
-    /**
-     * 用户编号
-     *
-     * @var mixed
-     * @access protected
-     * @primary_key true
-     */
-    protected $id;
-
-    /**
-     * Email
-     *
-     * @var string
-     * @access protected
-     */
-    protected $email;
-
-    /**
-     * 密码 md5
-     *
-     * @var string
-     * @access protected
-     */
-    protected $passwd;
-
-    /**
-     * 注册时间
-     *
-     * @var datetime
-     * @access protected
-     */
-    protected $create_time;
-
-    /**
-     * 最后更新时间
-     *
-     * @var datetime
-     * @access protected
-     */
-    protected $update_time;
-
-    /**
-     * 用户角色
-     *
-     * @var array
-     * @access protected
-     * @internal true
-     * @getter getRoles
-     * @readonly true
-     */
+    // 用户角色
     protected $roles;
 
     public function __construct() {
@@ -175,51 +133,15 @@ class User extends DBData {
  * @uses DBData
  * @package Model
  * @author yangyi <yangyi.cn.gz@gmail.com>
- * @collection public.user_role
  */
 class User_Role extends DBData {
-    /**
-     * 主健编号
-     *
-     * @var integer
-     * @access protected
-     * @primary_key true
-     */
-    protected $id;
-
-    /**
-     * 用户编号
-     *
-     * @var integer
-     * @access protected
-     */
-    protected $user_id;
-
-    /**
-     * 角色编号
-     *
-     * @var integer
-     * @access protected
-     */
-    protected $role_id;
-
-    /**
-     * 过期时间
-     *
-     * @var datetime
-     * @access protected
-     */
-    protected $expire_time;
-
-    /**
-     * 角色名
-     *
-     * @var string
-     * @access protected
-     * @internal
-     * @getter getRoleName
-     */
-    protected $role_name;
+    static protected $collection = 'public.user_role';
+    static protected $props_meta = array(
+        'id' => array('type' => 'int', 'primary_key' => true),
+        'user_id' => array('type' => 'int'),
+        'role_id' => array('type' => 'int'),
+        'expire_time' => array('type' => 'datetime', 'allow_null' => true),
+    );
 
     public function __get($prop) {
         if ($prop == 'role_name')
