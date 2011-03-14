@@ -128,7 +128,7 @@ abstract class Data extends ORM implements IData {
 
     public function id() {
         $prop = static::getMeta()->getPrimaryKey($as_prop = true);
-        return $this->props[$prop];
+        return $this->getProp($prop);
     }
 
     public function isFresh() {
