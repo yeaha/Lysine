@@ -122,6 +122,10 @@ abstract class Data extends ORM implements IData {
             case 'string':
             case 'text':
                 return (string)$val;
+            case 'datetime':
+            case 'date':
+            case 'time':
+                if (!$val) return null;
         }
         return $val;
     }

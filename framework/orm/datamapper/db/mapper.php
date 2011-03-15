@@ -60,7 +60,7 @@ class DBMapper extends Mapper {
      * @return integer affected row count
      */
     protected function doUpdate(Data $data, IStorage $storage = null, $collection = null) {
-        $record = $this->propsToRecord($data->toArray());
+        $record = $this->propsToRecord($data->toArray($only_dirty = true));
 
         $meta = $this->getMeta();
         $adapter = $storage ?: $this->getStorage();
