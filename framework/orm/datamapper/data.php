@@ -93,7 +93,7 @@ abstract class Data extends ORM implements IData {
             if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key']))
                 throw OrmError::refuse_update($this, $prop);
 
-            $val = $this->formatProp($prop_meta, $val);
+            $val = $this->formatProp($prop, $val, $prop_meta);
             $this->changeProp($prop, $val);
         }
 
@@ -106,7 +106,7 @@ abstract class Data extends ORM implements IData {
             $this->dirty_props[] = $prop;
     }
 
-    protected function formatProp(array $prop_meta, $val) {
+    protected function formatProp($prop, $val, array $prop_meta) {
         $type = $prop_meta['type'];
         switch ($type) {
             case 'integer':
