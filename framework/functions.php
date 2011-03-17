@@ -82,6 +82,22 @@ function request($key = null, $default = null) {
     return isset($_REQUEST[$key]) ? $_REQUEST[$key] : put($key, $default);
 }
 
+function has_get($key) {
+    return array_key_exists($key, $_GET);
+}
+
+function has_post($key) {
+    return array_key_exists($key, $_POST);
+}
+
+function has_put($key) {
+    return array_key_exists($key, put());
+}
+
+function has_request($key) {
+    return array_key_exists($key, $_REQUEST);
+}
+
 function env($key = null, $default = false) {
     if ($key === null) return $_ENV;
     $key = strtoupper($key);
@@ -314,60 +330,4 @@ function now($format = null) {
     static $now = null;
     if ($now === null) $now = time();
     return $format ? date($format, $now) : $now;
-}
-
-function add($a, $b) {
-    return $a + $b;
-}
-
-function sub($a, $b) {
-    return $a - $b;
-}
-
-function mul($a, $b) {
-    return $a * $b;
-}
-
-function div($a, $b) {
-    return $a / $b;
-}
-
-function mod($a, $b) {
-    return $a % $b;
-}
-
-function divmod($a, $b) {
-    return array(floor(div($a, $b)), mod($a, $b));
-}
-
-function inc($n) {
-    return $n + 1;
-}
-
-function dec($n) {
-    return $n - 1;
-}
-
-function eq($a, $b) {
-    return $a === $b;
-}
-
-function comp($a, $b) {
-    return $a == $b;
-}
-
-function great($a, $b) {
-    return $a > $b;
-}
-
-function less($a, $b) {
-    return $a < $b;
-}
-
-function negative($n) {
-    return $n < 0;
-}
-
-function positive($n) {
-    return $n > 0;
 }
