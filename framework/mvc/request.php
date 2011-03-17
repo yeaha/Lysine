@@ -42,12 +42,12 @@ class Request extends Singleton {
     public function file() {
     }
 
-    public function cookie() {
-        return call_user_func_array('cookie', func_get_args());
+    public function cookie($key = null, $default = false) {
+        return cookie($key, $default);
     }
 
-    public function session() {
-        return call_user_func_array('session', func_get_args());
+    public function session($key = null, $default = false) {
+        return session($key, $default);
     }
 
     public function header($key) {

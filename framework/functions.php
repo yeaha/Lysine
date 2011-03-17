@@ -110,14 +110,16 @@ function server($key = null, $default = false) {
     return isset($_SERVER[$key]) ? $_SERVER[$key] : $default;
 }
 
-function session() {
+function session($key = null, $default = false) {
     if (!isset($_SESSION)) session_start();
-    return array_get($_SESSION, func_get_args());
+    if ($key === null) return $_SESSION;
+    return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
 }
 
-function cookie() {
-    if (!isset($_COOKIE)) return false;
-    return array_get($_COOKIE, func_get_args());
+function cookie($key = null, $default = false) {
+    if (!isset($_COOKIE)) return array();
+    if ($key === null) return $_COOKIE;
+    return isset($_COOKIE[$key]) ? $_COOKIE[$key] : $default;
 }
 
 function logger($name) {
