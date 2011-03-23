@@ -204,7 +204,7 @@ class Router extends Router_Abstract {
         list($class, $args) = $this->match($url);
         if (DEBUG) $logger->debug('Match url controller as '. $class);
 
-        if (!$class || !class_exists($class)) throw HttpError::page_not_found($url, array('controller' => $class));
+        if (!$class || !class_exists($class)) throw HttpError::page_not_found(array('controller' => $class));
 
         if ($params) $args = array_merge($args, $params);
         fire_event($this, BEFORE_DISPATCH_EVENT, array($url, $class, $args));
@@ -246,7 +246,7 @@ class Router extends Router_Abstract {
         // 不检查method是否存在，用is_callable()
         // 保留__call()重载方法的方式
         if (!is_callable(array($controller, $method)))
-            throw HttpError::method_not_allowed($method, array(
+            throw HttpError::method_not_allowed(array(
                 'url' => $url,
                 'controller' => $class,
             ));

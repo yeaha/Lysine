@@ -107,74 +107,77 @@ namespace Lysine {
             return Response::httpStatus($this->getCode());
         }
 
-        static public function bad_request(array $more) {
+        static public function bad_request(array $more = array()) {
             return new static('Bad Request', 400, null, $more);
         }
 
-        static public function unauthorized(array $more) {
+        static public function unauthorized(array $more = array()) {
             return new static('Unauthorized', 401, null, $more);
         }
 
-        static public function forbidden(array $more) {
+        static public function forbidden(array $more = array()) {
             return new static('Forbidden', 403, null, $more);
         }
 
-        static public function page_not_found($url, $more = array()) {
-            $more['url'] = $url;
+        static public function page_not_found(array $more = array()) {
+            if (!isset($more['url']))
+                $more['url'] = req()->requestUri();
             return new static('Page Not Found', 404, null, $more);
         }
 
-        static public function method_not_allowed($method, array $more = array()) {
-            $more['method'] = $method;
+        static public function method_not_allowed(array $more = array()) {
+            if (!isset($more['method']))
+                $more['method'] = req()->method();
             return new static('Method Not Allowed', 405, null, $more);
         }
 
-        static public function not_acceptable(array $more) {
+        static public function not_acceptable(array $more = array()) {
             return new static('Not Acceptable', 406, null, $more);
         }
 
-        static public function request_timeout(array $more) {
+        static public function request_timeout(array $more = array()) {
             return new static('Request Time-out', 408, null, $more);
         }
 
-        static public function conflict(array $more) {
+        static public function conflict(array $more = array()) {
             return new static('Conflict', 409, null, $more);
         }
 
-        static public function gone(array $more) {
+        static public function gone(array $more = array()) {
             return new static('Gone', 410, null, $more);
         }
 
-        static public function precondition_failed(array $more) {
+        static public function precondition_failed(array $more = array()) {
             return new static('Precondition Failed', 412, null, $more);
         }
 
-        static public function request_entity_too_large(array $more) {
+        static public function request_entity_too_large(array $more = array()) {
             return new static('Request Entity Too Large', 413, null, $more);
         }
 
-        static public function unsupported_media_type(array $more) {
+        static public function unsupported_media_type(array $more = array()) {
             return new static('Unsupported Media Type', 415, null, $more);
         }
 
-        static public function internal_server_error(array $more) {
+        static public function internal_server_error(array $more = array()) {
             return new static('Internal Server Error', 500, null, $more);
         }
 
-        static public function not_implemented($method, array $more = array()) {
-            $more['method'] = $method;
+        static public function not_implemented(array $more = array()) {
+            if (!isset($more['method']))
+                $more['method'] = req()->method();
             return new static('Not Implemented', 501, null, $more);
         }
 
-        static public function bad_gateway(array $more) {
+        static public function bad_gateway(array $more = array()) {
             return new static('Bad Gateway', 502, null, $more);
         }
 
-        static public function service_unavailable(array $more) {
+        static public function service_unavailable(array $more = array()) {
             return new static('Service Unavailable', 503, null, $more);
         }
 
-        static public function gateway_timeout(array $more) {
+        static public function gateway_timeout(array $more = array()) {
             return new static('Gateway Time-out', 504, null, $more);
         }
     }
