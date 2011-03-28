@@ -13,6 +13,20 @@ use Lysine\ORM\DataMapper\DBMapper;
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 abstract class DBData extends Data {
+    protected function formatProp($prop, $val, array $prop_meta) {
+        $val = parent::formatProp($prop, $val, $prop_meta);
+
+        if ($prop_meta['allow_null']) {
+            if ($prop_meta['default'] === $val)
+                return null;
+        } else {
+            if ($val === null)
+                return $prop_meta['default'];
+        }
+
+        return $val;
+    }
+
     /**
      * 获得数据映射关系封装
      *

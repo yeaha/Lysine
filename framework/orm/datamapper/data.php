@@ -94,6 +94,8 @@ abstract class Data extends ORM implements IData {
                 throw OrmError::refuse_update($this, $prop);
 
             $val = $this->formatProp($prop, $val, $prop_meta);
+            if (!$prop_meta['allow_null'] && $val === null)
+                throw OrmError::not_allow_null($this, $prop);
             $this->changeProp($prop, $val);
         }
 
@@ -107,14 +109,14 @@ abstract class Data extends ORM implements IData {
     }
 
     protected function formatProp($prop, $val, array $prop_meta) {
+        if ($val === null) return $val;
+        if ($val === '') return null;
+
         $type = $prop_meta['type'];
         switch ($type) {
-            case 'integer':
             case 'int':
+            case 'integer':
                 return (int)$val;
-            case 'boolean':
-            case 'bool':
-                return (bool)$val;
             case 'float':
             case 'real':
             case 'double':
@@ -122,11 +124,8 @@ abstract class Data extends ORM implements IData {
             case 'string':
             case 'text':
                 return (string)$val;
-            case 'datetime':
-            case 'date':
-            case 'time':
-                if (!$val) return null;
         }
+
         return $val;
     }
 
