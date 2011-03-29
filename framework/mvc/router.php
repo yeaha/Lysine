@@ -223,19 +223,6 @@ class Router extends Router_Abstract {
         // head方法除了不输出数据之外，和get方法没有区别
         if ($method == 'head') $method = 'get';
 
-        if ($request->isAJAX()) {
-            if (method_exists($controller, 'ajax_'. $method)) {
-                $method = 'ajax_'. $method;
-            } elseif (method_exists($controller, 'ajax')) {
-                $method = 'ajax';
-            }
-        } elseif ($request->isFlash()) {
-            if (method_exists($controller, 'flash_'. $method)) {
-                $method = 'flash_'. $method;
-            } elseif (method_exists($controller, 'flash')) {
-                $method = 'flash';
-            }
-        }
         if (DEBUG) {
             $log = 'Call controller ['. $class .'] method ['. $method .']';
             if ($args) $log .= ' with '. json_encode($args);
