@@ -191,7 +191,7 @@ abstract class Mapper {
 
         $props = $data->toArray();
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
-            if (!$prop_meta['allow_null'] && !isset($props[$prop]))
+            if (!$prop_meta['allow_null'] && !isset($props[$prop]) && $prop_meta['default'] === null)
                 throw OrmError::not_allow_null($data, $prop);
         }
 
