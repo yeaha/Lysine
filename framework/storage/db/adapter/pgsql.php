@@ -595,7 +595,7 @@ EOF;
      * @return string
      */
     public static function encodeArray(array $array) {
-        return sprintf('{"%s"}', implode('","', $array));
+        return $array ? sprintf('{"%s"}', implode('","', $array)) : null;
     }
 
     /**
@@ -629,6 +629,8 @@ EOF;
      * @return string
      */
     public static function encodeHstore(array $array, $new_style = false) {
+        if (!$array) return null;
+
         if (!$new_style) {
             $result = array();
             foreach ($array as $k => $v) {
