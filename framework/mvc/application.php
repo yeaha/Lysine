@@ -15,6 +15,8 @@ use Lysine\Utils\Singleton;
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 class Application extends Singleton {
+    static public $support_method = array('HEAD', 'GET', 'POST', 'PUT', 'DELETE');
+
     /**
      * 路由器
      *
@@ -173,7 +175,7 @@ class Application extends Singleton {
      */
     public function run() {
         $req = req();
-        if (!in_array($req->method(), array('get', 'post', 'put', 'delete', 'head')))
+        if (!in_array($req->method(), static::$support_method))
             throw HttpError::not_implemented();
 
         $url = parse_url($req->requestUri());

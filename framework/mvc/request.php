@@ -60,13 +60,13 @@ class Request extends Singleton {
     public function method() {
         if ($this->method) return $this->method;
 
-        $method = strtolower($this->header('x-http-method-override') ?: server('request_method'));
+        $method = strtoupper($this->header('x-http-method-override') ?: server('request_method'));
         if ($method != 'post') return $this->method = $method;
 
         // 某些js库的ajax封装使用这种方式
         $method = post('_method', $method);
         unset($_POST['_method']);
-        return $this->method = strtolower($method);
+        return $this->method = strtoupper($method);
     }
 
     public function requestUri() {
@@ -93,23 +93,23 @@ class Request extends Singleton {
     }
 
     public function isGET() {
-        return ($this->method() === 'get') ?: $this->isHEAD();
+        return ($this->method() === 'GET') ?: $this->isHEAD();
     }
 
     public function isPOST() {
-        return $this->method() === 'post';
+        return $this->method() === 'POST';
     }
 
     public function isPUT() {
-        return $this->method() === 'put';
+        return $this->method() === 'PUT';
     }
 
     public function isDELETE() {
-        return $this->method() === 'delete';
+        return $this->method() === 'DELETE';
     }
 
     public function isHEAD() {
-        return $this->method() === 'head';
+        return $this->method() === 'HEAD';
     }
 
     public function isAJAX() {

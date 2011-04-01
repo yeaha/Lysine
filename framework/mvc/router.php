@@ -221,7 +221,7 @@ class Router extends Router_Abstract {
         $request = req();
         $method = $request->method();
         // head方法除了不输出数据之外，和get方法没有区别
-        if ($method == 'head') $method = 'get';
+        if ($method == 'HEAD') $method = 'GET';
 
         if (DEBUG) {
             $log = 'Call controller ['. $class .'] method ['. $method .']';
@@ -235,7 +235,7 @@ class Router extends Router_Abstract {
         if (!is_callable(array($controller, $method)))
             throw HttpError::method_not_allowed(array(
                 'url' => $url,
-                'controller' => $class,
+                'class' => $class,
             ));
         $resp = call_user_func_array(array($controller, $method), $args);
 

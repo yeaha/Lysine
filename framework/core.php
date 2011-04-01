@@ -1,6 +1,7 @@
 <?php
 namespace Lysine {
     use Lysine\ORM;
+    use Lysine\MVC\Application;
     use Lysine\MVC\Response;
     use Lysine\HttpError;
 
@@ -104,7 +105,10 @@ namespace Lysine {
 
     class HttpError extends Error {
         public function getHeader() {
-            return Response::httpStatus($this->getCode());
+            $header = array(Response::httpStatus($this->getCode()));
+            if (isset($this->header))
+                $header = array_merge($header, $this->header);
+            return $header;
         }
 
         static public function bad_request(array $more = array()) {
@@ -128,6 +132,15 @@ namespace Lysine {
         static public function method_not_allowed(array $more = array()) {
             if (!isset($more['method']))
                 $more['method'] = req()->method();
+
+            if (isset($more['class'])) {
+                $class_method = get_class_methods($more['class']);
+                $support_method = Application::$support_method;
+
+                if ($allow = array_intersect(array_map('strtoupper', $class_method), $support_method))
+                    $more['header'] = array('Allow: '. implode(', ', $allow));
+            }
+
             return new static('Method Not Allowed', 405, null, $more);
         }
 
@@ -290,9 +303,9 @@ namespace Lysine {
             die(1);
         }
 
-        $header = array(
-            Response::httpStatus($code) ?: Response::httpStatus(500),
-        );
+        $header = $exception instanceof HttpError
+                ? $exception->getHeader()
+                : Response::httpStatus(500);
 
         if (DEBUG) {
             $message = strip_tags($exception->getMessage());
