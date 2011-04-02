@@ -61,7 +61,7 @@ class Request extends Singleton {
         if ($this->method) return $this->method;
 
         $method = strtoupper($this->header('x-http-method-override') ?: server('request_method'));
-        if ($method != 'post') return $this->method = $method;
+        if ($method != 'POST') return $this->method = $method;
 
         // 某些js库的ajax封装使用这种方式
         $method = post('_method', $method);
