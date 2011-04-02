@@ -305,7 +305,7 @@ namespace Lysine {
 
         $header = $exception instanceof HttpError
                 ? $exception->getHeader()
-                : Response::httpStatus(500);
+                : array(Response::httpStatus(500));
 
         if (DEBUG) {
             $message = strip_tags($exception->getMessage());
