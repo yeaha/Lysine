@@ -46,6 +46,6 @@ abstract class DBData extends Data {
      * @return Lysine\Storage\DB\Select
      */
     static public function select() {
-        return static::getMapper()->select()->setCols(array_keys(static::getMeta()->fieldOfProp()));
+        return static::getMapper()->select();
     }
 }
