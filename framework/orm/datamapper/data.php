@@ -63,6 +63,10 @@ abstract class Data extends ORM implements IData {
         return $this->setProp($prop, $val);
     }
 
+    public function hasProp($prop) {
+        return (bool)static::getMeta()->getPropMeta($prop);
+    }
+
     public function getProp($prop) {
         if (!$prop_meta = static::getMeta()->getPropMeta($prop))
             throw Error::undefined_property(get_class($this), $prop);
