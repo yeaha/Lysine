@@ -40,6 +40,7 @@ class Memcached extends Cache {
     }
 
     public function set($key, $val, $life_time = null) {
+        if ($life_time === null) $life_time = $this->life_time;
         $life_time = $life_time ? (time() + $life_time) : 0;
         if (DEBUG) \Lysine\logger('cache')->debug('Memcached set key '. (is_array($key) ? implode(',', $key) : $key) .' with life_time '. $life_time);
 
@@ -48,6 +49,7 @@ class Memcached extends Cache {
     }
 
     public function mset(array $data, $life_time = null) {
+        if ($life_time === null) $life_time = $this->life_time;
         $life_time = $life_time ? (time() + $life_time) : 0;
         if (DEBUG) \Lysine\logger('cache')->debug('Memcached set multiple keys '. implode(',', array_keys($data)) .' with life_time '. $life_time);
 
