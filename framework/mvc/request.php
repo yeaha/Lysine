@@ -72,9 +72,7 @@ class Request extends Singleton {
     public function requestUri() {
         if ($this->requestUri !== null) return $this->requestUri;
 
-        if ($uri = server('http_x_rewrite_url')) return $this->requestUri = $uri;
-
-        if ($uri = server('request_uri')) return $this->requestUri = $uri;
+        if ($uri = server('http_x_rewrite_url') ?: server('request_uri')) return $this->requestUri = $uri;
 
         if ($uri = server('orig_path_info')) {
             $query = server('query_string');
@@ -159,10 +157,13 @@ class Request extends Singleton {
         return server('http_referer');
     }
 
-    public function ip() {
-        $ip = server('remote_addr');
-        if (!function_exists('filter_var')) return $ip;
+    public function ip($proxy = false) {
+        $ip = null;
+        if ($proxy)
+            $ip = server('http_client_ip') ?: server('http_x_forwarded_for');
+        $ip = $ip ?: server('remote_addr');
 
+        if (!function_exists('filter_var')) return $ip;
         return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) ?: '0.0.0.0';
     }
 }
