@@ -637,7 +637,7 @@ EOF;
                 $v = str_replace('"', '\"', $v);
                 $result[] = sprintf('"%s"=>"%s"', $k, $v);
             }
-            return new Expr(implode(',', $result) .'::hstore');
+            return new Expr('\''. implode(',', $result) .'\'::hstore');
         } else {
             $result = 'hstore(ARRAY[%s], ARRAY[%s])';
             $cols = $vals = array();
