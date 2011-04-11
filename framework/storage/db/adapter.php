@@ -290,9 +290,8 @@ abstract class Adapter implements IAdapter {
             if ($val instanceof Expr) {
                 $vals[] = $val;
             } else {
-                $holder = ':'. $col;
-                $vals[] = $holder;
-                $bind[$holder] = $val;
+                $vals[] = '?';
+                $bind[] = $val;
             }
         }
 
