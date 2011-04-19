@@ -151,36 +151,6 @@ class Select {
     }
 
     /**
-     * 直接调用查询结果对象
-     *
-     * <code>
-     * 获得结果的第2行
-     * $select->getCols(1);
-     * 等于
-     * $select->execute()->getCols(1);
-     * </code>
-     *
-     * @param string $fn
-     * @param mixed $args
-     * @access public
-     * @return mixed
-     */
-    public function __call($fn, $args) {
-        $sth = $this->execute();
-        return call_user_func_array(array($sth, $fn), $args);
-    }
-
-    /**
-     * 魔法方法
-     *
-     * @access public
-     * @return void
-     */
-    public function __clone() {
-        $this->reset();
-    }
-
-    /**
      * 复位到初始状态
      * 只保留from和adapter
      *
