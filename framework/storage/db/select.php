@@ -495,6 +495,26 @@ class Select {
     }
 
     /**
+     * 生成sql语句的from部分
+     *
+     * $select->from($other_select)
+     * select * from (select * from table) as t
+     *
+     * @access public
+     * @return array
+     */
+    public function compileFrom() {
+        $bind = array();
+        if ($this->from instanceof Select) {
+            list($sql, $bind) = $this->from->compile();
+            $from = sprintf('(%s) AS %s', $sql, $this->adapter->qtab(uniqid()));
+        } else {
+            $from = $this->adapter->qtab($this->from);
+        }
+        return array($from, $bind);
+    }
+
+    /**
      * 生成sql语句
      *
      * @access public
@@ -505,9 +525,11 @@ class Select {
 
         $cols = empty($this->cols) ? '*' : implode(',', $adapter->qcol($this->cols));
 
-        $sql = sprintf('SELECT %s FROM %s', $cols, $adapter->qtab($this->from));
+        list($from, $from_bind) = $this->compileFrom();
+        $sql = sprintf('SELECT %s FROM %s', $cols, $from);
 
         list($where, $bind) = $this->compileWhere();
+        if ($from_bind) $bind = array_merge($from_bind, $bind);
         if ($where) $sql .= sprintf(' WHERE %s', $where);
 
         if ($this->group) {
