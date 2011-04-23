@@ -22,8 +22,8 @@ set_exception_handler(function($exception) {
     die(1);
 });
 
+// 日志配置
+use Lysine\Utils\Logging;
 if (DEBUG) {
-    // 日志配置
-    use Lysine\Utils\Logging;
     Lysine\logger()->setLevel(Logging::INFO)->addHandler(new Logging\FileHandler('lysine_log'));
 }
