@@ -2,7 +2,7 @@
 return array(
     'app' => array(
         'view' => array(
-            'view_dir' => ROOT_DIR .'/app/view',
+            'view_dir' => ROOT_DIR .'/view',
         ),
         'rbac' => require ROOT_DIR .'/config/_rbac.php',
     ),

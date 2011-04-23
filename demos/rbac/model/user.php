@@ -47,7 +47,7 @@ class User extends DBData {
         if (!$role) throw new \Exception('Invalid role name');
 
         $user_role = new User_Role();
-        $user_role->set(array(
+        $user_role->setProp(array(
             'user_id' => $user_id,
             'role_id' => $role->id(),
             'expire_time' => $expire_time
