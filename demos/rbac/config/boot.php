@@ -6,7 +6,7 @@ require __DIR__ .'/../../../framework/core.php';
 Lysine\Utils\Profiler::instance()->start('__MAIN__');
 Lysine\Config::import(require ROOT_DIR .'/config/_config.php');
 
-app()->includePath(ROOT_DIR .'/app');
+app()->includePath(ROOT_DIR);
 
 set_exception_handler(function($exception) {
     if (PHP_SAPI == 'cli') {  // run in shell
