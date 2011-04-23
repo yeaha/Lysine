@@ -172,7 +172,7 @@ class Router extends Router_Abstract {
     protected function match($url) {
         foreach ($this->dispatch_rewrite as $re => $class) {
             if (preg_match($re, $url, $match)) {
-                if (DEBUG) \Lysine\logger('mvc')->debug('Found url rewrite rule: '. $re);
+                if (DEBUG) \Lysine\logger('mvc')->debug('Match rewrite rule: '. $re);
                 return array($class, array_slice($match, 1));
             }
         }
@@ -199,10 +199,10 @@ class Router extends Router_Abstract {
         if (DEBUG) $logger = \Lysine\logger('mvc');
 
         $url = strtolower(rtrim($url, '/'));
-        if (DEBUG) $logger->debug('Dispatch url:'. $url);
+        if (DEBUG) $logger->debug('Request url:'. $url);
 
         list($class, $args) = $this->match($url);
-        if (DEBUG) $logger->debug('Match url controller as '. $class);
+        if (DEBUG) $logger->debug('Dispatch url to controller: '. $class);
 
         if (!$class || !class_exists($class)) throw HttpError::page_not_found(array('controller' => $class));
 
