@@ -6,7 +6,7 @@ require __DIR__ .'/../../../framework/core.php';
 Lysine\Utils\Profiler::instance()->start('__MAIN__');
 Lysine\Config::import(require ROOT_DIR .'/config/_config.php');
 
-app()->includePath(ROOT_DIR .'/app');
+app()->includePath(ROOT_DIR);
 
 set_exception_handler(function($exception) {
     if (PHP_SAPI == 'cli') {  // run in shell
@@ -22,6 +22,8 @@ set_exception_handler(function($exception) {
     die(1);
 });
 
-// 日志配置
-use Lysine\Utils\Logging;
-Lysine\logger()->setLevel(Logging::INFO)->addHandler(new Logging\FileHandler('lysine_log'));
+if (DEBUG) {
+    // 日志配置
+    use Lysine\Utils\Logging;
+    Lysine\logger()->setLevel(Logging::INFO)->addHandler(new Logging\FileHandler('lysine_log'));
+}
