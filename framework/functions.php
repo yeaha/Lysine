@@ -31,6 +31,16 @@ if (!function_exists('render_view')) {
     }
 }
 
+if (!function_exists('now')) {
+    // 得到当前时间
+    // return integer or string
+    function now($format = null) {
+        static $now = null;
+        if ($now === null) $now = time();
+        return $format ? date($format, $now) : $now;
+    }
+}
+
 function cfg($path = null) {
     $path = is_array($path) ? $path : func_get_args();
     return \Lysine\Config::get($path);
@@ -156,14 +166,6 @@ function pg_decode_hstore($hstore) {
 // 把转换php数组为postgresql hstore数据
 function pg_encode_hstore($php_array, $new_style = false) {
     return Pgsql::encodeHstore($php_array, $new_style);
-}
-
-function url() {
-    static $router_class;
-    if (!$router_class) $router_class = get_class(app()->getRouter());
-
-    $args = func_get_args();
-    return forward_static_call_array(array($router_class, 'url'), $args);
 }
 
 /**
@@ -313,24 +315,4 @@ function cal_page($total, $page_size, $current_page = 1) {
     }
 
     return $page;
-}
-
-function dump($var) {
-    echo '<pre>';
-    var_dump($var);
-    echo '</pre>';
-}
-
-/**
- * 当前unix timestamp
- * 可指定format格式化返回值
- *
- * @param string $format
- * @access public
- * @return mixed
- */
-function now($format = null) {
-    static $now = null;
-    if ($now === null) $now = time();
-    return $format ? date($format, $now) : $now;
 }
