@@ -86,7 +86,9 @@ class Response extends Singleton {
             $path = func_get_args();
             $val = array_pop($path);
         }
-        return array_set($this->session, $path, $val);
+
+        $this->session[] = array($path, $val);
+        return true;
     }
 
     public function setHeader($name, $val = null) {
@@ -118,8 +120,12 @@ class Response extends Singleton {
 
         if ($this->session) {
             if (!isset($_SESSION)) session_start();
-            foreach ($this->session as $name => $val)
-                $_SESSION[$name] = $val;
+
+            foreach ($this->session as $sess) {
+                list($path, $val) = $sess;
+                array_set($_SESSION, $path, $val);
+            }
+
             $this->session = array();
         }
 
