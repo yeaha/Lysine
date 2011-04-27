@@ -80,8 +80,13 @@ class Response extends Singleton {
     }
 
     public function setSession($name, $val) {
-        $this->session[$name] = $val;
-        return $this;
+        if (is_array($name)) {
+            $path = $name;
+        } else {
+            $path = func_get_args();
+            $val = array_pop($path);
+        }
+        return array_set($this->session, $path, $val);
     }
 
     public function setHeader($name, $val = null) {

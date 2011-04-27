@@ -41,7 +41,7 @@ function set_header($name, $val = null) {
 }
 
 function set_session($name, $val) {
-    return resp()->setSession($name, $val);
+    return call_user_func_array(array(resp(), 'setSession'), func_get_args());
 }
 
 function set_cookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false) {
@@ -110,16 +110,17 @@ function server($key = null, $default = false) {
     return isset($_SERVER[$key]) ? $_SERVER[$key] : $default;
 }
 
-function session($key = null, $default = false) {
+function session($path = null) {
     if (!isset($_SESSION)) session_start();
-    if ($key === null) return $_SESSION;
-    return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
+    if ($path === null) return $_SESSION;
+
+    return array_get($_SESSION, is_array($path) ? $path : func_get_args());
 }
 
-function cookie($key = null, $default = false) {
-    if (!isset($_COOKIE)) return array();
-    if ($key === null) return $_COOKIE;
-    return isset($_COOKIE[$key]) ? $_COOKIE[$key] : $default;
+function cookie($path = null) {
+    if ($path === null) return $_COOKIE;
+
+    return array_get($_COOKIE, is_array($path) ? $path : func_get_args());
 }
 
 function logger($name) {
