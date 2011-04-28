@@ -76,6 +76,7 @@ class User extends DBData {
                                                ->where('expire_time is null or expire_time > now()');
         return $this->roles = Role::select()->setCols('name')
                                             ->whereIn('id', $user_role_select)
+                                            ->execute()
                                             ->getCols();
     }
 
