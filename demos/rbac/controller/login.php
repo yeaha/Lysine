@@ -10,7 +10,7 @@ class Login {
 
     public function post() {
         if ($user = User::login(post('email'), post('passwd'))) {
-            $next = get('from', url('user'));
+            $next = get('from', '/user');
             return app()->redirect($next);
         }
 
