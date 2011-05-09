@@ -611,7 +611,10 @@ EOF;
         if (!$hstore) return $result;
 
         foreach (preg_split('/"\s*,\s*"/', $hstore) as $pair) {
-            list($k, $v) = explode('=>', $pair);
+            $pair = explode('=>', $pair);
+            if (count($pair) !== 2) continue;
+
+            list($k, $v) = $pair;
             $k = trim($k, '\'" ');
             $v = trim($v, '\'" ');
             $result[$k] = $v;
