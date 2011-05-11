@@ -611,7 +611,7 @@ EOF;
         if (!$hstore) return $result;
 
         foreach (preg_split('/"\s*,\s*"/', $hstore) as $pair) {
-            $pair = explode('=>', $pair);
+            $pair = explode('=>', $pair, 1);
             if (count($pair) !== 2) continue;
 
             list($k, $v) = $pair;
@@ -647,14 +647,16 @@ EOF;
             $result = 'hstore(ARRAY[%s], ARRAY[%s])';
             $cols = $vals = array();
             foreach ($array as $k => $v) {
+                $v = str_replace('\\', '\\\\', $v);
+                $v = str_replace("'", "\\'", $v);
                 $cols[] = $k;
-                $vals[] = str_replace("'", "''", $v);
+                $vals[] = $v;
             }
 
             return new Expr(sprintf(
                 $result,
                 "'". implode("','", $cols) ."'",
-                "'". implode("','", $vals) ."'"
+                "E'". implode("',E'", $vals) ."'"
             ));
         }
     }
