@@ -637,10 +637,12 @@ EOF;
         if (!$new_style) {
             $result = array();
             foreach ($array as $k => $v) {
-                $v = str_replace('"', '\"', $v);
+                $v = str_replace('\\', '\\\\\\\\', $v);
+                $v = str_replace('"', '\\\\"', $v);
+                $v = str_replace("'", "\\'", $v);
                 $result[] = sprintf('"%s"=>"%s"', $k, $v);
             }
-            return new Expr('\''. implode(',', $result) .'\'::hstore');
+            return new Expr('E\''. implode(',', $result) .'\'::hstore');
         } else {
             $result = 'hstore(ARRAY[%s], ARRAY[%s])';
             $cols = $vals = array();
