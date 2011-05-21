@@ -1,0 +1,2 @@
+*   废弃ActiveRecord，有DataMapper就足够了
+*   增加对storage collection的封装，比如DBTable
