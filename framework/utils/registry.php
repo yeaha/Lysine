@@ -58,6 +58,6 @@ class Registry {
      * @return void
      */
     static public function remove($key) {
-        unset(self::$instance[$key]);
+        unset(self::$items[$key]);
     }
 }
