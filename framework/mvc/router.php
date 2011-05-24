@@ -199,7 +199,7 @@ class Router extends Router_Abstract {
         if (DEBUG) $logger = \Lysine\logger('mvc');
 
         $url = strtolower(rtrim($url, '/'));
-        if (DEBUG) $logger->debug('Request url:'. $url);
+        if (DEBUG) $logger->info('Request url:'. req()->requestUri());
 
         list($class, $args) = $this->match($url);
         if (DEBUG) $logger->debug('Dispatch url to controller: '. $class);
