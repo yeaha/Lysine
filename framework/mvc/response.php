@@ -74,7 +74,7 @@ class Response extends Singleton {
         return $this;
     }
 
-    public function setCookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false) {
+    public function setCookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = true) {
         $this->cookie[$name] = array($value, $expire, $path, $domain, $secure, $httponly);
         return $this;
     }

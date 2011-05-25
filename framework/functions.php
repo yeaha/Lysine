@@ -54,7 +54,7 @@ function set_session($name, $val) {
     return call_user_func_array(array(resp(), 'setSession'), func_get_args());
 }
 
-function set_cookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false) {
+function set_cookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = true) {
     return resp()->setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
 }
 
