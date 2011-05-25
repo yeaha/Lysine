@@ -6,6 +6,7 @@ namespace Lysine {
     use Lysine\HttpError;
 
     defined('DEBUG') or define('DEBUG', false);
+    require __DIR__ .'/functions.php';
 
     class Config {
         static protected $config = array();
@@ -280,17 +281,13 @@ namespace Lysine {
         if ($domain) $name .= '.'. strtoupper($domain);
         return \Lysine\Utils\Logging::getLogger($name);
     }
-
     spl_autoload_register('Lysine\autoload');
-    require __DIR__ .'/functions.php';
 
     // $terminate = true 处理完后直接结束
     function __on_exception($exception, $terminate = true) {
-        if (DEBUG) {
-            try {
-                \Lysine\logger()->exception($exception, 8);
-            } catch (\Exception $ex) {
-            }
+        try {
+            \Lysine\logger()->exception($exception, 8);
+        } catch (\Exception $ex) {
         }
 
         $code = $exception instanceof HttpError
