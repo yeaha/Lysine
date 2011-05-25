@@ -27,6 +27,7 @@ if (!function_exists('render_view')) {
     function render_view($file, $vars = null) {
         static $view;
         if (!$view) $view = new MVC\View;
+        if (DEBUG) \Lysine\logger('mvc')->info('Render view file '. $file);
         return $view->reset()->render($file, $vars);
     }
 }

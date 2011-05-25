@@ -173,7 +173,6 @@ class View {
      */
     public function render($file, array $vars = null) {
         $file = $this->findFile($file);
-        if (DEBUG) \Lysine\logger('mvc')->info('Render view file '. $file);
 
         if ($vars) {
             foreach ($vars as $key => $val)
