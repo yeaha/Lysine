@@ -110,10 +110,9 @@ abstract class Data extends ORM implements IData {
 
     protected function changeProp($prop, $val, array $prop_meta) {
         if (!isset($this->props[$prop])) {
-            if ($val === null) return true;
-            if ($val === $prop_meta['default']) return true;
+            if ($val === null || $val === $prop_meta['default']) return;
         } elseif ($val === $this->props[$prop]) {
-            return true;
+            return;
         }
 
         $this->props[$prop] = $val;
