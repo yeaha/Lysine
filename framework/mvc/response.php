@@ -102,22 +102,9 @@ class Response extends Singleton {
         return $this;
     }
 
-    public function sendHeader($only_header = false) {
-        if (is_integer($this->code) && $this->code != 200) {
-            if ($status = self::httpStatus($this->code))
-                header($status);
-        }
-
-        foreach ($this->header as $name => $value) {
-            $header = ($value === null)
-                    ? $name
-                    : $name .': '. $value;
-            header($header);
-        }
-        $this->header = array();
-
-        if ($only_header) return $this;
-
+    public function sendHeader() {
+        // session必须要先于header处理
+        // 否则会覆盖header内对于Cache-Control的处理
         if ($this->session) {
             if (!isset($_SESSION)) session_start();
 
@@ -134,6 +121,19 @@ class Response extends Singleton {
             setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
         }
         $this->cookie = array();
+
+        if (is_integer($this->code) && $this->code != 200) {
+            if ($status = self::httpStatus($this->code))
+                header($status);
+        }
+
+        foreach ($this->header as $name => $value) {
+            $header = ($value === null)
+                    ? $name
+                    : $name .': '. $value;
+            header($header);
+        }
+        $this->header = array();
 
         return $this;
     }
