@@ -585,6 +585,19 @@ class Select {
     }
 
     /**
+     * 使用定义的预处理方法处理数据库返回的行
+     *
+     * @param array $row 
+     * @access public
+     * @return mixed
+     */
+    public function process(array $row) {
+        return $this->processor
+             ? call_user_func($this->processor, $row)
+             : $row;
+    }
+
+    /**
      * 以原生数组返回数据
      *
      * @access public
@@ -716,20 +729,20 @@ class Select {
  */
 class SelectIterator implements \Iterator {
     private $res;
-    private $processor;
+    private $select;
     private $row_count;
     private $pos = 0;
 
     public function __construct(Select $select) {
         $this->res = $select->execute();
         $this->row_count = $this->res->rowCount();
-        $this->processor = $select->processor;
+        $this->select = $select;
     }
 
     public function current() {
-        $row = $this->res->getRow();
-        if ($this->processor) $row = call_user_func($this->processor, $row);
-        return $row;
+        return $this->select->process(
+            $this->res->getRow()
+        );
     }
 
     public function key() {
