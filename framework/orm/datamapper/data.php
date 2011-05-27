@@ -102,15 +102,15 @@ abstract class Data extends ORM implements IData {
             if (!$prop_meta['allow_null'] && $val === null)
                 throw OrmError::not_allow_null($this, $prop);
 
-            $this->changeProp($prop, $val, $prop_meta);
+            $this->changeProp($prop, $val);
         }
 
         return $this;
     }
 
-    protected function changeProp($prop, $val, array $prop_meta) {
+    protected function changeProp($prop, $val) {
         if (!isset($this->props[$prop])) {
-            if ($val === null || $val === $prop_meta['default']) return;
+            if ($val === null) return;
         } elseif ($val === $this->props[$prop]) {
             return;
         }
