@@ -3,6 +3,7 @@ namespace Model;
 
 use Lysine\Utils\Singleton;
 use Lysine\HttpError;
+use Model\User;
 
 class Rbac extends Singleton {
     private $default_rule = array(
@@ -31,10 +32,17 @@ class Rbac extends Singleton {
     }
 
     private function halt($class) {
-        throw HttpError::forbidden(array(
-            'class' => $class,
-            'url' => req()->requestUri(),
-        ));
+        if (User::current()->hasRole('anonymous')) {
+            throw HttpError::unauthorized(array(
+                'class' => $class,
+                'url' => req()->requestUri(),
+            ));
+        } else {
+            throw HttpError::forbidden(array(
+                'class' => $class,
+                'url' => req()->requestUri(),
+            ));
+        }
     }
 
     public function check($url, $class) {

@@ -1,6 +1,11 @@
 <?php $this->extend('_layouts/default'); ?>
 
 <?php $this->block('main'); ?>
+<p>
+Email:dev@demo.ly Password:abc<br/>
+OR<br/>
+Email:admin@demo.ly Password:admin
+</p>
 <form method="post">
     <table align="center">
         <caption>Login</caption>

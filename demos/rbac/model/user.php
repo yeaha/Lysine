@@ -108,7 +108,7 @@ class User extends DBData {
 
     // 清除登录数据cookie
     static private function removeCookie() {
-        setcookie('login', null);
+        set_cookie('login', null);
     }
 
     // 保存登录数据到客户端cookie
@@ -118,7 +118,7 @@ class User extends DBData {
             'user' => $user->toArray(),
             'roles' => $user->roles,
         ));
-        setcookie('login', $data, $expire, '/', null, false, true);
+        set_cookie('login', $data, $expire);
     }
 
     // 从客户端cookie获得登录数据

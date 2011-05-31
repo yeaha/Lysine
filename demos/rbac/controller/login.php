@@ -10,10 +10,10 @@ class Login {
 
     public function post() {
         if ($user = User::login(post('email'), post('passwd'))) {
-            $next = get('from', '/user');
+            $next = get('ref') ?: '/user';
             return app()->redirect($next);
         }
 
-        return app()->redirect(req()->referer());
+        return app()->redirect(req()->referer() ?: '/login');
     }
 }

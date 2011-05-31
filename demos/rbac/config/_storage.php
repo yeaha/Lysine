@@ -6,8 +6,8 @@ return array(
         'user' => 'dev',
         'pass' => 'abc',
     ),
-    'lysine_log' => array(
+    'sys_log' => array(
         'class' => '\Lysine\Storage\File',
-        'filename' => ROOT_DIR .'/logs/lysine_%Y%m%d.log',
+        'filename' => ROOT_DIR .'/logs/sys_%Y%m%d.log',
     ),
 );
