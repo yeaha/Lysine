@@ -7,9 +7,15 @@ set_exception_handler(function($exception) {
 
     list($code, $header) = \Lysine\__on_exception($exception, false);
 
-    ob_start();
     if (!headers_sent())
         foreach ($header as $h) header($h);
+
+    // ajax方式下，如果DEBUG为true
+    // 可以在http header里面看到exception输出
+    // 根据各种不同的http status也可以大概判断是什么地方出问题
+    if (req()->isAjax()) die(1);
+
+    ob_start();
     require ROOT_DIR .'/view/_error/500.php';
     echo ob_get_clean();
 

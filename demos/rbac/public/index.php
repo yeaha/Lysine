@@ -7,9 +7,12 @@ set_exception_handler(function($exception) {
 
     list($code, $header) = \Lysine\__on_exception($exception, false);
 
-    ob_start();
     if (!headers_sent())
         foreach ($header as $h) header($h);
+
+    if (req()->isAjax()) die(1);
+
+    ob_start();
     require ROOT_DIR .'/view/_error/500.php';
     echo ob_get_clean();
 
