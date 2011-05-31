@@ -35,3 +35,12 @@ $profiler->end(true);
 $resp->setHeader('X-Runtime: '. round($profiler->getRuntime('__MAIN__') ?: 0, 6))
      ->sendHeader();
 echo $resp;
+
+// 尽快返回结果给fastcgi，剩下的环境清理工作已经和客户端无关
+// php-fpm fastcgi特性
+//
+// 如果使用FirePHP/FireLogger这种通过header传递数据的调试工具
+// 由于这些工具的header输出步骤都是注册到register_shutdown_function()
+// 所以会在request finish之后才产生，客户端无法拿到调试信息，调试时需要注释掉这个
+if (PHP_SAPI == 'fpm-fcgi')
+    fastcgi_finish_request();
