@@ -30,13 +30,16 @@ class File implements IStorage {
         $this->filename = strftime($config['filename'], time());
         if (isset($config['buffer_size'])) $this->buffer_size = (int)$config['buffer_size'];
         if (isset($config['open_mode'])) $this->open_mode = $config['open_mode'];
-        register_shutdown_function(array($this, 'flush'));
+    }
+
+    public function __destruct() {
+        $this->flush();
     }
 
     public function flush() {
         if (!$this->content_size) return true;
 
-        if (!$fp = fopen($this->filename, $this->open_mode)) return false;
+        if (!$fp = @fopen($this->filename, $this->open_mode)) return false;
 
         if (flock($fp, LOCK_EX)) {
             fwrite($fp, implode("\n", $this->buffer) ."\n");
