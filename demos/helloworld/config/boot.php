@@ -9,8 +9,8 @@ Lysine\Config::import(require ROOT_DIR .'/config/_config.php');
 
 app()->includePath(ROOT_DIR);
 
-// 日志配置
-use Lysine\Utils\Logging;
-Lysine\logger()
-    ->setLevel(DEBUG ? Logging::DEBUG : Logging::ERROR)
-    ->addHandler(new Logging\FileHandler('sys_log'));
+// 系统日志，根据需要开启，需要创建ROOT_DIR .'/logs'目录
+//use Lysine\Utils\Logging;
+//Lysine\logger()
+//    ->setLevel(DEBUG ? Logging::DEBUG : Logging::ERROR)
+//    ->addHandler(new Logging\FileHandler('sys_log'));
