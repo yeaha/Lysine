@@ -59,13 +59,16 @@ class Pool {
         $path[] = $name;
         $config = Config::get($path);
 
-        if (!$config)
+        if (!$config) return false;
+
+        if (!isset($config['__IMPORT__'])) return $config;
+
+        if (!$import_config = $this->getConfig($config['__IMPORT__']))
             throw StorageError::undefined_storage($name);
 
-        if (isset($config['__IMPORT__'])) {
-            $config = array_merge($this->getConfig($config['__IMPORT__']), $config);
-            unset($config['__IMPORT__']);
-        }
+        $config = array_merge($import_config, $config);
+        unset($config['__IMPORT__']);
+
         return $config;
     }
 
@@ -111,7 +114,8 @@ class Pool {
 
         if (isset($this->storages[$name])) return $this->storages[$name];
 
-        $config = $this->getConfig($name);
+        if (!$config = $this->getConfig($name))
+            throw StorageError::undefined_storage($name);
 
         fire_event($this, self::BEFORE_CREATE_INSTANCE_EVENT, array($name, $config));
 
