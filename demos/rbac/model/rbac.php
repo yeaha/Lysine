@@ -1,11 +1,12 @@
 <?php
 namespace Model;
 
-use Lysine\Utils\Singleton;
 use Lysine\HttpError;
 use Model\User;
 
-class Rbac extends Singleton {
+class Rbac {
+    static private $instance;
+
     private $default_rule = array(
         'allow' => '*',
     );
@@ -63,5 +64,9 @@ class Rbac extends Singleton {
             }
             return $this->halt($class);
         }
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }
