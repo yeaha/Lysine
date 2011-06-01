@@ -40,3 +40,6 @@ $profiler->end(true);
 $resp->setHeader('X-Runtime: '. round($profiler->getRuntime('__MAIN__') ?: 0, 6))
      ->sendHeader();
 echo $resp;
+
+if (!DEBUG && PHP_SAPI == 'fpm-fcgi')
+    fastcgi_finish_request();

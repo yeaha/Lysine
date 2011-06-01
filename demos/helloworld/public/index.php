@@ -45,6 +45,6 @@ echo $resp;
 //
 // 如果使用FirePHP/FireLogger这种通过header传递数据的调试工具
 // 由于这些工具的header输出步骤都是注册到register_shutdown_function()
-// 所以会在request finish之后才产生，客户端无法拿到调试信息，调试时需要注释掉这个
-if (PHP_SAPI == 'fpm-fcgi')
+// 所以会在fastcgi_finish_request()之后才产生，客户端无法拿到调试信息
+if (!DEBUG && PHP_SAPI == 'fpm-fcgi')
     fastcgi_finish_request();
