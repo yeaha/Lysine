@@ -2,16 +2,16 @@
 namespace Lysine\Utils;
 
 use Lysine\Error;
-use Lysine\Utils\Singleton;
 
 /**
  * 事件机制封装
  *
- * @uses Singleton
  * @package Utils
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Events extends Singleton {
+class Events {
+    static private $instance;
+
     /**
      * 事件监听列表
      *
@@ -130,5 +130,9 @@ class Events extends Singleton {
         } else {
             unset($this->listen[$source][$event]);
         }
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }

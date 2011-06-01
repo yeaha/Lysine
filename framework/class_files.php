@@ -20,7 +20,6 @@ return array(
     'Lysine\ORM\DataMapper\IData' => './orm/datamapper/data.php',
     'Lysine\ORM\DataMapper\Mapper' => './orm/datamapper/mapper.php',
     'Lysine\ORM\DataMapper\Meta' => './orm/datamapper/meta.php',
-    'Lysine\ORM\DataMapper\MetaInspector' => './orm/datamapper/meta.php',
     'Lysine\ORM\DataMapper\MongoData' => './orm/datamapper/mongo/data.php',
     'Lysine\ORM\DataMapper\MongoMapper' => './orm/datamapper/mongo/mapper.php',
     'Lysine\ORM\DataMapper\RedisData' => './orm/datamapper/redis/data.php',
@@ -45,6 +44,7 @@ return array(
     'Lysine\Storage\DB\IResult' => './interfaces.php',
     'Lysine\Storage\DB\Result' => './storage/db/result.php',
     'Lysine\Storage\DB\Select' => './storage/db/select.php',
+    'Lysine\Storage\DB\SelectIterator' => './storage/db/select.php',
     'Lysine\Storage\DB\Select\Pgsql' => './storage/db/select/pgsql.php',
     'Lysine\Storage\File' => './storage/file.php',
     'Lysine\Storage\Mongo' => './storage/mongo.php',
@@ -65,5 +65,4 @@ return array(
     'Lysine\Utils\Profiler' => './utils/profiler.php',
     'Lysine\Utils\Registry' => './utils/registry.php',
     'Lysine\Utils\Set' => './utils/set.php',
-    'Lysine\Utils\Singleton' => './utils/singleton.php',
 );

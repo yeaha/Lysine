@@ -1,15 +1,15 @@
 <?php
 namespace Lysine\MVC;
 
-use Lysine\Utils\Singleton;
-
 /**
  * http返回数据封装
  *
  * @package MVC
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Response extends Singleton {
+class Response {
+    static private $instance;
+
     static protected $status = array(
         100 => 'HTTP/1.1 100 Continue',
         101 => 'HTTP/1.1 101 Switching Protocols',
@@ -153,5 +153,9 @@ class Response extends Singleton {
 
     static public function httpStatus($code) {
         return isset(self::$status[$code]) ? self::$status[$code] : false;
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }

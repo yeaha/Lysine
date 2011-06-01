@@ -2,9 +2,10 @@
 namespace Lysine\MVC;
 
 use Lysine\HttpError;
-use Lysine\Utils\Singleton;
 
-class Request extends Singleton {
+class Request {
+    static private $instance;
+
     protected $method;
 
     protected $requestUri;
@@ -165,5 +166,9 @@ class Request extends Singleton {
 
         if (!function_exists('filter_var')) return $ip;
         return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) ?: '0.0.0.0';
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }

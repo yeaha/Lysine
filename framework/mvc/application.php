@@ -5,16 +5,15 @@ use Lysine\Error;
 use Lysine\HttpError;
 use Lysine\MVC\Router;
 use Lysine\MVC\Router_Abstract;
-use Lysine\Utils\Singleton;
 
 /**
  * Application
  *
- * @uses Singleton
  * @package MVC
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Application extends Singleton {
+class Application {
+    static private $instance;
     static public $support_method = array('HEAD', 'GET', 'POST', 'PUT', 'DELETE');
 
     /**
@@ -180,5 +179,9 @@ class Application extends Singleton {
 
         $url = parse_url($req->requestUri());
         return $this->dispatch($url['path']);
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }

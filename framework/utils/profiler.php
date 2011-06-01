@@ -1,9 +1,9 @@
 <?php
 namespace Lysine\Utils;
 
-use Lysine\Utils\Singleton;
+class Profiler {
+    static private $instance;
 
-class Profiler extends Singleton {
     private $stack = array();
 
     private $time = array();
@@ -36,5 +36,9 @@ class Profiler extends Singleton {
         }
 
         return implode(PHP_EOL, $lines);
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }

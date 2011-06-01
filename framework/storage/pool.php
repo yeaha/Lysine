@@ -3,7 +3,6 @@ namespace Lysine\Storage;
 
 use Lysine\Config;
 use Lysine\StorageError;
-use Lysine\Utils\Singleton;
 
 /**
  * 存储服务连接池
@@ -11,11 +10,16 @@ use Lysine\Utils\Singleton;
  * @package Storage
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
-class Pool extends Singleton {
+class Pool {
     // 生成存储服务实例之前
     const BEFORE_CREATE_INSTANCE_EVENT = 'before create instance event';
     // 生成存储服务实例之后
     const AFTER_CREATE_INSTANCE_EVENT = 'after create instance event';
+
+    /**
+     * 单例实例
+     */
+    static private $instance;
 
     /**
      * 存储服务配置路径
@@ -131,5 +135,9 @@ class Pool extends Singleton {
      */
     public function __invoke() {
         return call_user_func_array(array($this, 'get'), func_get_args());
+    }
+
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 }
