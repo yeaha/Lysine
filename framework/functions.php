@@ -229,7 +229,7 @@ function array_set(&$target, $path, $val) {
     }
 
     foreach ($path as $p) {
-        if (!is_array($target)) return false;
+        if (!is_array($target)) $target = array();
         if (!array_key_exists($p, $target)) $target[$p] = array();
         $target =& $target[$p];
     }
