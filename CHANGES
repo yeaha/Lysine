@@ -1,0 +1,2 @@
+2011-06-01
+* 废弃Lysine\Utils\Singleton，每个类自行实现单例，减少依赖
