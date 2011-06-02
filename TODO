@@ -1,3 +1,3 @@
-*   废弃ActiveRecord，有DataMapper就足够了
+*   [SOLVED] 废弃ActiveRecord，有DataMapper就足够了
 *   增加对storage collection的封装，比如DBTable
 *   改进render_view()机制，如果有多个不同的view目录，就得声明多个redner_view()，不方便

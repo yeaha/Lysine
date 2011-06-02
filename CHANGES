@@ -1,2 +1,8 @@
+2011-06-02
+* 合并相关的类到少数几个文件，减少文件包含次数
+* 删除掉ActiveRecord，只提供DataMapper
+* Lysine\ORM\DataMapper 名字空间改名为 Lysine\DataMapper
+* 删除没有多少用的DataMapper\Redis* Utils\Html Utils\Injection
+
 2011-06-01
 * 废弃Lysine\Utils\Singleton，每个类自行实现单例，减少依赖
