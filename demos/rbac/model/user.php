@@ -1,7 +1,7 @@
 <?php
 namespace Model;
 
-use Lysine\ORM\DataMapper\DBData;
+use Lysine\DataMapper\DBData;
 use Model\Role;
 
 /**
