@@ -9,8 +9,6 @@ return array(
     'Lysine\DataMapper\Meta' => 'orm/datamapper.php',
     'Lysine\DataMapper\MongoData' => 'orm/datamapper/mongo.php',
     'Lysine\DataMapper\MongoMapper' => 'orm/datamapper/mongo.php',
-    'Lysine\DataMapper\RedisData' => 'orm/datamapper/redis.php',
-    'Lysine\DataMapper\RedisMapper' => 'orm/datamapper/redis.php',
     'Lysine\DataMapper\Registry' => 'orm/datamapper.php',
     'Lysine\Error' => 'core.php',
     'Lysine\HttpError' => 'core.php',
