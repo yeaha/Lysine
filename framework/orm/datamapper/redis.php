@@ -2,8 +2,14 @@
 namespace Lysine\ORM\DataMapper;
 
 use Lysine\IStorage;
-use Lysine\ORM\DataMapper\Data;
 use Lysine\ORMError;
+use Lysine\ORM\DataMapper\Data;
+
+class RedisData extends Data {
+    static public function getMapper() {
+        return RedisMapper::factory(get_called_class());
+    }
+}
 
 class RedisMapper extends Mapper {
     /**
