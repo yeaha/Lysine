@@ -16,6 +16,7 @@ ksort($map);
 $out = array();
 
 foreach ($map as $class => $file) {
+    $file = ltrim($file, './');
     $out[] = sprintf("    '%s' => '%s',", $class, $file);
 }
 $out = implode("\n", $out);
