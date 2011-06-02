@@ -48,8 +48,6 @@ return array(
     'Lysine\Utils\Curl\Http' => 'utils/curl.php',
     'Lysine\Utils\Curl\HttpError' => 'utils/curl.php',
     'Lysine\Utils\Events' => 'utils/events.php',
-    'Lysine\Utils\Html\Tag' => 'utils/html.php',
-    'Lysine\Utils\Injection' => 'utils/injection.php',
     'Lysine\Utils\Logging' => 'utils/logging.php',
     'Lysine\Utils\Logging\ChromePHPHandler' => 'utils/logging.php',
     'Lysine\Utils\Logging\FileHandler' => 'utils/logging.php',
