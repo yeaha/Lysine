@@ -2,8 +2,9 @@
 namespace Lysine\Storage\DB;
 
 use Lysine\StorageError;
-use Lysine\Storage\DB\IAdapter;
 use Lysine\Storage\DB\Expr;
+use Lysine\Storage\DB\IAdapter;
+use Lysine\Storage\DB\IResult;
 use Lysine\Storage\DB\Select;
 
 /**
@@ -474,5 +475,118 @@ abstract class Adapter implements IAdapter {
                  : array();
 
         return array($dsn, $user, $pass, $options);
+    }
+}
+
+/**
+ * 数据库表达式
+ * Expr类型不会被adapter qstr()逃逸处理
+ * 可以用于包装那些不希望被adapter逃逸处理的内容
+ * 使用时需要自己注意安全方面的考虑
+ *
+ * @package Storage
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
+class Expr {
+    protected $expr;
+
+    public function __construct($expr) {
+        if ($expr instanceof Expr) $expr = $expr->__toString();
+        $this->expr = $expr;
+    }
+
+    public function __toString() {
+        return $this->expr;
+    }
+}
+
+class Result extends \PDOStatement implements IResult {
+    /**
+     * __toString魔法方法
+     *
+     * @access public
+     * @return string
+     */
+    public function __toString() {
+        return $this->queryString;
+    }
+
+    /**
+     * 一行
+     *
+     * @access public
+     * @return array
+     */
+    public function getRow() {
+        return $this->fetch();
+    }
+
+    /**
+     * 第一行某列的结果
+     *
+     * @param int $col_number
+     * @access public
+     * @return mixed
+     */
+    public function getCol($col_number = 0) {
+        return $this->fetch(\PDO::FETCH_COLUMN, $col_number);
+    }
+
+    /**
+     * 所有行某列的结果
+     *
+     * @param int $col_number
+     * @access public
+     * @return array
+     */
+    public function getCols($col_number = 0) {
+        return $this->fetchAll(\PDO::FETCH_COLUMN, $col_number);
+    }
+
+    /**
+     * 所有的行，以指定的column name为key
+     *
+     * @param string $col
+     * @access public
+     * @return array
+     */
+    public function getAll($col = null) {
+        if (!$col) return $this->fetchAll();
+
+        $rowset = array();
+        while ($row = $this->fetch())
+            $rowset[$row[$col]] = $row;
+        return $rowset;
+    }
+}
+
+/**
+ * 数据库sql执行异常
+ *
+ * @package DB
+ * @author yangyi <yangyi.cn.gz@gmail.com>
+ */
+class Exception extends \Exception {
+    /**
+     * 数据库原生错误代码
+     *
+     * @var mixed
+     * @access protected
+     */
+    protected $native_code;
+
+    public function __construct($message = '', $code = 0, $previous = null, $native_code = null) {
+        parent::__construct($message, $code, $previous);
+        $this->native_code = $native_code;
+    }
+
+    /**
+     * 获得数据库原生错误代码
+     *
+     * @access public
+     * @return void
+     */
+    public function getNativeCode() {
+        return $this->native_code;
     }
 }
