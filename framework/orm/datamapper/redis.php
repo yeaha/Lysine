@@ -1,9 +1,9 @@
 <?php
-namespace Lysine\ORM\DataMapper;
+namespace Lysine\DataMapper;
 
 use Lysine\IStorage;
-use Lysine\ORMError;
-use Lysine\ORM\DataMapper\Data;
+use Lysine\OrmError;
+use Lysine\DataMapper\Data;
 
 class RedisData extends Data {
     static public function getMapper() {

@@ -1,8 +1,8 @@
 <?php
-namespace Lysine\ORM\DataMapper;
+namespace Lysine\DataMapper;
 
 use Lysine\IStorage;
-use Lysine\ORM\DataMapper\Data;
+use Lysine\DataMapper\Data;
 use Lysine\Utils\Set;
 
 /**
@@ -10,7 +10,7 @@ use Lysine\Utils\Set;
  *
  * @uses Data
  * @abstract
- * @package ORM
+ * @package DataMapper
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 abstract class MongoData extends Data {
@@ -19,7 +19,7 @@ abstract class MongoData extends Data {
      *
      * @static
      * @access public
-     * @return Lysine\ORM\DataMapper\MongoMapper
+     * @return Lysine\DataMapper\MongoMapper
      */
     static public function getMapper() {
         return MongoMapper::factory(get_called_class());
@@ -42,7 +42,7 @@ abstract class MongoData extends Data {
  * Mongodb数据映射关系封装
  *
  * @uses Mapper
- * @package ORM
+ * @package DataMapper
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 class MongoMapper extends Mapper {

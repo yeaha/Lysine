@@ -1,9 +1,9 @@
 <?php
 namespace Lysine {
-    use Lysine\ORM;
+    use Lysine\DataMapper\Data;
+    use Lysine\HttpError;
     use Lysine\MVC\Application;
     use Lysine\MVC\Response;
-    use Lysine\HttpError;
 
     defined('DEBUG') or define('DEBUG', false);
     require __DIR__ .'/functions.php';
@@ -208,31 +208,31 @@ namespace Lysine {
 
     class OrmError extends StorageError {
         static public function readonly($class) {
-            if ($class instanceof ORM) $class = get_class($class);
+            if ($class instanceof Data) $class = get_class($class);
             return new static("{$class} is readonly");
         }
 
         static public function not_allow_null($class, $prop) {
-            if ($class instanceof ORM) $class = get_class($class);
+            if ($class instanceof Data) $class = get_class($class);
             return new static("{$class}: Property {$prop} not allow null");
         }
 
         static public function refuse_update($class, $prop) {
-            if ($class instanceof ORM) $class = get_class($class);
+            if ($class instanceof Data) $class = get_class($class);
             return new static("{$class}: Property {$prop} refuse update");
         }
 
         static public function undefined_collection($class) {
-            if ($class instanceof ORM) $class = get_class($class);
+            if ($class instanceof Data) $class = get_class($class);
             return new static("{$class}: Undefined collection");
         }
 
         static public function undefined_primarykey($class) {
-            if ($class instanceof ORM) $class = get_class($class);
+            if ($class instanceof Data) $class = get_class($class);
             return new static("{$class}: Undefined primary key");
         }
 
-        static public function insert_failed(ORM $obj, $previous = null, array $more = array()) {
+        static public function insert_failed(Data $obj, $previous = null, array $more = array()) {
             $class = get_class($obj);
             $more['class'] = $class;
             $more['record'] = $obj->toArray();
@@ -241,7 +241,7 @@ namespace Lysine {
             return new static("{$class} insert failed", 0, $previous, $more);
         }
 
-        static public function update_failed(ORM $obj, $previous = null, array $more = array()) {
+        static public function update_failed(Data $obj, $previous = null, array $more = array()) {
             $class = get_class($obj);
             $more['class'] = $class;
             $more['record'] = $obj->toArray();
@@ -250,7 +250,7 @@ namespace Lysine {
             return new static("{$class} update failed", 0, $previous, $more);
         }
 
-        static public function delete_failed(ORM $obj, $previous = null, array $more = array()) {
+        static public function delete_failed(Data $obj, $previous = null, array $more = array()) {
             $class = get_class($obj);
             $more['class'] = $class;
             $more['primary_key'] = $obj->id();

@@ -1,15 +1,15 @@
 <?php
-namespace Lysine\ORM\DataMapper;
+namespace Lysine\DataMapper;
 
 use Lysine\IStorage;
-use Lysine\ORM\DataMapper\Data;
+use Lysine\DataMapper\Data;
 
 /**
  * 使用数据库存储方式的领域模型
  *
  * @uses Data
  * @abstract
- * @package ORM
+ * @package DataMapper
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 abstract class DBData extends Data {
@@ -54,7 +54,7 @@ abstract class DBData extends Data {
  * 数据库映射关系封装
  *
  * @uses Mapper
- * @package ORM
+ * @package DataMapper
  * @author yangyi <yangyi.cn.gz@gmail.com>
  */
 class DBMapper extends Mapper {
