@@ -20,6 +20,7 @@ class Redis implements IStorage {
         'host' => '127.0.0.1',
         'port' => 6379,
         'timeout' => 0,
+        'prefix' => null,
      // 'password' => 'your password',
      // 'database' => 0,    // dbindex, the database number to switch to
     );
@@ -54,6 +55,8 @@ class Redis implements IStorage {
 
         if (isset($config['database']) && !$handler->select($config['database']))
             throw new StorageError('Select database['. $config['database'] .'] failed');
+
+        if (isset($config['prefix'])) $handler->setOption(\Redis::OPT_PREFIX, $config['prefix']);
 
         $this->handler = $handler;
         return $this;
