@@ -79,7 +79,7 @@ class Mysql extends Adapter {
 
         $col_name = explode('.', $col_name);
         foreach ($col_name as $key => $col)
-            $col_name[$key] = '`'. trim('`', $col) .'`';
+            $col_name[$key] = '`'. trim($col, '`') .'`';
         return implode('.', $col_name);
     }
 }
