@@ -11,7 +11,7 @@
  *
  * 不同路径对应不同名字空间的controller
  * $config['app']['router']['namespace'] = array(
- *     '__default' => 'Controller',
+ *     '__default__' => 'Controller',
  *     'admin' => 'Admin\Controller',
  *     'other' => 'Other\Action',
  * );
