@@ -138,10 +138,10 @@ function logger($name) {
     return Logging::getLogger($name);
 }
 
-function storage($name = null) {
+function storage($name = null, $arg = null) {
     $pool = \Lysine\Storage\Pool::instance();
-    $args = func_get_args();
-    return call_user_func_array($pool, $args);
+    if ($arg === null) return $pool->get($name);
+    return call_user_func_array(array($pool, 'get'), func_get_args());
 }
 
 function dbexpr($expr) {
