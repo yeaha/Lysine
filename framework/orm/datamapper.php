@@ -6,7 +6,7 @@ use Lysine\Error;
 use Lysine\IStorage;
 use Lysine\OrmError;
 use Lysine\Storage\Cache;
-use Lysine\Storage\Pool;
+use Lysine\Storage\Manager;
 use Lysine\Utils;
 
 /**
@@ -372,7 +372,7 @@ abstract class Mapper {
      * @return Lysine\IStorage
      */
     public function getStorage() {
-        return Pool::instance()->get(
+        return Manager::instance()->get(
             $this->getMeta()->getStorage()
         );
     }

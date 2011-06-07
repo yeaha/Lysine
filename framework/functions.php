@@ -139,9 +139,9 @@ function logger($name) {
 }
 
 function storage($name = null, $arg = null) {
-    $pool = \Lysine\Storage\Pool::instance();
-    if ($arg === null) return $pool->get($name);
-    return call_user_func_array(array($pool, 'get'), func_get_args());
+    $manager = \Lysine\Storage\Manager::instance();
+    if ($arg === null) return $manager->get($name);
+    return call_user_func_array(array($manager, 'get'), func_get_args());
 }
 
 function dbexpr($expr) {

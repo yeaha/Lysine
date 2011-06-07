@@ -6,7 +6,7 @@ use Lysine\StorageError;
 // 存储服务管理器
 // 通过把存储服务命名为不同的名字实现垂直切分
 // 通过设置路由方法( setDispatcher() )，返回不同的存储名字，实现垂直切分
-class Pool {
+class Manager {
     // 生成存储服务实例之前
     const BEFORE_CREATE_INSTANCE_EVENT = 'before create instance event';
     // 生成存储服务实例之后
@@ -88,7 +88,7 @@ class Pool {
     }
 
     // 单例
-    // return Storage\Pool
+    // return Storage\Manager
     static public function instance() {
         return self::$instance ?: (self::$instance = new static);
     }

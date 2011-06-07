@@ -360,7 +360,7 @@ namespace Lysine {
         /**
          * 构造函数
          * 参数都必须以数组方式传递
-         * 这样才可以让Lysine\Storage\Pool使用统一的初始化方法
+         * 这样才可以让Lysine\Storage\Manager使用统一的初始化方法
          *
          * @param array $config
          * @access public

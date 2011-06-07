@@ -1,3 +1,6 @@
+2011-06-07
+* Lysine\Storage\Pool rename to Lysine\Storage\Manager
+
 2011-06-02
 * 合并相关的类到少数几个文件，减少文件包含次数
 * 删除掉ActiveRecord，只提供DataMapper
