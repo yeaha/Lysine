@@ -1,764 +1,798 @@
 <?php
-namespace Lysine\Storage\DB;
-
-use Lysine\Utils\Set;
-
-/**
- * 这个类只管组装sql语句，并对查询结果进行简单处理
- * 尽量只做字符串处理
- *
- * @package db
- * @author yangyi <yangyi.cn.gz@gmail.com>
- */
-class Select {
-    /**
-     * get()方法返回的多行数据是否使用Lysine\Utils\Set类包装
-     * 影响到所有的实例
-     *
-     * @var boolean
-     * @access public
-     * @static
-     */
-    static public $returnSet = true;
+namespace Lysine\Storage\DB {
+    use Lysine\Utils\Set;
 
     /**
-     * 数据库连接
+     * 这个类只管组装sql语句，并对查询结果进行简单处理
+     * 尽量只做字符串处理
      *
-     * @var IAdapter
-     * @access protected
+     * @package db
+     * @author yangyi <yangyi.cn.gz@gmail.com>
      */
-    protected $adapter;
+    class Select {
+        /**
+         * get()方法返回的多行数据是否使用Lysine\Utils\Set类包装
+         * 影响到所有的实例
+         *
+         * @var boolean
+         * @access public
+         * @static
+         */
+        static public $returnSet = true;
 
-    /**
-     * sql FROM
-     *
-     * @var string
-     * @access protected
-     */
-    protected $from;
+        /**
+         * 数据库连接
+         *
+         * @var IAdapter
+         * @access protected
+         */
+        protected $adapter;
 
-    /**
-     * 结果字段
-     *
-     * @var array
-     * @access protected
-     */
-    protected $cols = array();
+        /**
+         * sql FROM
+         *
+         * @var string
+         * @access protected
+         */
+        protected $from;
 
-    /**
-     * where 条件表达式
-     *
-     * @var array
-     * @access protected
-     */
-    protected $where = array();
+        /**
+         * 结果字段
+         *
+         * @var array
+         * @access protected
+         */
+        protected $cols = array();
 
-    /**
-     * sql GROUP
-     *
-     * @var string
-     * @access protected
-     */
-    protected $group;
+        /**
+         * where 条件表达式
+         *
+         * @var array
+         * @access protected
+         */
+        protected $where = array();
 
-    /**
-     * sql HAVING
-     *
-     * @var string
-     * @access protected
-     */
-    protected $having;
+        /**
+         * sql GROUP
+         *
+         * @var string
+         * @access protected
+         */
+        protected $group;
 
-    /**
-     * sql ORDER BY
-     *
-     * @var string
-     * @access protected
-     */
-    protected $order;
+        /**
+         * sql HAVING
+         *
+         * @var string
+         * @access protected
+         */
+        protected $having;
 
-    /**
-     * sql LIMIT
-     *
-     * @var integer
-     * @access protected
-     */
-    protected $limit;
+        /**
+         * sql ORDER BY
+         *
+         * @var string
+         * @access protected
+         */
+        protected $order;
 
-    /**
-     * sql OFFSET
-     *
-     * @var integer
-     * @access protected
-     */
-    protected $offset;
+        /**
+         * sql LIMIT
+         *
+         * @var integer
+         * @access protected
+         */
+        protected $limit;
 
-    /**
-     * 返回数组中作为key的字段
-     *
-     * @var string
-     * @access protected
-     */
-    protected $key_column;
+        /**
+         * sql OFFSET
+         *
+         * @var integer
+         * @access protected
+         */
+        protected $offset;
 
-    /**
-     * 返回值处理器
-     * get()方法返回的每条数据都会传递给处理器处理一次
-     *
-     * @var callback
-     * @access protected
-     */
-    protected $processor;
+        /**
+         * 返回数组中作为key的字段
+         *
+         * @var string
+         * @access protected
+         */
+        protected $key_column;
 
-    /**
-     * where表达式之间的逻辑关系 AND或OR
-     *
-     * @var string
-     * @access protected
-     */
-    protected $where_relation = 'AND';
+        /**
+         * 返回值处理器
+         * get()方法返回的每条数据都会传递给处理器处理一次
+         *
+         * @var callback
+         * @access protected
+         */
+        protected $processor;
 
-    /**
-     * get()方法返回的多行数据是否使用Lysine\Utils\Set类包装
-     * 只影响当前实例
-     *
-     * @var boolean
-     * @access protected
-     */
-    protected $return_set;
+        /**
+         * where表达式之间的逻辑关系 AND或OR
+         *
+         * @var string
+         * @access protected
+         */
+        protected $where_relation = 'AND';
 
-    /**
-     * 构造函数
-     *
-     * @param IAdapter $adapter
-     * @access public
-     * @return void
-     */
-    public function __construct(IAdapter $adapter) {
-        $this->adapter = $adapter;
-        $this->return_set = self::$returnSet;
-    }
+        /**
+         * get()方法返回的多行数据是否使用Lysine\Utils\Set类包装
+         * 只影响当前实例
+         *
+         * @var boolean
+         * @access protected
+         */
+        protected $return_set;
 
-    /**
-     * 魔法方法
-     *
-     * @param string $prop
-     * @access public
-     * @return mixed
-     */
-    public function __get($prop) {
-        return $this->$prop;
-    }
-
-    /**
-     * 复位到初始状态
-     * 只保留from和adapter
-     *
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function reset() {
-        $this->cols = $this->where = array();
-        $this->group = $this->having = $this->order = null;
-        $this->limit = $this->offset = null;
-        $this->key_column = $this->processor = null;
-        $this->where_relation = 'AND';
-
-        return $this;
-    }
-
-    /**
-     * sql FROM
-     *
-     * @param string $table
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function from($table) {
-        $this->from = $table;
-        return $this;
-    }
-
-    /**
-     * 获得数据库连接
-     *
-     * @access public
-     * @return Lysine\Storage\DB\IAdapter
-     */
-    public function getAdapter() {
-        return $this->adapter;
-    }
-
-    /**
-     * 指定结果字段
-     *
-     * <code>
-     * // SELECT user, passwd
-     * $select->setCols('user', 'passwd');
-     * $select->setCols(array('user', 'passwd'));
-     *
-     * // SELECT user as u, passwd as p
-     * $select->setCols(dbexpr('user as u'), dbexpr('passwd as p'));
-     * $select->setCols( array(dbexpr('user as u'), dbexpr('passwd as p')) );
-     * </code>
-     *
-     * @param mixed $cols
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function setCols($cols = null) {
-        $this->cols = is_array($cols) ? $cols : func_get_args();
-        return $this;
-    }
-
-    /**
-     * 增加结果字段
-     * 参数格式见setCols()
-     *
-     * @param mixed $col
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function addCol($col = null) {
-        $cols = $this->cols;
-        if (!is_array($col)) $col = func_get_args();
-
-        foreach ($col as $c) $cols[] = $c;
-        $this->cols = array_unique($cols);
-        return $this;
-    }
-
-    /**
-     * 指定返回的查询数组中，以哪个字段的值为key
-     * 注意：如果指定的字段不是主键字段，可能会造成返回数据不完整的情况
-     *
-     * @param string $column_name
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function setKeyColumn($column_name) {
-        $this->key_column = $column_name;
-        return $this;
-    }
-
-    /**
-     * 增加一个查询条件
-     *
-     * <code>
-     * // WHERE user = 'dev' AND 'passwd' = 'abc'
-     * $select->where('user = ?', 'dev')->where('passwd = ?', 'abc');
-     * // WHERE user = 'dev' OR 'passwd' = 'abc'
-     * $select->setWhereRelation('or')->where('user = ?', 'dev')->where('passwd = ?', 'abc');
-     *
-     * $select->where('user = ? and passwd = ?', 'dev', 'abc');
-     * $select->where('user = :user and passwd = :passwd', 'dev', 'abc');
-     * // WHERE date_trunc('day', 'create_time') = '2010-08-05'
-     * $select->where("date_trunc('day', 'create_time') = ?", '2010-08-05');
-     * </code>
-     *
-     * @param string $where
-     * @param mixed $bind
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function where($where, $bind = null) {
-        $args = func_get_args();
-        $this->where[] = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
-        return $this;
-    }
-
-    /**
-     * 添加一个子查询
-     *
-     * @param string $col
-     * @param mixed $relation
-     * @param boolean $in
-     * @access protected
-     * @return Lysine\Storage\DB\Select
-     */
-    protected function whereSub($col, $relation, $in) {
-        $adapter = $this->getAdapter();
-        $col = $adapter->qcol($col);
-
-        if ($relation instanceof Select) {
-            list($where, $bind) = $relation->compile();
-        } else {
-            if (!is_array($relation)) $relation = array($relation);
-            $where = implode(',', $adapter->qstr($relation));
-            $bind = array();
+        /**
+         * 构造函数
+         *
+         * @param IAdapter $adapter
+         * @access public
+         * @return void
+         */
+        public function __construct(IAdapter $adapter) {
+            $this->adapter = $adapter;
+            $this->return_set = self::$returnSet;
         }
 
-        if ($in) {
-            $where = sprintf('%s IN (%s)', $col, $where);
-        } else {
-            $where = sprintf('%s NOT IN (%s)', $col, $where);
-        }
-        $this->where[] = array($where, $bind);
-        return $this;
-    }
-
-    /**
-     * 添加一个WHERE IN子查询
-     *
-     * <code>
-     * // select * from user where id in (1, 2, 3)
-     * $user_select->whereIn('id', array(1, 2, 3));
-     *
-     * // select * from other where user_id in (select id from user where id in (1, 2, 3))
-     * $other_select->whereIn('user_id', $user_select->setCols('id'));
-     * </code>
-     *
-     * @param string $col
-     * @param mixed $relation
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function whereIn($col, $relation) {
-        return $this->whereSub($col, $relation, true);
-    }
-
-    /**
-     * 添加一个WHERE NOT IN子查询
-     *
-     * @param string $col
-     * @param mixed $relation
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function whereNotIn($col, $relation) {
-        return $this->whereSub($col, $relation, false);
-    }
-
-    /**
-     * 设置where表达式之间的逻辑关系
-     *
-     * @param string $relation
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function setWhereRelation($relation) {
-        $relation = strtoupper($relation);
-
-        if ($relation != 'AND' AND $relation != 'OR')
-            throw new \UnexpectedValueException('relation of where condition must be AND or OR');
-        $this->where_relation = $relation;
-        return $this;
-    }
-
-    /**
-     * sql GROUP
-     *
-     * @param string $group_by
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function group($group_by) {
-        $this->group = $group_by;
-        return $this;
-    }
-
-    /**
-     * sql HAVING
-     *
-     * @param string $having
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function having($having, $bind = null) {
-        $args = func_get_args();
-        $this->having = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
-        return $this;
-    }
-
-    /**
-     * sql ORDER
-     *
-     * <code>
-     * $select->order('create_time');
-     * $select->order('create_time DESC');
-     * $select->order('random()');
-     * </code>
-     *
-     * @param string $order_by
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function order($order_by) {
-        $this->order = $order_by;
-        return $this;
-    }
-
-    /**
-     * sql LIMIT
-     *
-     * @param integer $limit
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function limit($limit) {
-        $this->limit = abs((int)$limit);
-        return $this;
-    }
-
-    /**
-     * sql OFFSET
-     *
-     * @param integer $offset
-     * @access public
-     * @return Lysine\Storage\DB\Select
-     */
-    public function offset($offset) {
-        $this->offset = abs((int)$offset);
-        return $this;
-    }
-
-    /**
-     * count()查询
-     *
-     * @access public
-     * @return integer
-     */
-    public function count($col = null, $distinct = false) {
-        if ($col) {
-            $col = $this->adapter->qcol($col);
-            $expr = $distinct ? "count(distinct({$col}))" : "count({$col})";
-        } else {
-            $expr = 'count(1)';
+        /**
+         * 魔法方法
+         *
+         * @param string $prop
+         * @access public
+         * @return mixed
+         */
+        public function __get($prop) {
+            return $this->$prop;
         }
 
-        $old_cols = $this->cols;
-        $this->setCols(dbexpr($expr));
-        $count = $this->execute()->getCol();
+        /**
+         * 复位到初始状态
+         * 只保留from和adapter
+         *
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function reset() {
+            $this->cols = $this->where = array();
+            $this->group = $this->having = $this->order = null;
+            $this->limit = $this->offset = null;
+            $this->key_column = $this->processor = null;
+            $this->where_relation = 'AND';
 
-        $this->cols = $old_cols;
-        return $count;
-    }
+            return $this;
+        }
 
-    /**
-     * 分页查询结果
-     *
-     * @param integer $page
-     * @param integer $size
-     * @access public
-     * @return mixed
-     */
-    public function getPage($page, $size = 10) {
-        $old_offset = $this->offset;
-        $result = $this->offset( ($page - 1) * $size )->get($size);
+        /**
+         * sql FROM
+         *
+         * @param string $table
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function from($table) {
+            $this->from = $table;
+            return $this;
+        }
 
-        $this->offset = $old_offset;
-        return $result;
-    }
+        /**
+         * 获得数据库连接
+         *
+         * @access public
+         * @return Lysine\Storage\DB\IAdapter
+         */
+        public function getAdapter() {
+            return $this->adapter;
+        }
 
-    /**
-     * 获得分页信息
-     *
-     * @param integer $size
-     * @param integer $current_page
-     * @param integer $total
-     * @access public
-     * @return array
-     */
-    public function getPageInfo($current_page, $size, $total = null) {
-        if (!$total) {
+        /**
+         * 指定结果字段
+         *
+         * <code>
+         * // SELECT user, passwd
+         * $select->setCols('user', 'passwd');
+         * $select->setCols(array('user', 'passwd'));
+         *
+         * // SELECT user as u, passwd as p
+         * $select->setCols(dbexpr('user as u'), dbexpr('passwd as p'));
+         * $select->setCols( array(dbexpr('user as u'), dbexpr('passwd as p')) );
+         * </code>
+         *
+         * @param mixed $cols
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function setCols($cols = null) {
+            $this->cols = is_array($cols) ? $cols : func_get_args();
+            return $this;
+        }
+
+        /**
+         * 增加结果字段
+         * 参数格式见setCols()
+         *
+         * @param mixed $col
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function addCol($col = null) {
+            $cols = $this->cols;
+            if (!is_array($col)) $col = func_get_args();
+
+            foreach ($col as $c) $cols[] = $c;
+            $this->cols = array_unique($cols);
+            return $this;
+        }
+
+        /**
+         * 指定返回的查询数组中，以哪个字段的值为key
+         * 注意：如果指定的字段不是主键字段，可能会造成返回数据不完整的情况
+         *
+         * @param string $column_name
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function setKeyColumn($column_name) {
+            $this->key_column = $column_name;
+            return $this;
+        }
+
+        /**
+         * 增加一个查询条件
+         *
+         * <code>
+         * // WHERE user = 'dev' AND 'passwd' = 'abc'
+         * $select->where('user = ?', 'dev')->where('passwd = ?', 'abc');
+         * // WHERE user = 'dev' OR 'passwd' = 'abc'
+         * $select->setWhereRelation('or')->where('user = ?', 'dev')->where('passwd = ?', 'abc');
+         *
+         * $select->where('user = ? and passwd = ?', 'dev', 'abc');
+         * $select->where('user = :user and passwd = :passwd', 'dev', 'abc');
+         * // WHERE date_trunc('day', 'create_time') = '2010-08-05'
+         * $select->where("date_trunc('day', 'create_time') = ?", '2010-08-05');
+         * </code>
+         *
+         * @param string $where
+         * @param mixed $bind
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function where($where, $bind = null) {
+            $args = func_get_args();
+            $this->where[] = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
+            return $this;
+        }
+
+        /**
+         * 添加一个子查询
+         *
+         * @param string $col
+         * @param mixed $relation
+         * @param boolean $in
+         * @access protected
+         * @return Lysine\Storage\DB\Select
+         */
+        protected function whereSub($col, $relation, $in) {
+            $adapter = $this->getAdapter();
+            $col = $adapter->qcol($col);
+
+            if ($relation instanceof Select) {
+                list($where, $bind) = $relation->compile();
+            } else {
+                if (!is_array($relation)) $relation = array($relation);
+                $where = implode(',', $adapter->qstr($relation));
+                $bind = array();
+            }
+
+            if ($in) {
+                $where = sprintf('%s IN (%s)', $col, $where);
+            } else {
+                $where = sprintf('%s NOT IN (%s)', $col, $where);
+            }
+            $this->where[] = array($where, $bind);
+            return $this;
+        }
+
+        /**
+         * 添加一个WHERE IN子查询
+         *
+         * <code>
+         * // select * from user where id in (1, 2, 3)
+         * $user_select->whereIn('id', array(1, 2, 3));
+         *
+         * // select * from other where user_id in (select id from user where id in (1, 2, 3))
+         * $other_select->whereIn('user_id', $user_select->setCols('id'));
+         * </code>
+         *
+         * @param string $col
+         * @param mixed $relation
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function whereIn($col, $relation) {
+            return $this->whereSub($col, $relation, true);
+        }
+
+        /**
+         * 添加一个WHERE NOT IN子查询
+         *
+         * @param string $col
+         * @param mixed $relation
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function whereNotIn($col, $relation) {
+            return $this->whereSub($col, $relation, false);
+        }
+
+        /**
+         * 设置where表达式之间的逻辑关系
+         *
+         * @param string $relation
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function setWhereRelation($relation) {
+            $relation = strtoupper($relation);
+
+            if ($relation != 'AND' AND $relation != 'OR')
+                throw new \UnexpectedValueException('relation of where condition must be AND or OR');
+            $this->where_relation = $relation;
+            return $this;
+        }
+
+        /**
+         * sql GROUP
+         *
+         * @param string $group_by
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function group($group_by) {
+            $this->group = $group_by;
+            return $this;
+        }
+
+        /**
+         * sql HAVING
+         *
+         * @param string $having
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function having($having, $bind = null) {
+            $args = func_get_args();
+            $this->having = call_user_func_array(array($this->adapter, 'parsePlaceHolder'), $args);
+            return $this;
+        }
+
+        /**
+         * sql ORDER
+         *
+         * <code>
+         * $select->order('create_time');
+         * $select->order('create_time DESC');
+         * $select->order('random()');
+         * </code>
+         *
+         * @param string $order_by
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function order($order_by) {
+            $this->order = $order_by;
+            return $this;
+        }
+
+        /**
+         * sql LIMIT
+         *
+         * @param integer $limit
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function limit($limit) {
+            $this->limit = abs((int)$limit);
+            return $this;
+        }
+
+        /**
+         * sql OFFSET
+         *
+         * @param integer $offset
+         * @access public
+         * @return Lysine\Storage\DB\Select
+         */
+        public function offset($offset) {
+            $this->offset = abs((int)$offset);
+            return $this;
+        }
+
+        /**
+         * count()查询
+         *
+         * @access public
+         * @return integer
+         */
+        public function count($col = null, $distinct = false) {
+            if ($col) {
+                $col = $this->adapter->qcol($col);
+                $expr = $distinct ? "count(distinct({$col}))" : "count({$col})";
+            } else {
+                $expr = 'count(1)';
+            }
+
+            $old_cols = $this->cols;
+            $this->setCols(dbexpr($expr));
+            $count = $this->execute()->getCol();
+
+            $this->cols = $old_cols;
+            return $count;
+        }
+
+        /**
+         * 分页查询结果
+         *
+         * @param integer $page
+         * @param integer $size
+         * @access public
+         * @return mixed
+         */
+        public function getPage($page, $size = 10) {
             $old_offset = $this->offset;
-            $old_limit = $this->limit;
-            $old_order = $this->order;
-            $this->offset = $this->limit = $this->order = null;
-
-            $total = $this->count();
+            $result = $this->offset( ($page - 1) * $size )->get($size);
 
             $this->offset = $old_offset;
-            $this->limit = $old_limit;
-            $this->order = $old_order;
-        }
-        return cal_page($total, $size, $current_page);
-    }
-
-    /**
-     * 生成sql语句的where部分
-     *
-     * @access protected
-     * @return array
-     */
-    protected function compileWhere() {
-        $where = $bind = array();
-        foreach ($this->where as $w) {
-            list($where_sql, $where_bind) = $w;
-            $where[] = $where_sql;
-            if ($where_bind) $bind = array_merge($bind, $where_bind);
+            return $result;
         }
 
-        $where = $where ? '('. implode(') '. $this->where_relation .' (', $where) .')' : '';
+        /**
+         * 获得分页信息
+         *
+         * @param integer $size
+         * @param integer $current_page
+         * @param integer $total
+         * @access public
+         * @return array
+         */
+        public function getPageInfo($current_page, $size, $total = null) {
+            if (!$total) {
+                $old_offset = $this->offset;
+                $old_limit = $this->limit;
+                $old_order = $this->order;
+                $this->offset = $this->limit = $this->order = null;
 
-        return array($where, $bind);
-    }
+                $total = $this->count();
 
-    /**
-     * 生成sql语句的from部分
-     *
-     * $select->from($other_select)
-     * select * from (select * from table) as t
-     *
-     * @access public
-     * @return array
-     */
-    public function compileFrom() {
-        $bind = array();
-        if ($this->from instanceof Select) {
-            list($sql, $bind) = $this->from->compile();
-            $from = sprintf('(%s) AS %s', $sql, $this->adapter->qtab(uniqid()));
-        } else {
-            $from = $this->adapter->qtab($this->from);
+                $this->offset = $old_offset;
+                $this->limit = $old_limit;
+                $this->order = $old_order;
+            }
+            return cal_page($total, $size, $current_page);
         }
-        return array($from, $bind);
-    }
 
-    /**
-     * 生成sql语句
-     *
-     * @access public
-     * @return array
-     */
-    public function compile() {
-        $adapter = $this->adapter;
+        /**
+         * 生成sql语句的where部分
+         *
+         * @access protected
+         * @return array
+         */
+        protected function compileWhere() {
+            $where = $bind = array();
+            foreach ($this->where as $w) {
+                list($where_sql, $where_bind) = $w;
+                $where[] = $where_sql;
+                if ($where_bind) $bind = array_merge($bind, $where_bind);
+            }
 
-        $cols = empty($this->cols) ? '*' : implode(',', $adapter->qcol($this->cols));
+            $where = $where ? '('. implode(') '. $this->where_relation .' (', $where) .')' : '';
 
-        list($from, $from_bind) = $this->compileFrom();
-        $sql = sprintf('SELECT %s FROM %s', $cols, $from);
+            return array($where, $bind);
+        }
 
-        list($where, $bind) = $this->compileWhere();
-        if ($from_bind) $bind = array_merge($from_bind, $bind);
-        if ($where) $sql .= sprintf(' WHERE %s', $where);
+        /**
+         * 生成sql语句的from部分
+         *
+         * $select->from($other_select)
+         * select * from (select * from table) as t
+         *
+         * @access public
+         * @return array
+         */
+        public function compileFrom() {
+            $bind = array();
+            if ($this->from instanceof Select) {
+                list($sql, $bind) = $this->from->compile();
+                $from = sprintf('(%s) AS %s', $sql, $this->adapter->qtab(uniqid()));
+            } else {
+                $from = $this->adapter->qtab($this->from);
+            }
+            return array($from, $bind);
+        }
 
-        if ($this->group) {
-            $sql .= ' GROUP BY '. $this->group;
-            if ($this->having) {
-                list($having, $having_bind) = $this->having;
-                $sql .= ' HAVING '. $having;
-                if ($having_bind) $bind = array_merge($bind, $having_bind);
+        /**
+         * 生成sql语句
+         *
+         * @access public
+         * @return array
+         */
+        public function compile() {
+            $adapter = $this->adapter;
+
+            $cols = empty($this->cols) ? '*' : implode(',', $adapter->qcol($this->cols));
+
+            list($from, $from_bind) = $this->compileFrom();
+            $sql = sprintf('SELECT %s FROM %s', $cols, $from);
+
+            list($where, $bind) = $this->compileWhere();
+            if ($from_bind) $bind = array_merge($from_bind, $bind);
+            if ($where) $sql .= sprintf(' WHERE %s', $where);
+
+            if ($this->group) {
+                $sql .= ' GROUP BY '. $this->group;
+                if ($this->having) {
+                    list($having, $having_bind) = $this->having;
+                    $sql .= ' HAVING '. $having;
+                    if ($having_bind) $bind = array_merge($bind, $having_bind);
+                }
+            }
+
+            if ($this->order) $sql .= ' ORDER BY '. $this->order;
+            if ($this->limit) $sql .= ' LIMIT '. $this->limit;
+            if ($this->offset) $sql .= ' OFFSET '. $this->offset;
+
+            return array($sql, $bind);
+        }
+
+        /**
+         * 魔法方法
+         *
+         * @access public
+         * @return string
+         */
+        public function __toString() {
+            list($sql, $bind) = $this->compile();
+            return $sql;
+        }
+
+        /**
+         * 执行数据库查询
+         * 返回db result对象
+         *
+         * @access public
+         * @return Lysine\Storage\DB\IResult
+         */
+        public function execute() {
+            list($sql, $bind) = $this->compile();
+            return $this->adapter->execute($sql, $bind);
+        }
+
+        /**
+         * 定义预处理器，所有get()方法返回的数据都会用预处理器执行一次
+         * 预处理器可以是任意合法的callback或者闭包
+         *
+         * @param mixed $processor
+         * @access public
+         * @return mixed
+         */
+        public function setProcessor($processor) {
+            $this->processor = $processor;
+            return $this;
+        }
+
+        /**
+         * 使用定义的预处理方法处理数据库返回的行
+         *
+         * @param array $row 
+         * @access public
+         * @return mixed
+         */
+        public function process(array $row) {
+            return $this->processor
+                 ? call_user_func($this->processor, $row)
+                 : $row;
+        }
+
+        /**
+         * 以原生数组返回数据
+         *
+         * @access public
+         * @return Select
+         */
+        public function asArray() {
+            $this->return_set = false;
+            return $this;
+        }
+
+        /**
+         * 以Lysine\Utils\Set类型返回数据
+         *
+         * @access public
+         * @return Select
+         */
+        public function asSet() {
+            $this->return_set = true;
+            return $this;
+        }
+
+        /**
+         * 返回查询数据
+         *
+         * @param integer $limit
+         * @access public
+         * @return mixed
+         */
+        public function get($limit = null) {
+            if (is_int($limit)) $this->limit($limit);
+
+            $limit = $this->limit;
+            $sth = $this->execute();
+
+            $processor = $this->processor;
+            if ($limit === 1) {
+                $result = $sth->getRow();
+                return $processor ? call_user_func($processor, $result) : $result;
+            } else {
+                $result = $sth->getAll($this->key_column);
+                if ($processor) $result = array_map($processor, $result);
+                if ($this->return_set) $result = new Set($result);
+                return $result;
             }
         }
 
-        if ($this->order) $sql .= ' ORDER BY '. $this->order;
-        if ($this->limit) $sql .= ' LIMIT '. $this->limit;
-        if ($this->offset) $sql .= ' OFFSET '. $this->offset;
+        /**
+         * 删除数据
+         *
+         * 注意：直接利用select删除数据可能不是你想要的结果
+         * <code>
+         * // 找出符合条件的前5条
+         * // select * from "users" where id > 100 order by create_time desc limit 5
+         * $select = $adapter->select('users')->where('id > ?', 100)->order('create_time desc')->limit(5);
+         *
+         * // 因为DELETE语句不支持order by / limit / offset
+         * // 删除符合条件的，不仅仅是前5条
+         * // delete from "users" where id > 100
+         * $select->delete()
+         *
+         * // 如果要删除符合条件的前5条
+         * // delete from "users" where id in (select id from "users" where id > 100 order by create_time desc limit 5)
+         * $adapter->select('users')->whereIn('id', $select->setCols('id'))->delete();
+         * </code>
+         * 这里很容易犯错，考虑是否不提供delete()和update()方法
+         * 或者发现定义了limit / offset就抛出异常中止
+         *
+         * @access public
+         * @return integer
+         */
+        public function delete() {
+            list($where, $bind) = $this->compileWhere();
 
-        return array($sql, $bind);
-    }
+            // 在这里，不允许没有任何条件的delete
+            if (!$where)
+                throw new \LogicException('MUST specify WHERE condition before delete');
 
-    /**
-     * 魔法方法
-     *
-     * @access public
-     * @return string
-     */
-    public function __toString() {
-        list($sql, $bind) = $this->compile();
-        return $sql;
-    }
+            // 见方法注释
+            if ($this->limit OR $this->offset)
+                throw new \LogicException('CAN NOT DELETE while specify LIMIT or OFFSET');
 
-    /**
-     * 执行数据库查询
-     * 返回db result对象
-     *
-     * @access public
-     * @return Lysine\Storage\DB\IResult
-     */
-    public function execute() {
-        list($sql, $bind) = $this->compile();
-        return $this->adapter->execute($sql, $bind);
-    }
+            return $this->adapter->delete($this->from, $where, $bind);
+        }
 
-    /**
-     * 定义预处理器，所有get()方法返回的数据都会用预处理器执行一次
-     * 预处理器可以是任意合法的callback或者闭包
-     *
-     * @param mixed $processor
-     * @access public
-     * @return mixed
-     */
-    public function setProcessor($processor) {
-        $this->processor = $processor;
-        return $this;
-    }
+        /**
+         * 更新数据
+         * 注意事项见delete()
+         *
+         * @param array $set
+         * @access public
+         * @return integer
+         */
+        public function update(array $set) {
+            list($where, $bind) = $this->compileWhere();
 
-    /**
-     * 使用定义的预处理方法处理数据库返回的行
-     *
-     * @param array $row 
-     * @access public
-     * @return mixed
-     */
-    public function process(array $row) {
-        return $this->processor
-             ? call_user_func($this->processor, $row)
-             : $row;
-    }
+            // 在这里，不允许没有任何条件的update
+            if (!$where)
+                throw new \LogicException('MUST specify WHERE condition before update');
 
-    /**
-     * 以原生数组返回数据
-     *
-     * @access public
-     * @return Select
-     */
-    public function asArray() {
-        $this->return_set = false;
-        return $this;
-    }
+            // 见delete()方法注释
+            if ($this->limit OR $this->offset)
+                throw new \LogicException('CAN NOT UPDATE while specify LIMIT or OFFSET');
 
-    /**
-     * 以Lysine\Utils\Set类型返回数据
-     *
-     * @access public
-     * @return Select
-     */
-    public function asSet() {
-        $this->return_set = true;
-        return $this;
-    }
+            return $this->adapter->update($this->from, $set, $where, $bind);
+        }
 
-    /**
-     * 返回查询数据
-     *
-     * @param integer $limit
-     * @access public
-     * @return mixed
-     */
-    public function get($limit = null) {
-        if (is_int($limit)) $this->limit($limit);
-
-        $limit = $this->limit;
-        $sth = $this->execute();
-
-        $processor = $this->processor;
-        if ($limit === 1) {
-            $result = $sth->getRow();
-            return $processor ? call_user_func($processor, $result) : $result;
-        } else {
-            $result = $sth->getAll($this->key_column);
-            if ($processor) $result = array_map($processor, $result);
-            if ($this->return_set) $result = new Set($result);
-            return $result;
+        /**
+         * 返回迭代器
+         * 和get()方法不同的是，get()方法直接生成完整的集合
+         * 迭代器在每次迭代时才生成结果
+         * 结果集不大的情况下，迭代器和get()都可以达到目的
+         * 结果集很大的情况下，用迭代器可以大大节省内存
+         *
+         * @access public
+         * @return \NoRewindIterator
+         */
+        public function iterator() {
+            return new \NoRewindIterator(
+                new SelectIterator($this)
+            );
         }
     }
 
     /**
-     * 删除数据
+     * $select = \Model\User::select();
      *
-     * 注意：直接利用select删除数据可能不是你想要的结果
-     * <code>
-     * // 找出符合条件的前5条
-     * // select * from "users" where id > 100 order by create_time desc limit 5
-     * $select = $adapter->select('users')->where('id > ?', 100)->order('create_time desc')->limit(5);
-     *
-     * // 因为DELETE语句不支持order by / limit / offset
-     * // 删除符合条件的，不仅仅是前5条
-     * // delete from "users" where id > 100
-     * $select->delete()
-     *
-     * // 如果要删除符合条件的前5条
-     * // delete from "users" where id in (select id from "users" where id > 100 order by create_time desc limit 5)
-     * $adapter->select('users')->whereIn('id', $select->setCols('id'))->delete();
-     * </code>
-     * 这里很容易犯错，考虑是否不提供delete()和update()方法
-     * 或者发现定义了limit / offset就抛出异常中止
-     *
-     * @access public
-     * @return integer
+     * foreach ($select->iterator() as $user)
+     *     echo $user->id() . PHP_EOL;
      */
-    public function delete() {
-        list($where, $bind) = $this->compileWhere();
+    class SelectIterator implements \Iterator {
+        private $res;
+        private $select;
+        private $row_count;
+        private $pos = 0;
 
-        // 在这里，不允许没有任何条件的delete
-        if (!$where)
-            throw new \LogicException('MUST specify WHERE condition before delete');
+        public function __construct(Select $select) {
+            $this->res = $select->execute();
+            $this->row_count = $this->res->rowCount();
+            $this->select = $select;
+        }
 
-        // 见方法注释
-        if ($this->limit OR $this->offset)
-            throw new \LogicException('CAN NOT DELETE while specify LIMIT or OFFSET');
+        public function current() {
+            return $this->select->process(
+                $this->res->getRow()
+            );
+        }
 
-        return $this->adapter->delete($this->from, $where, $bind);
-    }
+        public function key() {
+            return $this->pos;
+        }
 
-    /**
-     * 更新数据
-     * 注意事项见delete()
-     *
-     * @param array $set
-     * @access public
-     * @return integer
-     */
-    public function update(array $set) {
-        list($where, $bind) = $this->compileWhere();
+        public function next() {
+            $this->pos++;
+        }
 
-        // 在这里，不允许没有任何条件的update
-        if (!$where)
-            throw new \LogicException('MUST specify WHERE condition before update');
+        public function rewind() {
+            $this->res->closeCursor();
+            $this->pos = 0;
+        }
 
-        // 见delete()方法注释
-        if ($this->limit OR $this->offset)
-            throw new \LogicException('CAN NOT UPDATE while specify LIMIT or OFFSET');
-
-        return $this->adapter->update($this->from, $set, $where, $bind);
-    }
-
-    /**
-     * 返回迭代器
-     * 和get()方法不同的是，get()方法直接生成完整的集合
-     * 迭代器在每次迭代时才生成结果
-     * 结果集不大的情况下，迭代器和get()都可以达到目的
-     * 结果集很大的情况下，用迭代器可以大大节省内存
-     *
-     * @access public
-     * @return \NoRewindIterator
-     */
-    public function iterator() {
-        return new \NoRewindIterator(
-            new SelectIterator($this)
-        );
+        public function valid() {
+            return $this->pos < $this->row_count;
+        }
     }
 }
 
-/**
- * $select = \Model\User::select();
- *
- * foreach ($select->iterator() as $user)
- *     echo $user->id() . PHP_EOL;
- */
-class SelectIterator implements \Iterator {
-    private $res;
-    private $select;
-    private $row_count;
-    private $pos = 0;
+namespace Lysine\Storage\DB\Select {
+    use Lysine\Storage\DB\Select;
 
-    public function __construct(Select $select) {
-        $this->res = $select->execute();
-        $this->row_count = $this->res->rowCount();
-        $this->select = $select;
-    }
+    class Pgsql extends Select {
+        private $for_update;
 
-    public function current() {
-        return $this->select->process(
-            $this->res->getRow()
-        );
-    }
+        private $for_share;
 
-    public function key() {
-        return $this->pos;
-    }
+        public function forUpdate($nowait = false) {
+            $this->for_update = $nowait;
+            return $this;
+        }
 
-    public function next() {
-        $this->pos++;
-    }
+        public function forShare($nowait = false) {
+            $this->for_share = $nowait;
+            return $this;
+        }
 
-    public function rewind() {
-        $this->res->closeCursor();
-        $this->pos = 0;
-    }
+        public function compile() {
+            list($sql, $bind) = parent::compile();
 
-    public function valid() {
-        return $this->pos < $this->row_count;
+            if ($this->for_update !== null) {
+                $sql .= ' FOR UPDATE';
+                if ($this->for_update) $sql .= ' NOTWAIT';
+            } elseif ($this->for_share !== null) {
+                $sql .= ' FOR SHARE';
+                if ($this->for_share) $sql .= ' NOTWAIT';
+            }
+
+            return array($sql, $bind);
+        }
     }
 }
