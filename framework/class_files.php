@@ -37,7 +37,7 @@ return array(
     'Lysine\Storage\DB\Result' => 'storage/db/adapter.php',
     'Lysine\Storage\DB\Select' => 'storage/db/select.php',
     'Lysine\Storage\DB\SelectIterator' => 'storage/db/select.php',
-    'Lysine\Storage\DB\Select\Pgsql' => 'storage/db/select/pgsql.php',
+    'Lysine\Storage\DB\Select\Pgsql' => 'storage/db/select.php',
     'Lysine\Storage\File' => 'storage/file.php',
     'Lysine\Storage\Manager' => 'storage/manager.php',
     'Lysine\Storage\Mongo' => 'storage/mongo.php',
