@@ -4,7 +4,7 @@
       webpy风格的controller(可替换)
     * 支持存储数据分区，水平切分或者垂直切分
       example: https://gist.github.com/672178
-    * 提供ActiveRecord和DataMapper ORM
+    * 提供DataMapper ORM
       内置垂直切分支持，水平切分需自行扩展
     * 对象事件机制
       example: rbac demo
