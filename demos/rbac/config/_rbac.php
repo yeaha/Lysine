@@ -1,18 +1,6 @@
 <?php
 return array(
-    'Controller' => array(
-        '_config' => array(
-            'allow' => '*',
-        ),
-        'admin' => array(
-            '_config' => array(
-                'allow' => 'admin',
-            ),
-        ),
-        'user' => array(
-            '_config' => array(
-                'deny' => 'anonymous',
-            ),
-        ),
-    ),
+    '__default__' => array('allow' => '*'),
+    'controller\admin' => array('allow' => 'admin'),
+    'controller\user' => array('deny' => 'anonymous'),
 );

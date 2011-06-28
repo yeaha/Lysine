@@ -7,66 +7,65 @@ use Model\User;
 class Rbac {
     static private $instance;
 
-    private $default_rule = array(
-        'allow' => '*',
-    );
-
-    private function getRule($class) {
-        $rules = array();
-        foreach (cfg('app', 'rbac') as $namespace => $config) {
-            if (!in_namespace($class, $namespace)) continue;
-            $rules = $config;
-            $class = preg_replace('/^\\\?'. preg_quote($namespace) .'/i', '', $class);
-            break;
-        }
-
-        $rule = isset($cfg['_config']) ? $cfg['_config'] : $this->default_rule;
-        $class = preg_split('/\\\/', $class, null, PREG_SPLIT_NO_EMPTY);
-
-        foreach ($class as $key) {
-            if (!isset($rules[$key])) return $rule;
-            if (isset($rules[$key]['_config'])) $rule = $rules[$key]['_config'];
-            $rules = $rules[$key];
-        }
-
-        return $rule;
+    static public function instance() {
+        return self::$instance ?: (self::$instance = new static);
     }
 
-    private function halt($class) {
-        if (User::current()->hasRole('anonymous')) {
-            throw HttpError::unauthorized(array(
-                'class' => $class,
-                'url' => req()->requestUri(),
-            ));
-        } else {
-            throw HttpError::forbidden(array(
-                'class' => $class,
-                'url' => req()->requestUri(),
-            ));
-        }
+    private function halt() {
+        throw User::current()->hasRole('anonymous')     // login?
+            ? HttpError::unauthorized()                 // 401
+            : HttpError::forbidden();                   // 403
     }
 
-    public function check($url, $class) {
-        $rule = $this->getRule($class);
-        $user = User::current();
-
+    private function execute($rule) {
         if (isset($rule['deny'])) {
-            if ($rule['deny'] == '*') return $this->halt($class);
-            foreach (explode(',', $rule['deny']) as $role) {
-                if ($user->hasRole(trim($role))) return $this->halt($class);
-            }
+            if ($rule['deny'] == '*') $this->halt();
+
+            if (array_intersect(
+                User::current()->getRoles(),
+                preg_split('/\s*,\s*/', $rule['deny'])
+            )) $this->halt();
         }
 
         if (isset($rule['allow'])) {
             if ($rule['allow'] == '*') return true;
-            foreach (explode(',', $rule['allow']) as $role) {
-                if ($user->hasRole(trim($role))) return true;
-            }
-            return $this->halt($class);
+
+            if (array_intersect(
+                User::current()->getRoles(),
+                preg_split('/\s*,\s*/', $rule['allow'])
+            )) return true;
+
+            // 如果设置了allow，但是当前登录用户又没有包括这些角色，就不允许访问
+            $this->halt();
         }
+
+        // 返回false会继续检查上一级rule
+        return false;
     }
 
-    static public function instance() {
-        return self::$instance ?: (self::$instance = new static);
+    public function check($url, $class) {
+        $rules = cfg('app', 'rbac');
+        $token = strtolower(trim($class, '\\'));
+
+        try {
+            // 从下向上一层一层检查namespace权限设置
+            $pos = null;
+            do {
+                if ($pos !== null)
+                    $token = substr($token, 0, $pos);
+
+                if (isset($rules[$token]) && $this->execute($rules[$token]))
+                    return true;
+
+                $pos = strrpos($token, '\\');
+            } while ($pos !== false);
+
+            $this->execute($rules['__default__']);
+        } catch (HttpError $ex) {
+            $ex->url = $url;
+            $ex->class = $class;
+
+            throw $ex;
+        }
     }
 }

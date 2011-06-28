@@ -67,7 +67,7 @@ class User extends DBData {
     }
 
     // return array('role1', 'role2', 'role3', ...);
-    protected function getRoles() {
+    public function getRoles() {
         if (!$id = $this->id()) return array('anonymous');
         if ($this->roles !== null) return $this->roles;
 
