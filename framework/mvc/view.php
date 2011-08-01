@@ -202,16 +202,19 @@ class View {
      *
      * @param string $file
      * @param array $vars
+     * @param boolean $return_content
      * @access protected
      * @return void
      */
-    protected function includes($file, array $vars = null) {
+    protected function includes($file, array $vars = null, $return_content = false) {
         $file = $this->findFile($file);
 
         $vars = $vars ? array_merge($this->vars, $vars) : $this->vars;
         if ($vars) extract($vars);
 
+        if ($return_content) ob_start();
         require $file;
+        if ($return_content) return ob_end_clean();
     }
 
     /**
