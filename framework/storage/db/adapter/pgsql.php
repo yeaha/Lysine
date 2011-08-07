@@ -203,7 +203,6 @@ class Pgsql extends Adapter {
      */
     public static function decodeArray($array) {
         $array = explode(',', trim($array, '{}'));
-        foreach ($array as &$val) $val = trim($val, '"');
         return $array;
     }
 
