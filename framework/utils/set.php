@@ -117,6 +117,30 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
+     * 获得指定的key对应的元素
+     *
+     * @param mixed $key
+     * @access public
+     * @return mixed
+     */
+    public function get($key) {
+        return $this[$key];
+    }
+
+    /**
+     * 设置指定的key对应的元素
+     *
+     * @param mixed $key
+     * @param mixed $value
+     * @access public
+     * @return Lysine\Utils\Set
+     */
+    public function set($key, $value) {
+        $this[$key] = $value;
+        return $this;
+    }
+
+    /**
      * 获得所有元素的key
      *
      * @access public
