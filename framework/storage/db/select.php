@@ -446,7 +446,8 @@ namespace Lysine\Storage\DB {
             $result = $this->offset( ($page - 1) * $size )->get($size);
 
             $this->offset = $old_offset;
-            return $result;
+            // 如果size == 1，$result就不是Set
+            return ($result instanceof Set) ? $result : new Set(array($set));
         }
 
         /**
