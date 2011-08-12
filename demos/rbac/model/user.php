@@ -25,13 +25,6 @@ class User extends DBData {
     // 用户角色
     protected $roles;
 
-    public function __construct() {
-        if ($login = self::getCookie()) {
-            $this->__fill($login['user']);
-            $this->roles = $login['roles'];
-        }
-    }
-
     public function __get($prop) {
         if ($prop == 'roles')
             return $this->getRoles();
@@ -94,8 +87,15 @@ class User extends DBData {
 
     // 当前用户
     static public function current() {
-        if (!self::$instance) self::$instance = new self();
-        return self::$instance;
+        if (self::$instance) return self::$instance;
+
+        $user = new self();
+        if ($data = self::getCookie()) {
+            $user->__fill($data['user']);
+            $user->roles = $data['roles'];
+        }
+
+        return self::$instance = $user;
     }
 
     // return 登录后的User实例
