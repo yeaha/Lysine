@@ -128,7 +128,7 @@ abstract class Data implements IData {
         return $val;
     }
 
-    public function setProp($prop, $val = null, $static = true) {
+    public function setProp($prop, $val = null, $strict = true) {
         if (static::$readonly) throw OrmError::readonly($this);
 
         if (is_array($prop)) {
