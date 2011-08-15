@@ -115,10 +115,10 @@ class Request {
         return strtolower($this->header('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
 
-    // copy from qeephp
+    // 通过http header x-requested-with或user-agent判断
     public function isFlash() {
-        $agent = strtolower($this->header('USER_AGENT'));
-        return (strpos($agent, 'shockwave flash') !== false) || (strpos($agent, 'adobeair') !== false);
+        return (strtolower($this->header('X_REQUESTED_WITH')) == 'flash')
+            || (strpos(strtolower($this->header('USER_AGENT')), ' flash') !== false);
     }
 
     protected function _getAccept($key) {
