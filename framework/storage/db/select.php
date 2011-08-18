@@ -627,7 +627,7 @@ namespace Lysine\Storage\DB {
          * @return mixed
          */
         public function get($limit = null) {
-            if (is_int($limit)) $this->limit($limit);
+            if ($limit !== null) $this->limit($limit);
 
             $limit = $this->limit;
             $sth = $this->execute();
