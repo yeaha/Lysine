@@ -122,10 +122,9 @@ abstract class Data implements IData {
         if (!$prop_meta = static::getMeta()->getPropMeta($prop))
             throw Error::undefined_property(get_class($this), $prop);
 
-        $val = isset($this->props[$prop]) ? $this->props[$prop] : null;
-        if ($val === null && $prop_meta['default'] !== null)
-            return $prop_meta['default'];
-        return $val;
+        return isset($this->props[$prop])
+             ? $this->props[$prop]
+             : $prop_meta['default'];
     }
 
     public function setProp($prop, $val = null, $strict = true) {
