@@ -231,7 +231,7 @@ class Pgsql extends Adapter {
         if (!$hstore) return $result;
 
         foreach (preg_split('/"\s*,\s*"/', $hstore) as $pair) {
-            $pair = explode('=>', $pair, 1);
+            $pair = explode('=>', $pair);
             if (count($pair) !== 2) continue;
 
             list($k, $v) = $pair;
