@@ -37,6 +37,7 @@ class Logging {
         $record = array(
             'message' => $message,
             'level' => $level,
+            'pid' => getmypid(),
         );
 
         foreach ($this->handler as $handler) $handler->emit($record);
@@ -151,7 +152,7 @@ class FileHandler implements IHandler {
         }
 
         foreach ($message as $line)
-            $this->storage->write(sprintf('%s %-8s %s', $record['time'], $record['level_name'], $line));
+            $this->storage->write(sprintf('%s %-8s %-8s %s', $record['time'], $record['pid'], $record['level_name'], $line));
     }
 }
 
