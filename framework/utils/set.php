@@ -389,6 +389,17 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     }
 
     /**
+     * array_unique()
+     *
+     * @access public
+     * @return self
+     */
+    public function unique() {
+        $this->set = array_unique($this->set);
+        return $this;
+    }
+
+    /**
      * 自定义排序
      * 修改自身
      *
