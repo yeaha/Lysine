@@ -214,7 +214,7 @@ class View {
 
         if ($return_content) ob_start();
         require $file;
-        if ($return_content) return ob_end_clean();
+        if ($return_content) return ob_get_clean();
     }
 
     /**
