@@ -144,8 +144,10 @@ abstract class Data implements IData {
                 throw Error::undefined_property(get_class($this), $prop);
             }
 
-            if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key']))
+            if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key'])) {
+                if (!$strict) continue;
                 throw OrmError::refuse_update($this, $prop);
+            }
 
             $val = $this->formatProp($prop, $val, $prop_meta);
 
