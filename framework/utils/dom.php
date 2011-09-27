@@ -88,7 +88,7 @@ class Element extends \DOMElement {
                 $result[$key] = $this->getAttribute($key);
         }
 
-        return $reuslt;
+        return $result;
     }
 
     /**
