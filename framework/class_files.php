@@ -45,6 +45,8 @@ return array(
     'Lysine\Utils\Curl' => 'utils/curl.php',
     'Lysine\Utils\Curl\Http' => 'utils/curl.php',
     'Lysine\Utils\Curl\HttpError' => 'utils/curl.php',
+    'Lysine\Utils\DOM\Document' => 'utils/dom.php',
+    'Lysine\Utils\DOM\Element' => 'utils/dom.php',
     'Lysine\Utils\Events' => 'utils/events.php',
     'Lysine\Utils\Logging' => 'utils/logging.php',
     'Lysine\Utils\Logging\ChromePHPHandler' => 'utils/logging.php',
