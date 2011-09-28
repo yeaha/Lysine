@@ -21,7 +21,7 @@ class Document extends \DOMDocument {
      * @param   string  $version
      * @param   string  $encoding
      */
-    public function __construct(/* string */$version = '1.0', /* string */$encoding = 'utf-8') {
+    public function __construct($version = '1.0', $encoding = 'utf-8') {
         parent::__construct($version, $encoding);
         // 把\Lysine\Utils\DOM\Element类注册为默认的Node class
         $this->registerNodeClass('DOMElement', '\Lysine\Utils\DOM\Element');
@@ -34,7 +34,7 @@ class Document extends \DOMDocument {
      * @param   boolean $return_first
      * @return  mixed
      */
-    public function select(/* string */$query, /* boolean */$return_first = false) {
+    public function select($query, $return_first = false) {
         return $this->documentElement->select($query, $return_first);
     }
 
@@ -77,7 +77,7 @@ class Element extends \DOMElement {
      * @param   string  $key
      * @return  array
      */
-    public function getAttributes(/* string */$key = null/* [, $key2[, $key3[, ...]]] */) {
+    public function getAttributes($key = null/* [, $key2[, $key3[, ...]]] */) {
         $result = array();
 
         if ($key === null) {
@@ -97,7 +97,7 @@ class Element extends \DOMElement {
      * @param   string  $query
      * @param   boolean $return_first
      */
-    public function select(/* string */$query, /* boolean */$return_first = false) {
+    public function select($query, $return_first = false) {
         if (!$this->ownerDocument)
             throw new Error('Element must have ownerDocument while select()');
 
@@ -132,12 +132,12 @@ class Element extends \DOMElement {
     public function inject(\DOMNode $refnode, $where = 'bottom') {
         $where = strtolower($where);
 
-        if ('before' == $where) {
+        if ($where == 'before') {
             $refnode->parentNode->insertBefore($this, $refnode);
-        } elseif ('after' == $where) {
+        } elseif ($where == 'after') {
             $refnode->parentNode->insertAfter($this, $refnode);
         } else {
-            if ('top' == $where AND $first = $refnode->firstChild) {
+            if ($where == 'top' AND ($first = $refnode->firstChild)) {
                 $refnode->insertBefore($this, $first);
             } else {
                 $refnode->appendChild($this);
