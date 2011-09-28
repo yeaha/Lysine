@@ -286,7 +286,7 @@ namespace Lysine {
     // $terminate = true 处理完后直接结束
     function __on_exception($exception, $terminate = true) {
         try {
-            \Lysine\logger()->exception($exception, 8);
+            \Lysine\logger()->exception($exception);
         } catch (\Exception $ex) {
         }
 

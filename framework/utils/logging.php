@@ -64,6 +64,9 @@ class Logging {
     }
 
     public function exception(\Exception $exception, $trace_limit = 0) {
+        if ($previous = $exception->getPrevious())
+            $this->exception($previous);
+
         $message = array(
             '>>> Exception '. get_class($exception) .'('. $exception->getCode() .') <<<',
             'Message: '. $exception->getMessage(),
