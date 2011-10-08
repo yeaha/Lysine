@@ -96,12 +96,6 @@ class Response {
         return $this;
     }
 
-    public function setContentType($type) {
-        if (is_array($type)) $type = implode(',', $type);
-        $this->setHeader('Content-Type', $type);
-        return $this;
-    }
-
     public function sendHeader() {
         // session必须要先于header处理
         // 否则会覆盖header内对于Cache-Control的处理
@@ -116,17 +110,11 @@ class Response {
             $this->session = array();
         }
 
-        foreach ($this->cookie as $name => $config) {
-            list($value, $expire, $path, $domain, $secure, $httponly) = $config;
-            setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
-        }
-        $this->cookie = array();
+        // http 状态
+        if ($status = self::httpStatus($this->code))
+            header($status);
 
-        if (is_integer($this->code) && $this->code != 200) {
-            if ($status = self::httpStatus($this->code))
-                header($status);
-        }
-
+        // 自定义http header
         foreach ($this->header as $name => $value) {
             $header = ($value === null)
                     ? $name
@@ -134,6 +122,13 @@ class Response {
             header($header);
         }
         $this->header = array();
+
+        // cookie
+        foreach ($this->cookie as $name => $config) {
+            list($value, $expire, $path, $domain, $secure, $httponly) = $config;
+            setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+        }
+        $this->cookie = array();
 
         return $this;
     }
