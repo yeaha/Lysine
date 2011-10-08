@@ -1,35 +1,34 @@
 <?php
+defined('LYSINE_APP_CLASS') or define('LYSINE_APP_CLASS', '\Lysine\MVC\Application');
+defined('LYSINE_REQUEST_CLASS') or define('LYSINE_REQUEST_CLASS', '\Lysine\MVC\Request');
+defined('LYSINE_RESPONSE_CLASS') or define('LYSINE_RESPONSE_CLASS', '\Lysine\MVC\Response');
+
 use Lysine\MVC;
 use Lysine\Storage\DB\Adapter\Pgsql;
 use Lysine\Storage\DB\Expr;
 use Lysine\Utils\Events;
 use Lysine\Utils\Logging;
 
-if (!function_exists('app')) {
-    function app() {
-        return MVC\Application::instance();
-    }
+function app() {
+    $class = LYSINE_APP_CLASS;
+    return $class::instance();
 }
 
-if (!function_exists('req')) {
-    function req() {
-        return MVC\Request::instance();
-    }
+function req() {
+    $class = LYSINE_REQUEST_CLASS;
+    return $class::instance();
 }
 
-if (!function_exists('resp')) {
-    function resp() {
-        return MVC\Response::instance();
-    }
+function resp() {
+    $class = LYSINE_RESPONSE_CLASS;
+    return $class::instance();
 }
 
-if (!function_exists('render_view')) {
-    function render_view($file, $vars = null) {
-        static $view;
-        if (!$view) $view = new MVC\View;
-        if (DEBUG) \Lysine\logger('mvc')->info('Render view file ['. $file .']');
-        return $view->reset()->render($file, $vars);
-    }
+function render_view($file, $vars = null) {
+    static $view;
+    if (!$view) $view = new MVC\View;
+    if (DEBUG) \Lysine\logger('mvc')->info('Render view file ['. $file .']');
+    return $view->reset()->render($file, $vars);
 }
 
 if (!function_exists('now')) {
