@@ -108,22 +108,19 @@ class Application {
      *
      * \Controller\User => controller/user.php
      * \Controller\User\Login => controller/user/login.php
-     * \Controller\User_Login => controller/user.php
      *
      * @param string $class
      * @access public
      * @return boolean
      */
     public function loadClass($class) {
-        $pos = strpos($class, '_', strrpos($class, '\\'));
-        $find = ($pos === false) ? $class : substr($class, 0, $pos);
-        $find = str_replace('\\', '/', strtolower($find)) .'.php';
+        $file = str_replace('\\', '/', strtolower($class)) .'.php';
 
         foreach ($this->include_path as $path) {
-            $file = $path .'/'. $find;
-            if (!is_file($file)) continue;
+            $find = $path .'/'. $file;
+            if (!is_file($find)) continue;
 
-            require $file;
+            require $find;
             return class_exists($class, false) || interface_exists($class, false);
         }
 
