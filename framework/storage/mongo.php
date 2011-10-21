@@ -1,7 +1,11 @@
 <?php
 namespace Lysine\Storage;
 
+use Lysine\Error;
 use Lysine\IStorage;
+
+if (!extension_loaded('mongo'))
+    throw Error::require_extension('mongo');
 
 /**
  * mongodb数据库连接
