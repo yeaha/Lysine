@@ -1,8 +1,9 @@
 <?php
 namespace Lysine\Storage;
 
-use Lysine\Error;
-use Lysine\IStorage;
+use Lysine\Error,
+    Lysine\IStorage,
+    MongoCollection;
 
 if (!extension_loaded('mongo'))
     throw Error::require_extension('mongo');
@@ -25,7 +26,6 @@ class Mongo extends \Mongo implements IStorage {
      */
     public function __construct(array $config) {
         list($dsn, $options) = self::parseConfig($config);
-        if (!isset($options['persist'])) $options['persist'] = $dsn;
         parent::__construct($dsn, $options);
     }
 
@@ -153,7 +153,7 @@ class Mongo extends \Mongo implements IStorage {
     static public function parseConfig(array $config) {
         $dsn = isset($config['dsn'])
              ? $config['dsn']
-             : sprintf('mongodb://%s/%s', ini_get('mongo.default_host'), ini_get('mongo.default_port'));
+             : sprintf('mongodb://%s:%s', ini_get('mongo.default_host'), ini_get('mongo.default_port'));
 
         $options = (isset($config['options']) && is_array($config['options']))
                  ? $config['options']
