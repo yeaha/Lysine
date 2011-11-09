@@ -24,7 +24,7 @@ function resp() {
     return $class::instance();
 }
 
-function render_view($file, $vars = null) {
+function render_view($file, $vars = array()) {
     static $view;
     if (!$view) $view = new MVC\View;
     if (DEBUG) \Lysine\logger('mvc')->info('Render view file ['. $file .']');
