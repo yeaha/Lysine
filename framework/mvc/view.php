@@ -180,6 +180,9 @@ class View {
 
         $output = $this->includes($file, array(), true);
 
+        // 安全措施，关闭掉忘记关闭的block
+        $this->endBlock($all = true);
+
         // 如果没有继承其它视图，就直接输出结果
         if (!$extend_file = $this->extend_file)
             return $output;
@@ -209,9 +212,6 @@ class View {
             while (ob_get_level()) ob_end_clean();
             throw $ex;
         }
-
-        // 安全措施，关闭掉忘记关闭的block
-        $this->endBlock($all = true);
 
         $output = ob_get_clean();
         if ($return_content) return $output;
