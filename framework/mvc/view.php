@@ -167,38 +167,29 @@ class View {
      * 生成视图渲染结果
      *
      * @param mixed $file
+     * @param array $vars
+     * @param boolean $reset
      * @access public
      * @return string
      */
-    public function render($file, array $vars = null) {
-        $file = $this->findFile($file);
+    public function render($file, array $vars = array(), $reset = true) {
+        if ($reset) $this->reset();
 
-        if ($vars) {
-            foreach ($vars as $key => $val)
-                $this->set($key, $val);
-        }
+        foreach ($vars as $key => $val)
+            $this->set($key, $val);
 
-        ob_start();
-        if ($this->vars) extract($this->vars);
-        try {
-            require $file;
-        } catch (\Exception $ex) {
-            ob_get_level() and ob_clean();
-            throw $ex;
-        }
-        // 安全措施，关闭掉忘记关闭的block
-        $this->endBlock($all = true);
-        $output = ob_get_clean();
+        $output = $this->includes($file, array(), true);
 
         // 如果没有继承其它视图，就直接输出结果
-        if (!$extend_file = $this->extend_file) return $output;
+        if (!$extend_file = $this->extend_file)
+            return $output;
 
         $this->extend_file = null;
-        return $this->render($extend_file);
+        return $this->render($extend_file, array(), false);
     }
 
     /**
-     * 包含其它视图
+     * 包含视图文件
      *
      * @param string $file
      * @param array $vars
@@ -206,15 +197,25 @@ class View {
      * @access protected
      * @return void
      */
-    protected function includes($file, array $vars = null, $return_content = false) {
+    protected function includes($file, array $vars = array(), $return_content = false) {
         $file = $this->findFile($file);
-
         $vars = $vars ? array_merge($this->vars, $vars) : $this->vars;
-        if ($vars) extract($vars);
 
-        if ($return_content) ob_start();
-        require $file;
-        if ($return_content) return ob_get_clean();
+        ob_start();
+        try {
+            extract($vars);
+            require $file;
+        } catch (\Exception $ex) {
+            while (ob_get_level()) ob_end_clean();
+            throw $ex;
+        }
+
+        // 安全措施，关闭掉忘记关闭的block
+        $this->endBlock($all = true);
+
+        $output = ob_get_clean();
+        if ($return_content) return $output;
+        echo $output;
     }
 
     /**
@@ -253,9 +254,8 @@ class View {
     protected function endBlock($all = false) {
         if (!$this->block_stack) return false;
 
-        while ($all) {
+        while ($all)
             if (!$this->endBlock(false)) return true;
-        }
 
         $block_name = array_pop($this->block_stack);
         $output = ob_get_clean();
