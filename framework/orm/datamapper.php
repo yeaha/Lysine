@@ -229,14 +229,12 @@ abstract class Data implements IData {
         return static::getMapper()->destroy($this);
     }
 
-    public function fireEvent($event, $args = null) {
+    public function fireEvent($event, array $args = null) {
         if (isset(self::$event_methods[$event])) {
             $method = self::$event_methods[$event];
             $this->$method();
         }
 
-        $args = is_array($args) ? $args : array_slice(func_get_args(), 1);
-        array_unshift($args, $this);
         return fire_event($this, $event, $args);
     }
 
@@ -443,11 +441,11 @@ abstract class Mapper {
         if (!($is_fresh = $data->isFresh()) && !($is_dirty = $data->isDirty()))
             return true;
 
-        $data->fireEvent(Data::BEFORE_SAVE_EVENT);
+        $data->fireEvent(Data::BEFORE_SAVE_EVENT, array($data));
         if ($is_fresh) {
-            $data->fireEvent(Data::BEFORE_INSERT_EVENT, $data);
+            $data->fireEvent(Data::BEFORE_INSERT_EVENT, array($data));
         } elseif ($is_dirty) {
-            $data->fireEvent(Data::BEFORE_UPDATE_EVENT, $data);
+            $data->fireEvent(Data::BEFORE_UPDATE_EVENT, array($data));
         }
 
         $props = $data->toArray();
@@ -458,14 +456,14 @@ abstract class Mapper {
 
         if ($is_fresh) {
             if ($result = $this->insert($data))
-                $data->fireEvent(Data::AFTER_INSERT_EVENT);
+                $data->fireEvent(Data::AFTER_INSERT_EVENT, array($data));
         } elseif ($is_dirty) {
             if ($result = $this->update($data))
-                $data->fireEvent(Data::AFTER_UPDATE_EVENT);
+                $data->fireEvent(Data::AFTER_UPDATE_EVENT, array($data));
         }
 
         if ($result)
-            $data->fireEvent(Data::AFTER_SAVE_EVENT);
+            $data->fireEvent(Data::AFTER_SAVE_EVENT, array($data));
 
         return $result;
     }
@@ -523,13 +521,13 @@ abstract class Mapper {
 
         if ($data->isFresh()) return true;
 
-        $data->fireEvent(Data::BEFORE_DELETE_EVENT);
+        $data->fireEvent(Data::BEFORE_DELETE_EVENT, array($data));
         try {
             if (!$this->doDelete($data)) return false;
         } catch (\Exception $ex) {
             throw OrmError::delete_failed($data, $ex);
         }
-        $data->fireEvent(Data::AFTER_DELETE_EVENT);
+        $data->fireEvent(Data::AFTER_DELETE_EVENT, array($data));
         Registry::remove($this->class, $data->id());
         return true;
     }

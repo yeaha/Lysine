@@ -84,14 +84,14 @@ class Events {
      * @access public
      * @return integer 事件回调次数
      */
-    public function fire($source, $event, array $args = array()) {
+    public function fire($source, $event, array $args = null) {
         $fire = 0;  // 回调次数
         if (!$this->listen && !$this->subscribe) return $fire;
 
         $key = is_object($source) ? $this->keyOf($source) : strtolower($source);
         if (isset($this->listen[$key][$event])) {
             foreach ($this->listen[$key][$event] as $callback) {
-                call_user_func_array($callback, $args);
+                $args ? call_user_func_array($callback, $args) : call_user_func($callback);
                 $fire++;
             }
         }
@@ -105,7 +105,7 @@ class Events {
         // 订阅回调参数
         // 第一个参数是事件对象
         // 第二个参数是事件参数
-        $args = array($source, $args);
+        $args = $args ? array($source, $args) : array($source);
         foreach ($this->subscribe[$class][$event] as $callback) {
             call_user_func_array($callback, $args);
             $fire++;
