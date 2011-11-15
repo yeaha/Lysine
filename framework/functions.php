@@ -2,6 +2,7 @@
 defined('LYSINE_APP_CLASS') or define('LYSINE_APP_CLASS', '\Lysine\MVC\Application');
 defined('LYSINE_REQUEST_CLASS') or define('LYSINE_REQUEST_CLASS', '\Lysine\MVC\Request');
 defined('LYSINE_RESPONSE_CLASS') or define('LYSINE_RESPONSE_CLASS', '\Lysine\MVC\Response');
+defined('LYSINE_STORAGE_MANAGER_CLASS') or define('LYSINE_STORAGE_MANAGER_CLASS', '\Lysine\Storage\Manager');
 
 use Lysine\MVC;
 use Lysine\Storage\DB\Adapter\Pgsql;
@@ -138,9 +139,15 @@ function logger($name) {
 }
 
 function storage($name = null, $arg = null) {
-    $manager = \Lysine\Storage\Manager::instance();
-    if ($arg === null) return $manager->get($name);
-    return call_user_func_array(array($manager, 'get'), func_get_args());
+    static $instance;
+
+    if (!$instance) {
+        $class = LYSINE_STORAGE_MANAGER_CLASS;
+        $instance = $class::instance();
+    }
+
+    if ($arg === null) return $instance->get($name);
+    return call_user_func_array(array($instance, 'get'), func_get_args());
 }
 
 function dbexpr($expr) {
