@@ -74,6 +74,10 @@ class Response {
         return $this;
     }
 
+    public function getCode() {
+        return $this->code;
+    }
+
     public function setCookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = true) {
         $this->cookie[$name] = array($value, $expire, $path, $domain, $secure, $httponly);
         return $this;
