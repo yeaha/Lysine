@@ -88,7 +88,7 @@ class Request {
         $uri = $this->requestUri();
         $pos = strpos($uri, '?');
         if ($pos !== false) $uri = substr($uri, 0, $pos);
-        return $uri;
+        return rtrim($uri, '/') ?: '/';
     }
 
     public function isGET() {
