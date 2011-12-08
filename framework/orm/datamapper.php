@@ -200,6 +200,7 @@ abstract class Data implements IData {
 
     public function setFresh($fresh) {
         $this->is_fresh = (bool)$fresh;
+        return $this;
     }
 
     public function isFresh() {
