@@ -198,6 +198,10 @@ abstract class Data implements IData {
         return $this->getProp($prop);
     }
 
+    public function setFresh($fresh) {
+        $this->is_fresh = (bool)$fresh;
+    }
+
     public function isFresh() {
         return $this->is_fresh;
     }
