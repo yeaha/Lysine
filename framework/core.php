@@ -232,6 +232,11 @@ namespace Lysine {
             return new static("{$class}: Undefined primary key");
         }
 
+        static public function mismatching_pattern($class, $prop, $pattern) {
+            if ($class instanceof Data) $class = get_class($class);
+            return new static("{$class}: Property {$prop} mismatching pattern {$pattern}");
+        }
+
         static public function insert_failed(Data $obj, $previous = null, array $more = array()) {
             $class = get_class($obj);
             $more['class'] = $class;

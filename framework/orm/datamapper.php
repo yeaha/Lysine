@@ -149,6 +149,9 @@ abstract class Data implements IData {
                 throw OrmError::refuse_update($this, $prop);
             }
 
+            if ($prop_meta['pattern'] && !preg_match($prop_meta['pattern'], $val))
+                throw OrmError::mismatching_pattern($this, $prop, $prop_meta['pattern']);
+
             $val = $this->formatProp($prop, $val, $prop_meta);
 
             if (!$prop_meta['allow_null'] && $val === null)
@@ -585,6 +588,7 @@ class Meta {
         'refuse_update' => FALSE,   // 是否允许更新
         'allow_null' => FALSE,      // 是否允许为空
         'default' => NULL,          // 默认值
+        'pattern' => NULL,          // 正则表达式检查
     );
 
     static private $instance = array();
