@@ -237,6 +237,13 @@ abstract class Data implements IData {
         return static::getMapper()->destroy($this);
     }
 
+    public function refresh() {
+        if (!$this->isFresh())
+            static::getMapper()->refresh($this);
+
+        return $this;
+    }
+
     public function fireEvent($event, array $args = null) {
         if (isset(self::$event_methods[$event])) {
             $method = self::$event_methods[$event];
@@ -436,6 +443,18 @@ abstract class Mapper {
     }
 
     /**
+     * 重新从存储服务中查询数据，刷新实例
+     *
+     * @param Data $data
+     * @access public
+     * @return Data
+     */
+    public function refresh(Data $data) {
+        if ($record = $this->doFind($data->id()))
+            $this->package($record, $data);
+    }
+
+    /**
      * 保存模型数据到存储服务
      *
      * @param Data $data
@@ -544,12 +563,16 @@ abstract class Mapper {
      * 把存储服务中获得的数据实例化为领域模型
      *
      * @param array $record
+     * @param Data $data
      * @access public
      * @return Lysine\DataMapper\Data
      */
-    public function package(array $record) {
-        $data_class = $this->class;
-        $data = new $data_class;
+    public function package(array $record, Data $data = null) {
+        if (!$data) {
+            $data_class = $this->class;
+            $data = new $data_class;
+        }
+
         $data->__fill($this->recordToProps($record));
 
         Registry::set($data);
