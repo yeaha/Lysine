@@ -192,7 +192,7 @@ class Request {
             if (!$is_private) return $ip;
         }
 
-        return array_shift($ip);
+        return array_shift($ip_set);
     }
 
     static public function instance() {
