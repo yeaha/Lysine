@@ -1,9 +1,13 @@
 <?php
 namespace Lysine\Storage\DB\Adapter;
 
-use Lysine\Storage\DB;
-use Lysine\Storage\DB\Adapter;
-use Lysine\Storage\DB\Expr;
+use Lysine\Error,
+    Lysine\Storage\DB,
+    Lysine\Storage\DB\Adapter,
+    Lysine\Storage\DB\Expr;
+
+if (!extension_loaded('pdo_mysql'))
+    throw Error::require_extension('pdo_mysql');
 
 class Mysql extends Adapter {
     /**

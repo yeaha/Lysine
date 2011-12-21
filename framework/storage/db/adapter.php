@@ -1,11 +1,15 @@
 <?php
 namespace Lysine\Storage\DB;
 
-use Lysine\StorageError;
-use Lysine\Storage\DB\Expr;
-use Lysine\Storage\DB\IAdapter;
-use Lysine\Storage\DB\IResult;
-use Lysine\Storage\DB\Select;
+use Lysine\Error,
+    Lysine\StorageError,
+    Lysine\Storage\DB\Expr,
+    Lysine\Storage\DB\IAdapter,
+    Lysine\Storage\DB\IResult,
+    Lysine\Storage\DB\Select;
+
+if (!extension_loaded('pdo'))
+    throw Error::require_extension('pdo');
 
 /**
  * PDO数据库连接
@@ -52,12 +56,6 @@ abstract class Adapter implements IAdapter {
      * @return void
      */
     public function __construct(array $config) {
-        $explode = explode('\\', get_class($this));
-        $extension = 'pdo_'. strtolower( array_pop($explode) );
-
-        if (!extension_loaded($extension))
-            throw new \RuntimeException('Need '. $extension .' extension!');
-
         $this->config = static::parseConfig($config);
     }
 
