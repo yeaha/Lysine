@@ -62,6 +62,15 @@ class View {
      */
     protected $block_config = array();
 
+    /**
+     * 本视图已经包含的视图文件
+     * 文件名为key
+     *
+     * @var array
+     * @access protected
+     */
+    protected $include_files = array();
+
     public function __construct(array $config = null) {
         if ( !$config = ($config ?: cfg('app', 'view')) )
             throw new Error('Invalid View config');
@@ -201,6 +210,7 @@ class View {
      * @return void
      */
     protected function includes($file, array $vars = array(), $return_content = false) {
+        $this->include_files[$file] = 1;
         $file = $this->findFile($file);
         $vars = $vars ? array_merge($this->vars, $vars) : $this->vars;
 
@@ -216,6 +226,19 @@ class View {
         $output = ob_get_clean();
         if ($return_content) return $output;
         echo $output;
+    }
+
+    /**
+     * 只包含一次视图文件
+     *
+     * @param string $file
+     * @param array $vars
+     * @access protected
+     * @return void
+     */
+    protected function includeOnce($file, array $vars = array()) {
+        if (!isset($this->include_files[$file]))
+            $this->includes($file, $vars);
     }
 
     /**
