@@ -302,23 +302,26 @@ function cal_page($total, $page_size, $current_page = 1) {
     $page = array(
         'total' => $total,
         'size' => $page_size,
+        'from' => 0,
+        'to' => 0,
         'first' => 1,
-        'last' => $page_count,
-        'current' => $current_page,
-        'has_prev' => false,
         'prev' => null,
-        'has_next' => false,
+        'current' => $current_page,
         'next' => null,
+        'last' => $page_count,
     );
 
-    if ($current_page > $page['first']) {
-        $page['has_prev'] = true;
+    if ($current_page > $page['first'])
         $page['prev'] = $current_page - 1;
-    }
 
-    if ($current_page < $page['last']) {
-        $page['has_next'] = true;
+    if ($current_page < $page['last'])
         $page['next'] = $current_page + 1;
+
+    if ($total) {
+        $page['from'] = ($current_page - 1) * $page_size + 1;
+        $page['to'] = $current_page == $page['last']
+                    ? $total
+                    : $current_page * $page_size;
     }
 
     return $page;
