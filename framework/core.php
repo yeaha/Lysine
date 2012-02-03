@@ -290,11 +290,6 @@ namespace Lysine {
 
     // $terminate = true 处理完后直接结束
     function __on_exception($exception, $terminate = true) {
-        try {
-            \Lysine\logger()->exception($exception);
-        } catch (\Exception $ex) {
-        }
-
         $code = $exception instanceof HttpError
               ? $exception->getCode()
               : 500;
