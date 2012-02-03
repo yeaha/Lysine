@@ -275,14 +275,6 @@ function start_with($haystack, $needle, $case_insensitive = false) {
     }
 }
 
-// 检查对象实例或者类名是否属于指定名字空间
-function in_namespace($class, $namespace) {
-    if (is_object($class)) $class = get_class($class);
-    $class = ltrim($class, '\\');
-    $namespace = trim($namespace, '\\') . '\\';
-    return start_with($class, $namespace, true);
-}
-
 // 是关联数组还是普通数组
 function is_assoc_array($array) {
     $keys = array_keys($array);

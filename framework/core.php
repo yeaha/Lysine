@@ -266,7 +266,7 @@ namespace Lysine {
     }
 
     function autoload($class) {
-        if (!in_namespace($class, 'Lysine')) return false;
+        if (stripos($class, 'lysine\\') !== 0) return false;
 
         static $files = null;
         if ($files === null)
