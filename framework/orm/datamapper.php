@@ -50,6 +50,9 @@ abstract class Data implements IData {
     // }}}
 
     // {{{ 内置事件响应方法
+    protected function __before_init() {}
+    protected function __after_init() {}
+
     protected function __before_save() {}
     protected function __after_save() {}
 
@@ -85,14 +88,18 @@ abstract class Data implements IData {
     static protected $props_meta = array();
 
     private $is_fresh = true;
-    private $props = array();
-    private $dirty_props = array();
+    protected $props = array();
+    protected $dirty_props = array();
 
     public function __construct(array $props = null, $is_fresh = true) {
+        $this->__before_init();
+
         if ($props) $this->setProp($props);
 
         $this->is_fresh = $is_fresh;
         if (!$is_fresh) $this->dirty_props = array();
+
+        $this->__after_init();
     }
 
     public function __destruct() {
@@ -165,14 +172,15 @@ abstract class Data implements IData {
 
     protected function changeProp($prop, $val) {
         if (!isset($this->props[$prop])) {
-            if ($val === null) return;
+            if ($val === null) return false;
         } elseif ($val === $this->props[$prop]) {
-            return;
+            return false;
         }
 
         $this->props[$prop] = $val;
         if (!in_array($prop, $this->dirty_props))
             $this->dirty_props[] = $prop;
+        return true;
     }
 
     protected function formatProp($prop, $val, array $prop_meta) {
