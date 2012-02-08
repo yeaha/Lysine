@@ -22,9 +22,9 @@ class Sqlite extends Adapter {
      * 是否处于事务中
      *
      * @var boolean
-     * @access private
+     * @access protected
      */
-    private $in_transaction = false;
+    protected $in_transaction = false;
 
     /**
      * 开始事务
