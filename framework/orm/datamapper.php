@@ -1,13 +1,14 @@
 <?php
+// @README: ORM DataMapper实现
+
 namespace Lysine\DataMapper;
 
-use Lysine\Config;
-use Lysine\Error;
-use Lysine\IStorage;
-use Lysine\OrmError;
-use Lysine\Storage\Cache;
-use Lysine\Storage\Manager;
-use Lysine\Utils;
+use Lysine\Config,
+    Lysine\Error,
+    Lysine\IStorage,
+    Lysine\OrmError,
+    Lysine\Storage\Manager,
+    Lysine\Utils;
 
 /**
  * 领域模型接口
@@ -82,15 +83,28 @@ abstract class Data implements IData {
     );
     // }}}
 
+    // 存储服务
     static protected $storage;
+    // 存储集合
     static protected $collection;
+    // 只读开关
     static protected $readonly = false;
+    // 属性元数据
     static protected $props_meta = array();
 
+    // 是否新建
     private $is_fresh = true;
+    // 属性值
     protected $props = array();
+    // 被修改过的属性
     protected $dirty_props = array();
 
+    /**
+     * 构造函数
+     *
+     * @param array $props      属性值
+     * @param bool  $is_fresh   是否新建
+     */
     public function __construct(array $props = null, $is_fresh = true) {
         $this->__before_init();
 
@@ -102,10 +116,20 @@ abstract class Data implements IData {
         $this->__after_init();
     }
 
+    /**
+     * 析构函数
+     */
     public function __destruct() {
         clear_event($this);
     }
 
+    /**
+     * 把属性填充进Data，并设置为非新建
+     *
+     * @param array $props 属性值
+     * @access public
+     * @return Data
+     */
     public function __fill(array $props) {
         $this->props = array_merge($this->props, $props);
         $this->is_fresh = false;
@@ -113,18 +137,47 @@ abstract class Data implements IData {
         return $this;
     }
 
+    /**
+     * 魔法方法，读属性
+     *
+     * @param string $prop
+     * @access public
+     * @return mixed
+     */
     public function __get($prop) {
         return $this->getProp($prop);
     }
 
+    /**
+     * 魔法方法，写属性
+     *
+     * @param string    $prop   属性名
+     * @param mixed     $val    属性值
+     * @access public
+     * @return void
+     */
     public function __set($prop, $val) {
-        return $this->setProp($prop, $val);
+        $this->setProp($prop, $val);
     }
 
+    /**
+     * 是否有指定属性
+     *
+     * @param string $prop 属性名
+     * @access public
+     * @return bool
+     */
     public function hasProp($prop) {
         return (bool)static::getMeta()->getPropMeta($prop);
     }
 
+    /**
+     * 读属性，如果属性未设置则返回默认值或NULL
+     *
+     * @param string $prop  属性名
+     * @access public
+     * @return mixed
+     */
     public function getProp($prop) {
         if (!$prop_meta = static::getMeta()->getPropMeta($prop))
             throw Error::undefined_property(get_class($this), $prop);
@@ -134,6 +187,15 @@ abstract class Data implements IData {
              : $prop_meta['default'];
     }
 
+    /**
+     * 写属性
+     *
+     * @param string|array  $prop   属性
+     * @param mixed         $val    值
+     * @param bool          $strict 严格模式，是否抛出异常
+     * @access public
+     * @return Data
+     */
     public function setProp($prop, $val = null, $strict = true) {
         if (static::$readonly) throw OrmError::readonly($this);
 
@@ -170,6 +232,16 @@ abstract class Data implements IData {
         return $this;
     }
 
+    /**
+     * 修改属性
+     * setProp()检查值是否符合属性元数据要求
+     * changeProp()的重点是根据已有值的情况决定是否修改属性以及修改Data内部状态
+     *
+     * @param string $prop 属性
+     * @param mixed  $val  值
+     * @access protected
+     * @return bool
+     */
     protected function changeProp($prop, $val) {
         if (!isset($this->props[$prop])) {
             if ($val === null) return false;
@@ -183,6 +255,16 @@ abstract class Data implements IData {
         return true;
     }
 
+    /**
+     * 修改属性之前，根据属性元数据定义格式化属性值
+     * 业务Data可通过重载此方法，对业务数据进行更灵活的预处理
+     *
+     * @param string    $prop
+     * @param mixed     $val
+     * @param array     $prop_meta
+     * @access protected
+     * @return mixed
+     */
     protected function formatProp($prop, $val, array $prop_meta) {
         if ($val === null) return $val;
         if ($val === '') return null;
@@ -204,28 +286,64 @@ abstract class Data implements IData {
         return $val;
     }
 
+    /**
+     * 获得唯一编号，对数据库就是主键
+     *
+     * @access public
+     * @return mixed
+     */
     public function id() {
         $prop = static::getMeta()->getPrimaryKey($as_prop = true);
         return $this->getProp($prop);
     }
 
+    /**
+     * 设置“新建”状态
+     *
+     * @access public
+     * @return Data
+     */
     public function setFresh($fresh) {
         $this->is_fresh = (bool)$fresh;
         return $this;
     }
 
+    /**
+     * 是否新建
+     *
+     * @access public
+     * @return bool
+     */
     public function isFresh() {
         return $this->is_fresh;
     }
 
+    /**
+     * 是否被修改过
+     *
+     * @access public
+     * @return bool
+     */
     public function isDirty() {
         return (bool)$this->dirty_props;
     }
 
+    /**
+     * 是否只读
+     *
+     * @access public
+     * @return bool
+     */
     public function isReadonly() {
         return static::$readonly;
     }
 
+    /**
+     * 把所有属性值转换为数组
+     *
+     * @access public
+     * @return array
+     */
     public function toArray($only_dirty = false) {
         if (!$only_dirty) return $this->props;
 
@@ -235,16 +353,35 @@ abstract class Data implements IData {
         return $props;
     }
 
+    /**
+     * 保存
+     * 其实Data不和存储打交道，通过Mapper完成此过程
+     *
+     * @access public
+     * @return bool
+     */
     public function save() {
         if (static::$readonly) throw OrmError::readonly($this);
         return static::getMapper()->save($this);
     }
 
+    /**
+     * 删除
+     *
+     * @access public
+     * @return bool
+     */
     public function destroy() {
         if (static::$readonly) throw OrmError::readonly($this);
         return static::getMapper()->destroy($this);
     }
 
+    /**
+     * 从存储中重新获得数据刷新所有属性
+     *
+     * @access public
+     * @return Data
+     */
     public function refresh() {
         if (!$this->isFresh())
             static::getMapper()->refresh($this);
@@ -252,6 +389,15 @@ abstract class Data implements IData {
         return $this;
     }
 
+    /**
+     * 触发事件
+     *
+     * @param string $event 事件名
+     * @param array  $args  事件参数
+     * @see Lysine\Utils\Event
+     * @access public
+     * @return integer
+     */
     public function fireEvent($event, array $args = null) {
         if (isset(self::$event_methods[$event])) {
             $method = self::$event_methods[$event];
@@ -261,6 +407,13 @@ abstract class Data implements IData {
         return fire_event($this, $event, $args);
     }
 
+    /**
+     * 得到属性元数据定义
+     *
+     * @access public
+     * @static
+     * @return array
+     */
     static public function getMetaDefine() {
         $meta = array(
             'storage' => static::$storage,
@@ -282,10 +435,24 @@ abstract class Data implements IData {
         return $meta;
     }
 
+    /**
+     * 得到当前Data的Meta对象
+     *
+     * @access public
+     * @static
+     * @return Meta
+     */
     static public function getMeta() {
         return static::getMapper()->getMeta();
     }
 
+    /**
+     * 根据主键得到对应的Data
+     *
+     * @access public
+     * @static
+     * @return Data
+     */
     static public function find() {
         return call_user_func_array(array(static::getMapper(), 'find'), func_get_args());
     }
@@ -467,7 +634,7 @@ abstract class Mapper {
      *
      * @param Data $data
      * @access public
-     * @return Lysine\DataMapper\Data
+     * @return bool
      */
     public function save(Data $data) {
         if ($data->isReadonly())
