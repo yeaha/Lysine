@@ -120,6 +120,10 @@ namespace Lysine {
             return new static('Unauthorized', 401, null, $more);
         }
 
+        static public function payment_required(array $more = array()) {
+            return new static('Payment Required', 402, null, $more);
+        }
+
         static public function forbidden(array $more = array()) {
             return new static('Forbidden', 403, null, $more);
         }
