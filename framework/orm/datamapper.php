@@ -178,13 +178,24 @@ abstract class Data implements IData {
      * @access public
      * @return mixed
      */
-    public function getProp($prop) {
-        if (!$prop_meta = static::getMeta()->getPropMeta($prop))
-            throw Error::undefined_property(get_class($this), $prop);
+    public function getProp($prop = null) {
+        // 返回指定的属性值
+        if ($prop) {
+            if (!$prop_meta = static::getMeta()->getPropMeta($prop))
+                throw Error::undefined_property(get_class($this), $prop);
 
-        return isset($this->props[$prop])
-             ? $this->props[$prop]
-             : $prop_meta['default'];
+            return isset($this->props[$prop])
+                 ? $this->props[$prop]
+                 : $prop_meta['default'];
+        }
+
+        // 返回所有属性值
+        $props = array();
+        foreach (static::getMeta()->getPropMeta() as $prop => $prop_meta)
+            $props[$prop] = isset($this->props[$prop])
+                          ? $this->props[$prop]
+                          : $prop_meta['default'];
+        return $props;
     }
 
     /**
