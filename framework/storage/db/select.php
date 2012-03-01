@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\Storage\DB {
-    use Lysine\Utils\Set;
+    use Lysine\Storage\DB\Expr,
+        Lysine\Utils\Set;
 
     /**
      * 这个类只管组装sql语句，并对查询结果进行简单处理
@@ -508,6 +509,8 @@ namespace Lysine\Storage\DB {
             if ($this->from instanceof Select) {
                 list($sql, $bind) = $this->from->compile();
                 $from = sprintf('(%s) AS %s', $sql, $this->adapter->qtab(uniqid()));
+            } elseif ($this->from instanceof Expr) {
+                $from = (string)$this->from;
             } else {
                 $from = $this->adapter->qtab($this->from);
             }
