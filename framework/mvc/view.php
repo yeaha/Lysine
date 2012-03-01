@@ -80,6 +80,16 @@ class View {
     }
 
     /**
+     * 魔法方法
+     *
+     * @access public
+     * @return void
+     */
+    public function __clone() {
+        $this->reset();
+    }
+
+    /**
      * 清除所有数据
      *
      * @access public
