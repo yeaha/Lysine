@@ -22,7 +22,6 @@ class Redis implements IStorage {
         'timeout' => 0,
         'prefix' => null,
         'persistent' => 0,
-        'persistent_id' => null,
      // 'unixsocket' => '/tmp/redis.sock',
      // 'password' => 'your password',
      // 'database' => 0,    // dbindex, the database number to switch to
@@ -53,7 +52,7 @@ class Redis implements IStorage {
         // 优先使用unixsocket
         $conn_args = isset($config['unixsocket'])
                    ? array($config['unixsocket'])
-                   : array($config['host'], $config['port'], $config['timeout'], $config['persistent_id']);
+                   : array($config['host'], $config['port'], $config['timeout']);
 
         $conn = $config['persistent']
               ? call_user_func_array(array($handler, 'connect'), $conn_args)
