@@ -21,6 +21,9 @@ class Redis implements IStorage {
         'port' => 6379,
         'timeout' => 0,
         'prefix' => null,
+        'persistent' => 0,
+        'persistent_id' => null,
+     // 'unixsocket' => '/tmp/redis.sock',
      // 'password' => 'your password',
      // 'database' => 0,    // dbindex, the database number to switch to
     );
@@ -47,7 +50,16 @@ class Redis implements IStorage {
         $config = $this->config;
         $handler = new \Redis;
 
-        if (!$handler->connect($config['host'], $config['port'], $config['timeout']))
+        // 优先使用unixsocket
+        $conn_args = isset($config['unixsocket'])
+                   ? array($config['unixsocket'])
+                   : array($config['host'], $config['port'], $config['timeout'], $config['persistent_id']);
+
+        $conn = $config['persistent']
+              ? call_user_func_array(array($handler, 'connect'), $conn_args)
+              : call_user_func_array(array($handler, 'pconnect'), $conn_args);
+
+        if (!$conn)
             throw new StorageError('Connect redis server failed');
 
         if (isset($config['password']) && !$handler->auth($config['password']))
