@@ -214,7 +214,11 @@ class Router extends Router_Abstract {
             // 如果__before_run返回了内容，就直接完成动作
             // 可以在这里进行某些阻断操作
             // 正常的内容不应该通过这里输出
-            if ($resp = call_user_func_array(array($controller, '__before_run'), $args))
+            $resp = $args
+                  ? call_user_func_array(array($controller, '__before_run'), $args)
+                  : $controller->__before_run();
+
+            if ($resp)
                 return ($resp instanceof Response) ? $resp : resp()->setBody($resp);
         }
 
@@ -237,7 +241,10 @@ class Router extends Router_Abstract {
                 'url' => $url,
                 'class' => $class,
             ));
-        $resp = call_user_func_array(array($controller, $method), $args);
+
+        $resp = $args
+              ? call_user_func_array(array($controller, $method), $args)
+              : $controller->$method();
 
         // 这里有机会对输出结果进行进一步处理
         if (method_exists($controller, '__after_run')) $controller->__after_run($resp);
