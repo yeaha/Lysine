@@ -55,8 +55,8 @@ class Redis implements IStorage {
                    : array($config['host'], $config['port'], $config['timeout']);
 
         $conn = $config['persistent']
-              ? call_user_func_array(array($handler, 'connect'), $conn_args)
-              : call_user_func_array(array($handler, 'pconnect'), $conn_args);
+              ? call_user_func_array(array($handler, 'pconnect'), $conn_args)
+              : call_user_func_array(array($handler, 'connect'), $conn_args);
 
         if (!$conn)
             throw new StorageError('Connect redis server failed');
