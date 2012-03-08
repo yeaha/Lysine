@@ -1,3 +1,8 @@
+2012-03-08
+* DataMapper\Data属性元数据定义增加strict
+  strict=true的属性不会被Data->setProp(array(), $strict = false)修改
+  默认所有属性的strict=true
+
 2011-06-07
 * Lysine\Storage\Pool rename to Lysine\Storage\Manager
 
