@@ -224,6 +224,10 @@ abstract class Data implements IData {
                 throw Error::undefined_property(get_class($this), $prop);
             }
 
+            // 严格模式的属性不允许在非严格模式下修改
+            if ($prop_meta['strict'] && !$strict)
+                continue;
+
             if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key'])) {
                 if (!$strict) continue;
                 throw OrmError::refuse_update($this, $prop);
@@ -798,6 +802,7 @@ class Meta {
         'allow_null' => FALSE,      // 是否允许为空
         'default' => NULL,          // 默认值
         'pattern' => NULL,          // 正则表达式检查
+        'strict' => TRUE,           // 是否采用严格模式，见Data->setProp()
     );
 
     static private $instance = array();
