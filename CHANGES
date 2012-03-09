@@ -1,5 +1,7 @@
 2012-03-09
 * DataMapper\Data属性元数据strict默认设置为false，不能太激进
++ DataMapper\Data::$strict 定义所有属性的strict默认值
++ DataMapper\Data::$refuse_update 定义所有属性的refuse_update默认值
 
 2012-03-08
 * DataMapper\Data属性元数据定义增加strict
