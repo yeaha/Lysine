@@ -22,7 +22,7 @@ class Redis implements IStorage {
         'timeout' => 0,
         'prefix' => null,
         'persistent' => 0,
-     // 'unixsocket' => '/tmp/redis.sock',
+     // 'unix_socket' => '/tmp/redis.sock',
      // 'password' => 'your password',
      // 'database' => 0,    // dbindex, the database number to switch to
     );
@@ -49,9 +49,9 @@ class Redis implements IStorage {
         $config = $this->config;
         $handler = new \Redis;
 
-        // 优先使用unixsocket
-        $conn_args = isset($config['unixsocket'])
-                   ? array($config['unixsocket'])
+        // 优先使用unix socket
+        $conn_args = isset($config['unix_socket'])
+                   ? array($config['unix_socket'])
                    : array($config['host'], $config['port'], $config['timeout']);
 
         $conn = $config['persistent']
