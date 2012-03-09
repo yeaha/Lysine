@@ -1,3 +1,6 @@
+2012-03-09
+* DataMapper\Data属性元数据strict默认设置为false，不能太激进
+
 2012-03-08
 * DataMapper\Data属性元数据定义增加strict
   strict=true的属性不会被Data->setProp(array(), $strict = false)修改

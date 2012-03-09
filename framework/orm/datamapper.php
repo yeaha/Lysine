@@ -157,7 +157,7 @@ abstract class Data implements IData {
      * @return void
      */
     public function __set($prop, $val) {
-        $this->setProp($prop, $val);
+        $this->setProp($prop, $val, $strict = true);
     }
 
     /**
@@ -201,13 +201,18 @@ abstract class Data implements IData {
     /**
      * 写属性
      *
+     * 元数据strict声明为true的属性，只能被以下3种情况修改
+     * $data->prop = $val;
+     * $data->setProp('prop', $val, true);
+     * $data->setProp(array $props, true);
+     *
      * @param string|array  $prop   属性
      * @param mixed         $val    值
      * @param bool          $strict 严格模式，是否抛出异常
      * @access public
      * @return Data
      */
-    public function setProp($prop, $val = null, $strict = true) {
+    public function setProp($prop, $val = null, $strict = false) {
         if (static::$readonly) throw OrmError::readonly($this);
 
         if (is_array($prop)) {
@@ -802,7 +807,7 @@ class Meta {
         'allow_null' => FALSE,      // 是否允许为空
         'default' => NULL,          // 默认值
         'pattern' => NULL,          // 正则表达式检查
-        'strict' => TRUE,           // 是否采用严格模式，见Data->setProp()
+        'strict' => FALSE,          // 是否采用严格模式，见Data->setProp()
     );
 
     static private $instance = array();
