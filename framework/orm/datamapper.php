@@ -89,7 +89,11 @@ abstract class Data implements IData {
     static protected $collection;
     // 只读开关
     static protected $readonly = false;
+    // 属性元数据定义，strict默认值
+    // @see Lysine\DataMapper\Data->setProp()
+    static protected $strict = false;
     // 属性元数据
+    // @see Lysine\DataMapper\Meta
     static protected $props_meta = array();
 
     // 是否新建
@@ -438,7 +442,8 @@ abstract class Data implements IData {
         $meta = array(
             'storage' => static::$storage,
             'collection' => static::$collection,
-            'props' => static::$props_meta
+            'strict' => static::$strict,
+            'props' => static::$props_meta,
         );
 
         $called_class = get_called_class();
@@ -807,7 +812,7 @@ class Meta {
         'allow_null' => FALSE,      // 是否允许为空
         'default' => NULL,          // 默认值
         'pattern' => NULL,          // 正则表达式检查
-        'strict' => FALSE,          // 是否采用严格模式，见Data->setProp()
+        'strict' => NULL,           // 是否采用严格模式，见Data->setProp()
     );
 
     static private $instance = array();
@@ -830,7 +835,9 @@ class Meta {
         foreach ($define['props'] as $prop_name => &$prop_meta) {
             $prop_meta = array_merge($default, $prop_meta);
             $prop_meta['field'] = $prop_meta['field'] ?: $prop_name;
+            if (!isset($prop_meta['strict'])) $prop_meta['strict'] = $define['strict'];
             if ($prop_meta['primary_key']) $this->primary_key = $prop_meta['field'];
+
             $this->prop_to_field[$prop_name] = $prop_meta['field'];
         }
 
