@@ -112,7 +112,7 @@ abstract class Data implements IData {
     public function __construct(array $props = null, $is_fresh = true) {
         $this->__before_init();
 
-        if ($props) $this->setProp($props);
+        if ($props) $this->setProp($props, $strict = true);
 
         $this->is_fresh = $is_fresh;
         if (!$is_fresh) $this->dirty_props = array();
