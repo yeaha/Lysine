@@ -217,7 +217,7 @@ abstract class Data implements IData {
 
         if (is_array($prop)) {
             $props = $prop;
-            $strict = ($val === null) ? true : (bool)$val;
+            $strict = ($val === null) ? false : (bool)$val;
         } else {
             $props = array($prop => $val);
         }
