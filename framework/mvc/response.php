@@ -108,7 +108,7 @@ class Response {
 
             foreach ($this->session as $sess) {
                 list($path, $val) = $sess;
-                array_set($_SESSION, $path, $val);
+                \Lysine\array_set($_SESSION, $path, $val);
             }
 
             $this->session = array();

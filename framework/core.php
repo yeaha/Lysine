@@ -18,12 +18,12 @@ namespace Lysine {
         static public function set() {
             $path = func_get_args();
             $val = array_pop($path);
-            return array_set(self::$config, $path, $val);
+            return \Lysine\array_set(self::$config, $path, $val);
         }
 
         static public function get($path) {
             $path = is_array($path) ? $path : func_get_args();
-            return $path ? array_get(self::$config, $path) : self::$config;
+            return $path ? \Lysine\array_get(self::$config, $path) : self::$config;
         }
     }
 

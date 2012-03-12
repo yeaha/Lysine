@@ -20,7 +20,7 @@ class Memcached extends Cache {
         if (isset($config['servers'])) {
             $memcached->addServers($config['servers']);
         } else {
-            list($host, $port) = (array_get($config, 'server') ?: $this->default_server);
+            list($host, $port) = \Lysine\array_get($config, 'server') ?: $this->default_server;
             $memcached->addServer($host, $port);
         }
 

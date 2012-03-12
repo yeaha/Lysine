@@ -337,7 +337,7 @@ abstract class Adapter implements IAdapter {
 
         //检查place holder类型
         $holder = null;
-        if ($where_bind AND !is_assoc_array($where_bind)) $holder = '?';
+        if ($where_bind AND !\Lysine\is_assoc_array($where_bind)) $holder = '?';
 
         $set = $bind = array();
         foreach ($row as $col => $val) {

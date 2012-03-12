@@ -473,7 +473,7 @@ namespace Lysine\Storage\DB {
                 $this->limit = $old_limit;
                 $this->order = $old_order;
             }
-            return cal_page($total, $size, $current_page);
+            return \Lysine\cal_page($total, $size, $current_page);
         }
 
         /**
