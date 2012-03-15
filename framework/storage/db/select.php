@@ -671,7 +671,13 @@ namespace Lysine\Storage\DB {
          * @access public
          * @return integer
          */
-        public function delete() {
+        public function delete($where = null, $bind = null) {
+            if ($where) {
+                if (!is_array($where))
+                    $where = array_slice(func_get_args(), 1);
+                call_user_func_array(array($this, 'where'), $where);
+            }
+
             list($where, $bind) = $this->compileWhere();
 
             // 在这里，不允许没有任何条件的delete
@@ -693,7 +699,13 @@ namespace Lysine\Storage\DB {
          * @access public
          * @return integer
          */
-        public function update(array $set) {
+        public function update(array $set, $where = null, $bind = null) {
+            if ($where) {
+                if (!is_array($where))
+                    $where = array_slice(func_get_args(), 1);
+                call_user_func_array(array($this, 'where'), $where);
+            }
+
             list($where, $bind) = $this->compileWhere();
 
             // 在这里，不允许没有任何条件的update
