@@ -1,6 +1,7 @@
 <?php
 namespace Lysine\DataMapper;
 
+use Lysine\OrmError;
 use Lysine\IStorage;
 use Lysine\DataMapper\Data;
 
@@ -94,7 +95,10 @@ class DBMapper extends Mapper {
         if (!$adapter->insert($table_name, $record)) return false;
 
         if (isset($record[$primary_key])) return $record[$primary_key];
-        return $adapter->lastId($table_name, $primary_key);
+
+        if (!$last_id = $adapter->lastId($table_name, $primary_key))
+            throw new OrmError('Insert record success, but get last id failed!');
+        return $last_id;
     }
 
     /**
