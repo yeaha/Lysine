@@ -105,7 +105,111 @@ namespace Lysine {
         }
     }
 
-    class HttpError extends Error {
+    class HttpError extends \Lysine\HTTP\Error {
+    }
+
+    class StorageError extends \Lysine\Storage\Error {
+    }
+
+    function autoload($class) {
+        if (stripos($class, 'lysine\\') !== 0) return false;
+
+        static $files = null;
+        if ($files === null)
+            $files = require __DIR__ . '/class_files.php';
+
+        $class = strtolower(ltrim($class, '\\'));
+
+        if (!array_key_exists($class, $files)) return false;
+        $file = __DIR__ .'/'. $files[$class];
+
+        require $file;
+        return class_exists($class, false) || interface_exists($class, false);
+    }
+
+    function logger($domain = null) {
+        $name = '__LYSINE__';
+        if ($domain) $name .= '.'. strtoupper($domain);
+        return \Lysine\Utils\Logging::getLogger($name);
+    }
+    spl_autoload_register('Lysine\autoload');
+
+    // $terminate = true 处理完后直接结束
+    function __on_exception($exception, $terminate = true) {
+        $code = $exception instanceof HttpError
+              ? $exception->getCode()
+              : 500;
+
+        if (PHP_SAPI == 'cli') {
+            if (!$terminate) return array($code, array());
+            echo $exception;
+            die(1);
+        }
+
+        $header = $exception instanceof HttpError
+                ? $exception->getHeader()
+                : array(Response::httpStatus(500));
+
+        if (DEBUG) {
+            $message = strip_tags($exception->getMessage());
+            if (strpos($message, "\n") !== false) {
+                $lines = explode("\n", $message);
+                $message = $lines[0];
+            }
+            $header[] = 'X-Exception-Message: '. $message;
+            $header[] = 'X-Exception-Code: '. $exception->getCode();
+
+            foreach (explode("\n", $exception->getTraceAsString()) as $index => $line)
+                $header[] = sprintf('X-Exception-Trace-%d: %s', $index, $line);
+        }
+
+        if ($terminate && !headers_sent())
+            foreach ($header as $h) header($h);
+
+        return array($code, $header);
+    }
+    if (!defined('LYSINE_NO_EXCEPTION_HANDLER'))
+        set_exception_handler('\Lysine\__on_exception');
+
+    function __on_error($code, $message, $file = null, $line = null) {
+        if (error_reporting() && $code)
+            throw new \ErrorException($message, $code, 0, $file, $line);
+        return true;
+    }
+    if (!defined('LYSINE_NO_ERROR_HANDLER'))
+        set_error_handler('\Lysine\__on_error');
+}
+
+namespace Lysine\HTTP {
+    const OK = 200;
+    const CREATED = 201;
+    const ACCEPTED = 202;
+    const NO_CONTENT = 204;
+    const MOVED_PERMANENTLY = 301;
+    const FOUND = 302;
+    const SEE_OTHER = 303;
+    const BAD_REQUEST = 400;
+    const UNAUTHORIZED = 401;
+    const PAYMENT_REQUIRED = 402;
+    const FORBIDDEN = 403;
+    const NOT_FOUND = 404;
+    const METHOD_NOT_ALLOWED = 405;
+    const NOT_ACCEPTABLE = 406;
+    const REQUEST_TIMEOUT = 408;
+    const CONFLICT = 409;
+    const GONE = 410;
+    const LENGTH_REQUIRED = 411;
+    const PRECONDITION_FAILED = 412;
+    const REQUEST_ENTITY_TOO_LARGE = 413;
+    const UNSUPPORTED_MEDIA_TYPE = 415;
+    const EXPECTATION_FAILED = 417;
+    const INTERNAL_SERVER_ERROR = 500;
+    const NOT_IMPLEMENTED = 501;
+    const BAD_GATEWAY = 502;
+    const SERVICE_UNAVAILABLE = 503;
+    const GATEWAY_TIMEOUT = 504;
+
+    class Error extends \Lysine\Error {
         public function getHeader() {
             $header = array(Response::httpStatus($this->getCode()));
             if (isset($this->header))
@@ -200,8 +304,10 @@ namespace Lysine {
             return new static('Gateway Time-out', HTTP\GATEWAY_TIMEOUT, null, $more);
         }
     }
+}
 
-    class StorageError extends Error {
+namespace Lysine\Storage {
+    class Error extends \Lysine\Error {
         static public function undefined_storage($storage_name) {
             return new static('Undefined storage service:'. $storage_name);
         }
@@ -210,163 +316,6 @@ namespace Lysine {
             return new static("Connect failed! Storage service: {$storage_name}");
         }
     }
-
-    class OrmError extends StorageError {
-        static public function readonly($class) {
-            if ($class instanceof Data) $class = get_class($class);
-            return new static("{$class} is readonly");
-        }
-
-        static public function not_allow_null($class, $prop) {
-            if ($class instanceof Data) $class = get_class($class);
-            return new static("{$class}: Property {$prop} not allow null");
-        }
-
-        static public function refuse_update($class, $prop) {
-            if ($class instanceof Data) $class = get_class($class);
-            return new static("{$class}: Property {$prop} refuse update");
-        }
-
-        static public function undefined_collection($class) {
-            if ($class instanceof Data) $class = get_class($class);
-            return new static("{$class}: Undefined collection");
-        }
-
-        static public function undefined_primarykey($class) {
-            if ($class instanceof Data) $class = get_class($class);
-            return new static("{$class}: Undefined primary key");
-        }
-
-        static public function mismatching_pattern($class, $prop, $pattern) {
-            if ($class instanceof Data) $class = get_class($class);
-            return new static("{$class}: Property {$prop} mismatching pattern {$pattern}");
-        }
-
-        static public function insert_failed(Data $obj, $previous = null, array $more = array()) {
-            $class = get_class($obj);
-            $more['class'] = $class;
-            $more['record'] = $obj->toArray();
-            $more['method'] = 'insert';
-
-            return new static("{$class} insert failed", 0, $previous, $more);
-        }
-
-        static public function update_failed(Data $obj, $previous = null, array $more = array()) {
-            $class = get_class($obj);
-            $more['class'] = $class;
-            $more['record'] = $obj->toArray();
-            $more['method'] = 'update';
-
-            return new static("{$class} update failed", 0, $previous, $more);
-        }
-
-        static public function delete_failed(Data $obj, $previous = null, array $more = array()) {
-            $class = get_class($obj);
-            $more['class'] = $class;
-            $more['primary_key'] = $obj->id();
-            $more['method'] = 'delete';
-
-            return new static("{$class} delete failed", 0, $previous, $more);
-        }
-    }
-
-    function autoload($class) {
-        if (stripos($class, 'lysine\\') !== 0) return false;
-
-        static $files = null;
-        if ($files === null)
-            $files = array_change_key_case(require __DIR__ . '/class_files.php');
-
-        $class = strtolower(ltrim($class, '\\'));
-
-        if (!array_key_exists($class, $files)) return false;
-        $file = __DIR__ .'/'. $files[$class];
-
-        require $file;
-        return class_exists($class, false) || interface_exists($class, false);
-    }
-
-    function logger($domain = null) {
-        $name = '__LYSINE__';
-        if ($domain) $name .= '.'. strtoupper($domain);
-        return \Lysine\Utils\Logging::getLogger($name);
-    }
-    spl_autoload_register('Lysine\autoload');
-
-    // $terminate = true 处理完后直接结束
-    function __on_exception($exception, $terminate = true) {
-        $code = $exception instanceof HttpError
-              ? $exception->getCode()
-              : 500;
-
-        if (PHP_SAPI == 'cli') {
-            if (!$terminate) return array($code, array());
-            echo $exception;
-            die(1);
-        }
-
-        $header = $exception instanceof HttpError
-                ? $exception->getHeader()
-                : array(Response::httpStatus(500));
-
-        if (DEBUG) {
-            $message = strip_tags($exception->getMessage());
-            if (strpos($message, "\n") !== false) {
-                $lines = explode("\n", $message);
-                $message = $lines[0];
-            }
-            $header[] = 'X-Exception-Message: '. $message;
-            $header[] = 'X-Exception-Code: '. $exception->getCode();
-
-            foreach (explode("\n", $exception->getTraceAsString()) as $index => $line)
-                $header[] = sprintf('X-Exception-Trace-%d: %s', $index, $line);
-        }
-
-        if ($terminate && !headers_sent())
-            foreach ($header as $h) header($h);
-
-        return array($code, $header);
-    }
-    if (!defined('LYSINE_NO_EXCEPTION_HANDLER'))
-        set_exception_handler('\Lysine\__on_exception');
-
-    function __on_error($code, $message, $file = null, $line = null) {
-        if (error_reporting() && $code)
-            throw new \ErrorException($message, $code, 0, $file, $line);
-        return true;
-    }
-    if (!defined('LYSINE_NO_ERROR_HANDLER'))
-        set_error_handler('\Lysine\__on_error');
-}
-
-namespace Lysine\HTTP {
-    const OK = 200;
-    const CREATED = 201;
-    const ACCEPTED = 202;
-    const NO_CONTENT = 204;
-    const MOVED_PERMANENTLY = 301;
-    const FOUND = 302;
-    const SEE_OTHER = 303;
-    const BAD_REQUEST = 400;
-    const UNAUTHORIZED = 401;
-    const PAYMENT_REQUIRED = 402;
-    const FORBIDDEN = 403;
-    const NOT_FOUND = 404;
-    const METHOD_NOT_ALLOWED = 405;
-    const NOT_ACCEPTABLE = 406;
-    const REQUEST_TIMEOUT = 408;
-    const CONFLICT = 409;
-    const GONE = 410;
-    const LENGTH_REQUIRED = 411;
-    const PRECONDITION_FAILED = 412;
-    const REQUEST_ENTITY_TOO_LARGE = 413;
-    const UNSUPPORTED_MEDIA_TYPE = 415;
-    const EXPECTATION_FAILED = 417;
-    const INTERNAL_SERVER_ERROR = 500;
-    const NOT_IMPLEMENTED = 501;
-    const BAD_GATEWAY = 502;
-    const SERVICE_UNAVAILABLE = 503;
-    const GATEWAY_TIMEOUT = 504;
 }
 
 namespace Lysine\MVC {

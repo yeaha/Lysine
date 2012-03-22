@@ -4,9 +4,7 @@
 namespace Lysine\DataMapper;
 
 use Lysine\Config,
-    Lysine\Error,
     Lysine\IStorage,
-    Lysine\OrmError,
     Lysine\Storage\Manager,
     Lysine\Utils;
 
@@ -217,7 +215,7 @@ abstract class Data implements IData {
      * @return Data
      */
     public function setProp($prop, $val = null, $strict = false) {
-        if (static::$readonly) throw OrmError::readonly($this);
+        if (static::$readonly) throw Error::readonly($this);
 
         if (is_array($prop)) {
             $props = $prop;
@@ -239,16 +237,16 @@ abstract class Data implements IData {
 
             if (!$this->is_fresh && ($prop_meta['refuse_update'] || $prop_meta['primary_key'])) {
                 if (!$strict) continue;
-                throw OrmError::refuse_update($this, $prop);
+                throw Error::refuse_update($this, $prop);
             }
 
             if ($prop_meta['pattern'] && !preg_match($prop_meta['pattern'], $val))
-                throw OrmError::mismatching_pattern($this, $prop, $prop_meta['pattern']);
+                throw Error::mismatching_pattern($this, $prop, $prop_meta['pattern']);
 
             $val = $this->formatProp($prop, $val, $prop_meta);
 
             if (!$prop_meta['allow_null'] && $val === null)
-                throw OrmError::not_allow_null($this, $prop);
+                throw Error::not_allow_null($this, $prop);
 
             $this->changeProp($prop, $val);
         }
@@ -385,7 +383,7 @@ abstract class Data implements IData {
      * @return bool
      */
     public function save() {
-        if (static::$readonly) throw OrmError::readonly($this);
+        if (static::$readonly) throw Error::readonly($this);
         return static::getMapper()->save($this);
     }
 
@@ -396,7 +394,7 @@ abstract class Data implements IData {
      * @return bool
      */
     public function destroy() {
-        if (static::$readonly) throw OrmError::readonly($this);
+        if (static::$readonly) throw Error::readonly($this);
         return static::getMapper()->destroy($this);
     }
 
@@ -663,7 +661,7 @@ abstract class Mapper {
      */
     public function save(Data $data) {
         if ($data->isReadonly())
-            throw OrmError::readonly($data);
+            throw Error::readonly($data);
 
         if (!($is_fresh = $data->isFresh()) && !($is_dirty = $data->isDirty()))
             return true;
@@ -678,7 +676,7 @@ abstract class Mapper {
         $props = $data->toArray();
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
             if (!$prop_meta['allow_null'] && !isset($props[$prop]) && $prop_meta['default'] === null)
-                throw OrmError::not_allow_null($data, $prop);
+                throw Error::not_allow_null($data, $prop);
         }
 
         if ($is_fresh) {
@@ -704,11 +702,7 @@ abstract class Mapper {
      * @return mixed
      */
     protected function insert(Data $data) {
-        try {
-            if (!$id = $this->doInsert($data)) return false;
-        } catch (\Exception $ex) {
-            throw OrmError::insert_failed($data, $ex);
-        }
+        if (!$id = $this->doInsert($data)) return false;
 
         $primary_key = $this->getMeta()->getPrimaryKey();
         $record = array($primary_key => $id);
@@ -726,11 +720,8 @@ abstract class Mapper {
      * @return boolean
      */
     protected function update(Data $data) {
-        try {
-            if (!$this->doUpdate($data)) return false;
-        } catch (\Exception $ex) {
-            throw OrmError::update_failed($data, $ex);
-        }
+        if (!$this->doUpdate($data)) return false;
+
         $data->__fill($data->toArray());
         return true;
     }
@@ -744,16 +735,13 @@ abstract class Mapper {
      */
     public function destroy(Data $data) {
         if ($data->isReadonly())
-            throw OrmError::readonly($data);
+            throw Error::readonly($data);
 
         if ($data->isFresh()) return true;
 
         $data->fireEvent(Data::BEFORE_DELETE_EVENT, array($data));
-        try {
-            if (!$this->doDelete($data)) return false;
-        } catch (\Exception $ex) {
-            throw OrmError::delete_failed($data, $ex);
-        }
+        if (!$this->doDelete($data)) return false;
+
         $data->fireEvent(Data::AFTER_DELETE_EVENT, array($data));
         Registry::remove($this->class, $data->id());
         return true;
@@ -842,7 +830,7 @@ class Meta {
         }
 
         if (!$this->primary_key)
-            throw OrmError::undefined_primarykey($this->class);
+            throw Error::undefined_primarykey($this->class);
 
         $this->field_to_prop = array_flip($this->prop_to_field);
         $this->prop_meta = $define['props'];
@@ -854,13 +842,13 @@ class Meta {
 
     public function getCollection() {
         if (!$collection = $this->collection)
-            throw OrmError::undefined_collection($this->class);
+            throw Error::undefined_collection($this->class);
         return $collection;
     }
 
     public function getPrimaryKey($as_prop = false) {
         if (!$primary_key = $this->primary_key)
-            throw OrmError::undefined_primarykey($this->class);
+            throw Error::undefined_primarykey($this->class);
 
         return $as_prop ? $this->getPropOfField($primary_key) : $primary_key;
     }
@@ -954,5 +942,37 @@ class Registry {
     static public function remove($class, $id) {
         $key = $class . $id;
         return Utils\Registry::remove($key);
+    }
+}
+
+class Error extends \Lysine\Error {
+    static public function readonly($class) {
+        if ($class instanceof Data) $class = get_class($class);
+        return new static("{$class} is readonly");
+    }
+
+    static public function not_allow_null($class, $prop) {
+        if ($class instanceof Data) $class = get_class($class);
+        return new static("{$class}: Property {$prop} not allow null");
+    }
+
+    static public function refuse_update($class, $prop) {
+        if ($class instanceof Data) $class = get_class($class);
+        return new static("{$class}: Property {$prop} refuse update");
+    }
+
+    static public function undefined_collection($class) {
+        if ($class instanceof Data) $class = get_class($class);
+        return new static("{$class}: Undefined collection");
+    }
+
+    static public function undefined_primarykey($class) {
+        if ($class instanceof Data) $class = get_class($class);
+        return new static("{$class}: Undefined primary key");
+    }
+
+    static public function mismatching_pattern($class, $prop, $pattern) {
+        if ($class instanceof Data) $class = get_class($class);
+        return new static("{$class}: Property {$prop} mismatching pattern {$pattern}");
     }
 }
