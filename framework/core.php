@@ -220,25 +220,25 @@ namespace Lysine\HTTP {
         }
 
         static public function bad_request(array $more = array()) {
-            return new static('Bad Request', HTTP\BAD_REQUEST, null, $more);
+            return new static('Bad Request', BAD_REQUEST, null, $more);
         }
 
         static public function unauthorized(array $more = array()) {
-            return new static('Unauthorized', HTTP\UNAUTHORIZED, null, $more);
+            return new static('Unauthorized', UNAUTHORIZED, null, $more);
         }
 
         static public function payment_required(array $more = array()) {
-            return new static('Payment Required', HTTP\PAYMENT_REQUIRED, null, $more);
+            return new static('Payment Required', PAYMENT_REQUIRED, null, $more);
         }
 
         static public function forbidden(array $more = array()) {
-            return new static('Forbidden', HTTP\FORBIDDEN, null, $more);
+            return new static('Forbidden', FORBIDDEN, null, $more);
         }
 
         static public function page_not_found(array $more = array()) {
             if (!isset($more['url']))
                 $more['url'] = req()->requestUri();
-            return new static('Page Not Found', HTTP\NOT_FOUND, null, $more);
+            return new static('Page Not Found', NOT_FOUND, null, $more);
         }
 
         static public function method_not_allowed(array $more = array()) {
@@ -253,57 +253,57 @@ namespace Lysine\HTTP {
                     $more['header'] = array('Allow: '. implode(', ', $allow));
             }
 
-            return new static('Method Not Allowed', HTTP\METHOD_NOT_ALLOWED, null, $more);
+            return new static('Method Not Allowed', METHOD_NOT_ALLOWED, null, $more);
         }
 
         static public function not_acceptable(array $more = array()) {
-            return new static('Not Acceptable', HTTP\NOT_ACCEPTABLE, null, $more);
+            return new static('Not Acceptable', NOT_ACCEPTABLE, null, $more);
         }
 
         static public function request_timeout(array $more = array()) {
-            return new static('Request Time-out', HTTP\REQUEST_TIMEOUT, null, $more);
+            return new static('Request Time-out', REQUEST_TIMEOUT, null, $more);
         }
 
         static public function conflict(array $more = array()) {
-            return new static('Conflict', HTTP\CONFLICT, null, $more);
+            return new static('Conflict', CONFLICT, null, $more);
         }
 
         static public function gone(array $more = array()) {
-            return new static('Gone', HTTP\GONE, null, $more);
+            return new static('Gone', GONE, null, $more);
         }
 
         static public function precondition_failed(array $more = array()) {
-            return new static('Precondition Failed', HTTP\PRECONDITION_FAILED, null, $more);
+            return new static('Precondition Failed', PRECONDITION_FAILED, null, $more);
         }
 
         static public function request_entity_too_large(array $more = array()) {
-            return new static('Request Entity Too Large', HTTP\REQUEST_ENTITY_TOO_LARGE, null, $more);
+            return new static('Request Entity Too Large', REQUEST_ENTITY_TOO_LARGE, null, $more);
         }
 
         static public function unsupported_media_type(array $more = array()) {
-            return new static('Unsupported Media Type', HTTP\UNSUPPORTED_MEDIA_TYPE, null, $more);
+            return new static('Unsupported Media Type', UNSUPPORTED_MEDIA_TYPE, null, $more);
         }
 
         static public function internal_server_error(array $more = array()) {
-            return new static('Internal Server Error', HTTP\INTERNAL_SERVER_ERROR, null, $more);
+            return new static('Internal Server Error', INTERNAL_SERVER_ERROR, null, $more);
         }
 
         static public function not_implemented(array $more = array()) {
             if (!isset($more['method']))
                 $more['method'] = req()->method();
-            return new static('Not Implemented', HTTP\NOT_IMPLEMENTED, null, $more);
+            return new static('Not Implemented', NOT_IMPLEMENTED, null, $more);
         }
 
         static public function bad_gateway(array $more = array()) {
-            return new static('Bad Gateway', HTTP\BAD_GATEWAY, null, $more);
+            return new static('Bad Gateway', BAD_GATEWAY, null, $more);
         }
 
         static public function service_unavailable(array $more = array()) {
-            return new static('Service Unavailable', HTTP\SERVICE_UNAVAILABLE, null, $more);
+            return new static('Service Unavailable', SERVICE_UNAVAILABLE, null, $more);
         }
 
         static public function gateway_timeout(array $more = array()) {
-            return new static('Gateway Time-out', HTTP\GATEWAY_TIMEOUT, null, $more);
+            return new static('Gateway Time-out', GATEWAY_TIMEOUT, null, $more);
         }
     }
 }
