@@ -3,10 +3,10 @@
 
 namespace Lysine\DataMapper;
 
-use Lysine\Config,
-    Lysine\IStorage,
-    Lysine\Storage\Manager,
-    Lysine\Utils;
+use Lysine\Config;
+use Lysine\IStorage;
+use Lysine\Storage\Manager;
+use Lysine\Utils;
 
 /**
  * 领域模型接口

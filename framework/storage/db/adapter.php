@@ -1,12 +1,12 @@
 <?php
 namespace Lysine\Storage\DB;
 
-use Lysine\Error,
-    Lysine\StorageError,
-    Lysine\Storage\DB\Expr,
-    Lysine\Storage\DB\IAdapter,
-    Lysine\Storage\DB\IResult,
-    Lysine\Storage\DB\Select;
+use Lysine\Error;
+use Lysine\StorageError;
+use Lysine\Storage\DB\Expr;
+use Lysine\Storage\DB\IAdapter;
+use Lysine\Storage\DB\IResult;
+use Lysine\Storage\DB\Select;
 
 if (!extension_loaded('pdo'))
     throw Error::require_extension('pdo');

@@ -1,11 +1,11 @@
 <?php
 namespace Lysine\Storage\DB\Adapter;
 
-use Lysine\Error,
-    Lysine\Storage\DB,
-    Lysine\Storage\DB\Adapter,
-    Lysine\Storage\DB\Expr,
-    Lysine\Storage\DB\Select\Pgsql as Select;
+use Lysine\Error;
+use Lysine\Storage\DB;
+use Lysine\Storage\DB\Adapter;
+use Lysine\Storage\DB\Expr;
+use Lysine\Storage\DB\Select\Pgsql as Select;
 
 if (!extension_loaded('pdo_pgsql'))
     throw Error::require_extension('pdo_pgsql');

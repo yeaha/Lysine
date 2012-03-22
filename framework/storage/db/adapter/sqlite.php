@@ -1,10 +1,10 @@
 <?php
 namespace Lysine\Storage\DB\Adapter;
 
-use Lysine\Error,
-    Lysine\Storage\DB,
-    Lysine\Storage\DB\Adapter,
-    Lysine\Storage\DB\Expr;
+use Lysine\Error;
+use Lysine\Storage\DB;
+use Lysine\Storage\DB\Adapter;
+use Lysine\Storage\DB\Expr;
 
 if (!extension_loaded('pdo_sqlite'))
     throw Error::require_extension('pdo_sqlite');

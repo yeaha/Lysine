@@ -1,9 +1,9 @@
 <?php
 namespace Lysine\Storage;
 
-use Lysine\Error,
-    Lysine\IStorage,
-    MongoCollection;
+use Lysine\Error;
+use Lysine\IStorage;
+use MongoCollection;
 
 if (!extension_loaded('mongo'))
     throw Error::require_extension('mongo');
