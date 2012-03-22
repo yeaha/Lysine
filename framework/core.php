@@ -105,9 +105,11 @@ namespace Lysine {
         }
     }
 
+    // 为兼容性保留，将会被废除
     class HttpError extends \Lysine\HTTP\Error {
     }
 
+    // 为兼容性保留，将会被废除
     class StorageError extends \Lysine\Storage\Error {
     }
 
