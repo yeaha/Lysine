@@ -666,12 +666,12 @@ abstract class Mapper {
         if (!($is_fresh = $data->isFresh()) && !($is_dirty = $data->isDirty()))
             return true;
 
-        $data->fireEvent(Data::BEFORE_SAVE_EVENT, array($data));
         if ($is_fresh) {
             $data->fireEvent(Data::BEFORE_INSERT_EVENT, array($data));
         } elseif ($is_dirty) {
             $data->fireEvent(Data::BEFORE_UPDATE_EVENT, array($data));
         }
+        $data->fireEvent(Data::BEFORE_SAVE_EVENT, array($data));
 
         $props = $data->toArray();
         foreach ($this->getMeta()->getPropMeta() as $prop => $prop_meta) {
