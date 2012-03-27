@@ -1,9 +1,6 @@
 <?php
 namespace Lysine {
-    use Lysine\DataMapper\Data;
     use Lysine\HTTP;
-    use Lysine\HttpError;
-    use Lysine\MVC\Application;
     use Lysine\MVC\Response;
 
     defined('DEBUG') or define('DEBUG', false);
@@ -130,7 +127,7 @@ namespace Lysine {
 
     // $terminate = true 处理完后直接结束
     function __on_exception($exception, $terminate = true) {
-        $code = $exception instanceof HttpError
+        $code = $exception instanceof HTTP\Error
               ? $exception->getCode()
               : 500;
 
@@ -140,7 +137,7 @@ namespace Lysine {
             die(1);
         }
 
-        $header = $exception instanceof HttpError
+        $header = $exception instanceof HTTP\Error
                 ? $exception->getHeader()
                 : array(Response::httpStatus(500));
 
@@ -175,6 +172,7 @@ namespace Lysine {
 }
 
 namespace Lysine\HTTP {
+    use Lysine\MVC\Application;
     use Lysine\MVC\Response;
 
     const OK = 200;
