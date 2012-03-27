@@ -2,7 +2,7 @@
 namespace Lysine\MVC;
 
 use Lysine\Error;
-use Lysine\HttpError;
+use Lysine\HTTP;
 use Lysine\MVC\Router;
 use Lysine\MVC\Router_Abstract;
 
@@ -172,7 +172,7 @@ class Application {
     public function run() {
         $req = req();
         if (!in_array($req->method(), static::$support_method))
-            throw HttpError::not_implemented();
+            throw HTTP\Error::not_implemented();
 
         $url = parse_url($req->requestUri());
         return $this->dispatch($url['path']);

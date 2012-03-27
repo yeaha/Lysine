@@ -126,6 +126,10 @@ use Lysine\Error;
 use Lysine\Storage\File;
 use Lysine\Utils\Logging;
 
+interface IHandler {
+    public function emit(array $record);
+}
+
 class FileHandler implements IHandler {
     private $storage;
     private $datefmt = '%Y-%m-%d %H:%M:%S';

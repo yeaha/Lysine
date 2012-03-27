@@ -2,7 +2,7 @@
 namespace Lysine\Storage;
 
 use Lysine\IStorage;
-use Lysine\StorageError;
+use Lysine\Storage;
 
 /**
  * Redis数据库封装
@@ -29,7 +29,7 @@ class Redis implements IStorage {
 
     public function __construct(array $config) {
         if (!extension_loaded('redis'))
-            throw StorageError::require_extension('redis');
+            throw Storage\Error::require_extension('redis');
 
         if ($config) $this->config = array_merge($this->config, $config);
     }
@@ -59,13 +59,13 @@ class Redis implements IStorage {
               : call_user_func_array(array($handler, 'connect'), $conn_args);
 
         if (!$conn)
-            throw new StorageError('Connect redis server failed');
+            throw new Storage\Error('Connect redis server failed');
 
         if (isset($config['password']) && !$handler->auth($config['password']))
-            throw new StorageError('Invalid password');
+            throw new Storage\Error('Invalid password');
 
         if (isset($config['database']) && !$handler->select($config['database']))
-            throw new StorageError('Select database['. $config['database'] .'] failed');
+            throw new Storage\Error('Select database['. $config['database'] .'] failed');
 
         if (isset($config['prefix'])) $handler->setOption(\Redis::OPT_PREFIX, $config['prefix']);
 
