@@ -175,6 +175,8 @@ namespace Lysine {
 }
 
 namespace Lysine\HTTP {
+    use Lysine\MVC\Response;
+
     const OK = 200;
     const CREATED = 201;
     const ACCEPTED = 202;
