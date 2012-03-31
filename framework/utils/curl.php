@@ -103,7 +103,27 @@ namespace Lysine\Utils\Curl {
             return $this;
         }
 
-        public function send($method, array $params = array()) {
+        public function head(array $params = array()) {
+            return $this->send('HEAD', $params);
+        }
+
+        public function get(array $params = array()) {
+            return $this->send('GET', $params);
+        }
+
+        public function post(array $params) {
+            return $this->send('POST', $params);
+        }
+
+        public function put(array $params) {
+            return $this->send('PUT', $params);
+        }
+
+        public function delete() {
+            return $this->send('DELETE');
+        }
+
+        protected function send($method, array $params = array()) {
             $method = strtoupper($method);
             $options = array();
 
@@ -149,26 +169,6 @@ namespace Lysine\Utils\Curl {
             $message['body'] = substr($result, $header_size);
 
             return $message;
-        }
-
-        public function head(array $params = array()) {
-            return $this->send('HEAD', $params);
-        }
-
-        public function get(array $params = array()) {
-            return $this->send('GET', $params);
-        }
-
-        public function post(array $params) {
-            return $this->send('POST', $params);
-        }
-
-        public function put(array $params) {
-            return $this->send('PUT', $params);
-        }
-
-        public function delete() {
-            return $this->send('DELETE');
         }
     }
 }
