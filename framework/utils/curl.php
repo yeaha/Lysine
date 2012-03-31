@@ -147,7 +147,7 @@ namespace Lysine\Utils\Curl {
                 }
             } elseif ($method == 'POST') {
                 $options[CURLOPT_POST] = true;
-                $options[CURLOPT_POSTFIELDS] = $params;
+                $options[CURLOPT_POSTFIELDS] = http_build_query($params);
             } else {
                 if (static::$method_emulate) {
                     $options[CURLOPT_HTTPHEADER][] = 'X-HTTP-METHOD-OVERRIDE: '. $method;
