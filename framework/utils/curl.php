@@ -5,15 +5,9 @@ namespace Lysine\Utils {
     // 对php curl函数的封装
     // 方便其它类继续封装，并且满足OOP恶趣味;)
     class Curl {
-        static public $return_transfer = true;
-        static public $return_header = false;
-        static public $verbose = false;
-
         protected $handler;
         protected $url;
         protected $options = array();
-        protected $error = array('', 0);
-        protected $result;
 
         public function __construct($url = null) {
             if (!extension_loaded('curl')) throw Error::require_extension('curl');
@@ -36,8 +30,6 @@ namespace Lysine\Utils {
             $this->close();
             $this->handler = null;
             $this->options = array();
-            $this->error = array('', 0);
-            $this->result = null;
 
             return $this;
         }
@@ -76,21 +68,13 @@ namespace Lysine\Utils {
             if ($this->url && !isset($options[CURLOPT_URL]))
                 $options[CURLOPT_URL] = $this->url;
 
-            if (!isset($options[CURLOPT_RETURNTRANSFER]) && static::$return_transfer)
-                $options[CURLOPT_RETURNTRANSFER] = true;
-            if (!isset($options[CURLOPT_HEADER]) && static::$return_header)
-                $options[CURLOPT_HEADER] = true;
-            if (!isset($options[CURLOPT_VERBOSE]) && static::$verbose)
-                $options[CURLOPT_VERBOSE] = true;
-
             curl_setopt_array($handler, $options);
 
-            $this->result = curl_exec($handler);
-            $this->error = ($this->result === false)
-                         ? array(curl_error($handler), curl_errno($handler))
-                         : array('', 0);
+            $result = curl_exec($handler);
+            if ($result === false)
+                throw new Error('Curl Error: '. curl_error($handler), curl_errno($handler));
 
-            return $this->result;
+            return $result;
         }
 
         public function close() {
@@ -119,15 +103,6 @@ namespace Lysine\Utils\Curl {
             return $this;
         }
 
-        protected function isSuccess() {
-            $code = $this->getResponseCode();
-            return ($code >= 200 && $code < 400);
-        }
-
-        public function getResponseCode() {
-            return $this->getInfo(CURLINFO_HTTP_CODE);
-        }
-
         public function send($method, array $params = array()) {
             $method = strtoupper($method);
             $options = array();
@@ -142,7 +117,6 @@ namespace Lysine\Utils\Curl {
                     $options[CURLOPT_HTTPGET] = true;
                 } else {
                     $options[CURLOPT_CUSTOMREQUEST] = 'HEAD';
-                    $options[CURLOPT_HEADER] = true;
                     $options[CURLOPT_NOBODY] = true;
                 }
             } elseif ($method == 'POST') {
@@ -160,13 +134,21 @@ namespace Lysine\Utils\Curl {
                 }
             }
 
+            $options[CURLOPT_RETURNTRANSFER] = true;
+            $options[CURLOPT_HEADER] = true;
+
             $this->setOption($options);
 
-            $this->exec();
-            if (!$this->isSuccess())
-                throw new HttpError($this->getResponseCode());
+            $result = $this->exec();
+            $message = array(
+                'info' => $this->getInfo()
+            );
 
-            return $this->result;
+            $header_size = $message['info']['header_size'];
+            $message['header'] = preg_split('/\r\n/', substr($result, 0, $header_size), 0, PREG_SPLIT_NO_EMPTY);
+            $message['body'] = substr($result, $header_size);
+
+            return $message;
         }
 
         public function head(array $params = array()) {
@@ -187,13 +169,6 @@ namespace Lysine\Utils\Curl {
 
         public function delete() {
             return $this->send('DELETE');
-        }
-    }
-
-    class HttpError extends Error {
-        public function __construct($code) {
-            $message = Response::httpStatus($code);
-            parent::__construct($message, $code);
         }
     }
 }
