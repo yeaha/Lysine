@@ -45,7 +45,6 @@ return array(
     'lysine\storage\redis' => 'storage/redis.php',
     'lysine\utils\curl' => 'utils/curl.php',
     'lysine\utils\curl\http' => 'utils/curl.php',
-    'lysine\utils\curl\httperror' => 'utils/curl.php',
     'lysine\utils\dom\document' => 'utils/dom.php',
     'lysine\utils\dom\element' => 'utils/dom.php',
     'lysine\utils\events' => 'utils/events.php',
