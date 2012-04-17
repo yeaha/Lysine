@@ -6,6 +6,14 @@ namespace Lysine {
     defined('DEBUG') or define('DEBUG', false);
     require __DIR__ .'/functions.php';
 
+    if (!defined('LYSINE_NO_EXCEPTION_HANDLER'))
+        set_exception_handler('\Lysine\__on_exception');
+
+    if (!defined('LYSINE_NO_ERROR_HANDLER'))
+        set_error_handler('\Lysine\__on_error');
+
+    spl_autoload_register('\Lysine\autoload');
+
     class Config {
         static protected $config = array();
 
@@ -123,7 +131,6 @@ namespace Lysine {
         if ($domain) $name .= '.'. strtoupper($domain);
         return \Lysine\Utils\Logging::getLogger($name);
     }
-    spl_autoload_register('Lysine\autoload');
 
     // $terminate = true 处理完后直接结束
     function __on_exception($exception, $terminate = true) {
@@ -159,16 +166,12 @@ namespace Lysine {
 
         return array($code, $header);
     }
-    if (!defined('LYSINE_NO_EXCEPTION_HANDLER'))
-        set_exception_handler('\Lysine\__on_exception');
 
     function __on_error($code, $message, $file = null, $line = null) {
-        if (error_reporting() && $code)
+        if (error_reporting() & $code)
             throw new \ErrorException($message, $code, 0, $file, $line);
         return true;
     }
-    if (!defined('LYSINE_NO_ERROR_HANDLER'))
-        set_error_handler('\Lysine\__on_error');
 
     // 为兼容性保留，将会被废除
     class HttpError extends \Lysine\HTTP\Error {
