@@ -72,9 +72,8 @@ class Logging {
             'Message: '. $exception->getMessage(),
         );
 
-        if ($exception instanceof \Lysine\Error && function_exists('json_encode'))
-            if ($more = $exception->getMore())
-                $message[] = 'More: '. json_encode($more);
+        if ($exception instanceof \Lysine\Error && ($more = $exception->getMore()))
+            $message[] = 'More: '. serialize($more);
 
         foreach (explode("\n", $exception->getTraceAsString()) as $idx => $trace) {
             if ($trace_limit && $idx == $trace_limit) break;
