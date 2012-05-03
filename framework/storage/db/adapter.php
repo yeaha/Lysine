@@ -18,12 +18,20 @@ if (!extension_loaded('pdo'))
  */
 interface IAdapter extends \Lysine\IStorage {
     /**
-     * 返回实际的数据库连接句柄
+     * 连接数据库
      *
      * @access public
-     * @return mixed
+     * @return 数据库连接对象
      */
-    public function getHandle();
+    public function connect();
+
+    /**
+     * 断开数据库
+     *
+     * @access public
+     * @return void
+     */
+    public function disconnect();
 
     /**
      * 开始事务
@@ -243,8 +251,8 @@ abstract class Adapter implements IAdapter {
      * @return void
      */
     public function __destruct() {
-        if ($this->isConnected())
-            while ($this->in_transaction) $this->rollback();
+        while ($this->in_transaction) $this->rollback();
+        $this->disconnect();
     }
 
     /**
@@ -257,10 +265,10 @@ abstract class Adapter implements IAdapter {
      * @return mixed
      */
     public function __call($fn, $args) {
-        $this->connect();
+        $dbh = $this->connect();
 
-        if (method_exists($this->dbh, $fn))
-            return call_user_func_array(array($this->dbh, $fn), $args);
+        if (method_exists($dbh, $fn))
+            return call_user_func_array(array($dbh, $fn), $args);
 
         throw Storage\Error::call_undefined($fn, get_class($this));
     }
@@ -289,23 +297,13 @@ abstract class Adapter implements IAdapter {
     }
 
     /**
-     * 是否已经连接数据库
-     *
-     * @access protected
-     * @return boolean
-     */
-    protected function isConnected() {
-        return $this->dbh instanceof \PDO;
-    }
-
-    /**
      * 连接数据库
      *
-     * @access protected
+     * @access public
      * @return self
      */
-    protected function connect() {
-        if ($this->isConnected()) return $this;
+    public function connect() {
+        if ($this->dbh) return $this->dbh;
 
         list($dsn, $user, $pass, $options) = $this->config;
 
@@ -320,28 +318,17 @@ abstract class Adapter implements IAdapter {
         $this->dbh = new \PDO($dsn, $user, $pass, $options);
         fire_event($this, CONNECT_EVENT, $this);
 
-        return $this;
+        return $this->dbh;
     }
 
     /**
      * 断开连接
      *
-     * @access protected
-     * @return void
-     */
-    protected function disconnect() {
-        $this->dbh = null;
-    }
-
-    /**
-     * 返回pdo连接对象
-     *
      * @access public
      * @return void
      */
-    public function getHandle() {
-        $this->connect();
-        return $this->dbh;
+    public function disconnect() {
+        $this->dbh = null;
     }
 
     /**
@@ -351,9 +338,9 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function begin() {
-        $this->connect();
-        if ($begin = $this->dbh->beginTransaction())
+        if ($begin = $this->connect()->beginTransaction())
             $this->in_transaction = true;
+
         return $begin;
     }
 
@@ -364,9 +351,11 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function rollback() {
-        if (!$this->in_transaction || !$this->isConnected()) return false;
-        if ($rollback = $this->dbh->rollBack())
+        if (!$this->in_transaction) return false;
+
+        if ($rollback = $this->connect()->rollBack())
             $this->in_transaction = false;
+
         return $rollback;
     }
 
@@ -377,9 +366,11 @@ abstract class Adapter implements IAdapter {
      * @return boolean
      */
     public function commit() {
-        if (!$this->in_transaction || !$this->isConnected()) return false;
-        if ($commit = $this->dbh->commit())
+        if (!$this->in_transaction) return false;
+
+        if ($commit = $this->connect()->commit())
             $this->in_transaction = false;
+
         return $commit;
     }
 
@@ -406,10 +397,9 @@ abstract class Adapter implements IAdapter {
         if (!is_array($bind)) $bind = array_slice(func_get_args(), 1);
 
         try {
-            $this->connect();
             $sth = ($sql instanceof \PDOStatement)
                  ? $sql
-                 : $this->dbh->prepare($sql);
+                 : $this->connect()->prepare($sql);
             if ($sth === false) return false;
 
             if (!$sth->execute($bind)) return false;
@@ -598,8 +588,7 @@ abstract class Adapter implements IAdapter {
         if (is_numeric($val)) return $val;
         if ($val === null) return 'NULL';
 
-        $this->connect();
-        return $this->dbh->quote($val);
+        return $this->connect()->quote($val);
     }
 
     /**
