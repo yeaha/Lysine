@@ -251,7 +251,6 @@ abstract class Adapter implements IAdapter {
      * @return void
      */
     public function __destruct() {
-        while ($this->in_transaction) $this->rollback();
         $this->disconnect();
     }
 
@@ -328,6 +327,7 @@ abstract class Adapter implements IAdapter {
      * @return void
      */
     public function disconnect() {
+        while ($this->in_transaction) $this->rollback();
         $this->dbh = null;
     }
 
