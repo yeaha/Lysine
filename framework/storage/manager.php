@@ -109,12 +109,10 @@ namespace Lysine\Storage {
     }
 
     class Error extends \Lysine\Error {
+        const CONNECT_FAILED = 503;
+
         static public function undefined_storage($storage_name) {
             return new static('Undefined storage service:'. $storage_name);
-        }
-
-        static public function connect_failed($storage_name) {
-            return new static("Connect failed! Storage service: {$storage_name}");
         }
     }
 }

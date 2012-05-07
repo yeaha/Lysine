@@ -314,7 +314,11 @@ abstract class Adapter implements IAdapter {
             // 可以定义自己的result class
             $options[\PDO::ATTR_STATEMENT_CLASS] = array('\Lysine\Storage\DB\Result');
 
-        $this->dbh = new \PDO($dsn, $user, $pass, $options);
+        try {
+            $this->dbh = new \PDO($dsn, $user, $pass, $options);
+        } catch (\PDOException $ex) {
+            throw new Storage\Error('Database connect failed!', Storage\Error::CONNECT_FAILED, $ex);
+        }
         fire_event($this, CONNECT_EVENT, $this);
 
         return $this->dbh;

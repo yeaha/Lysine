@@ -59,7 +59,7 @@ class Redis implements IStorage {
               : call_user_func_array(array($handler, 'connect'), $conn_args);
 
         if (!$conn)
-            throw new Storage\Error('Connect redis server failed');
+            throw new Storage\Error('Connect redis server failed', Storage\Error::CONNECT_FAILED);
 
         if (isset($config['password']) && !$handler->auth($config['password']))
             throw new Storage\Error('Invalid password');
