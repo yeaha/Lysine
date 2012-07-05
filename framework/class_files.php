@@ -21,6 +21,7 @@ return array(
     'lysine\mvc\router' => 'mvc/router.php',
     'lysine\mvc\router_abstract' => 'mvc/router.php',
     'lysine\mvc\view' => 'mvc/view.php',
+    'lysine\storage\amqp' => 'storage/amqp.php',
     'lysine\storage\cache' => 'storage/cache/abstract.php',
     'lysine\storage\cache\apc' => 'storage/cache/apc.php',
     'lysine\storage\cache\eaccelerator' => 'storage/cache/eaccelerator.php',
